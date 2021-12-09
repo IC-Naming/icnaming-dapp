@@ -1,0 +1,23 @@
+type Error = record { code : int32; message : text };
+type RefStatus = record { ref_count : nat64; credit : nat64 };
+type Result = variant { Ok : bool; Err : Error };
+type Result_1 = variant { Ok : RefStatus; Err : Error };
+type WhiteListInfo = record {
+  ens_white_list_end_date : nat64;
+  ens_white_list_count : nat64;
+  nns_staking_list_count : nat64;
+  nns_staking_list_end_date : nat64;
+  icnaming_canister_id : principal;
+};
+service : {
+  addToENSWhiteList : (text, text, text) -> (Result);
+  addToNNSWhiteList : (principal) -> (Result);
+  getWhiteListInfo : () -> (WhiteListInfo) query;
+  icnaming : () -> (principal) query;
+  isInWhiteList : (text, text) -> (Result) query;
+  owner : () -> (principal) query;
+  refStatus : (text) -> (Result_1) query;
+  regName : (text, text) -> (Result);
+  setICNaming : (principal) -> (Result);
+  setOwner : (principal) -> (Result);
+}

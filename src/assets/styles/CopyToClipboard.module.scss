@@ -1,0 +1,15 @@
+.btn-copy {
+  font-size: 14px;
+  margin   : 0px 5px;
+  position : relative;
+  color    : #00CFBB;
+  cursor   : pointer;
+}
+.Clipboard {
+  color: #00CFBB;
+}
+@media screen and (min-width: 768px) {
+  .btn-copy {
+    font-size: 18px;
+  }
+}

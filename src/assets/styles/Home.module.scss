@@ -1,0 +1,28 @@
+.home-logo{
+    width: 80%;
+    height: 56px;
+    background: url('../images/logo.png') no-repeat center;
+    background-size: contain;
+    font-size: 0;
+    margin:7rem auto 3rem;
+}
+@media screen and (min-width: 576px){
+  .home-logo{
+    width: 360px;
+    height: 88px;
+    margin: 210px auto 100px;
+  }
+  .home{
+    :global{
+      .headerLogo{
+        display: none;
+      }
+      .appheader-wallet-wrap{
+        position: absolute;
+        padding-left: 0;
+      }
+    }
+  }
+  
+}
+  

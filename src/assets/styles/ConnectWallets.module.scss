@@ -1,0 +1,37 @@
+.btn-connect-warp{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.btn-connect{
+  font-family:"PuHuiTi" !important;
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  height: 84px;
+  line-height: 84px;
+  background: var(--modal-btn-bg-color);
+  border: 1px solid #2F3A53;
+  color: #c8d0e2;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  &:hover{
+    background: rgba(47, 58, 83, 0.5);
+  }
+}
+
+.btn-connect img{
+  width: 60px;
+  margin-right: 20px;
+  vertical-align: middle;
+}
+.show-more{
+  color: rgba(0, 153, 230, 1);
+  font-size: 14px;
+  cursor: pointer;
+}

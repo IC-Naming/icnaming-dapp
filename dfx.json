@@ -1,0 +1,23 @@
+{
+  "canisters": {  
+    "react_app": {      
+      "frontend": {
+        "entrypoint": "public/index.html"
+      },
+      "source": ["dist"],
+      "type": "assets"
+    }
+  },
+  "defaults": {
+    "dist": {
+      "output": "dist",
+      "packtool": "vessel sources"
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    }
+  }
+}

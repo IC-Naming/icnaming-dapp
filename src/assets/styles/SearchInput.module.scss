@@ -1,0 +1,47 @@
+@import './mixin.scss';
+.search-input-wrap{
+  max-width: 960px;
+  padding: 0 0.75rem;
+  @include flex(row,center,center);
+  margin: auto;
+}
+.search-input-inner{
+  height: 70px;
+  flex: auto;
+  padding: 1px;
+  background: linear-gradient(270deg, rgba(119, 51, 255, 1) 0%, rgba(0, 147, 255, 1) 50%, rgba(0, 233, 223, 1) 100%);
+  border-radius: 12px;
+  &:hover,&:active{
+    box-shadow: 0px 0px 16px -2px rgba(13, 242, 242, 0.6);
+  }
+  
+}
+
+.search-input-main{
+  height: 100%;
+  background: linear-gradient(360deg, #29324D 0%, #1D2540 100%);
+  position: relative;
+  border-radius: 12px;
+  padding: 0 10px;
+  @include flex(row,space-between,center,nowrap);
+  &:hover,&:active{background: linear-gradient(360deg, #3B476B 0%, #2C3A62 100%);}
+  .input-search{
+    width: 100%;
+    font-family: "PuHuiTi";
+    background: none;
+    border: none;
+    padding: 10px 0;
+    outline: none;
+    color: #D9E1F2;
+    font-size: 16px;
+    @include beauty-placeholder(16px,#66728C)
+  }
+  .btn-search{
+    background: none;
+    border: none;
+    color: #028BF0;
+    font-size: 1.5rem;
+  }
+  
+}
+

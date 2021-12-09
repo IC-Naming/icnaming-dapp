@@ -1,0 +1,125 @@
+@mixin singleline-ellipsis($substract:0){
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100% - $substract;
+}
+
+@mixin multiEllipsis($line:2){
+  overflow : hidden;
+  word-break: break-all;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: $line;
+  -webkit-box-orient: vertical;
+}
+
+@mixin no-wrap(){
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+@mixin bg-image ($url) {
+  background-image: url($url + '@2x.png');
+  background-size: 100%;
+  background-repeat: no-repeat;
+  @media (-webkit-min-device-pixel-ratio: 3), (min-device-pixel-ratio: 3) {
+    background-image: url($url + '@3x.png');
+    background-size: 100%;
+    background-repeat: no-repeat;
+  }
+}
+
+@mixin clearfix() {
+  &:before,
+  &:after {
+      content: "";
+      display: table;
+  }
+  &:after {
+      clear: both;
+  }
+}
+
+@mixin beauty-placeholder($fz, $color: #999, $align: left) {
+  &:-moz-placeholder {
+    font-size: $fz;
+    color: $color;
+    text-align: $align;
+  }
+  &:-ms-input-placeholder {
+    font-size: $fz;
+    color: $color;
+    text-align: $align;
+  }
+  &::-webkit-input-placeholder {
+    font-size: $fz;
+    color: $color;
+    text-align: $align;
+  }
+}
+
+@mixin beauty-select($color, $bgcolor) {
+  &::selection {
+    color: $color;
+    background-color: $bgcolor;
+  }
+}
+
+@mixin blur($blur: 10px) {
+  -webkit-filter: blur($blur);
+  -moz-filter: blur($blur);
+  -o-filter: blur($blur);
+  -ms-filter: blur($blur);
+  filter: progid:DXImageTransform.Microsoft.Blur(PixelRadius='${blur}');
+  filter: blur($blur);
+  *zoom: 1;
+}
+
+@mixin grayscale() {
+  -webkit-filter: grayscale(100%);
+  -moz-filter: grayscale(100%);
+  -ms-filter: grayscale(100%);
+  -o-filter: grayscale(100%);
+  filter: grayscale(100%);
+}
+
+@mixin center($height:100%){
+  height: $height;
+  line-height: $height;
+  text-align: center
+}
+
+@mixin background($border-radius:5px, $bg-color:#eee, $color:#fff, $font-weight:400){
+  border-radius: $border-radius;
+  background-color: $bg-color;
+  color: $color;
+  font-weight: $font-weight;
+}
+
+@mixin flex ($direction: row, $justify-content: flex-start, $align-items: flex-start,$flex-wrap: nowrap) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify-content;
+  align-items: $align-items;
+  flex-wrap: $flex-wrap;
+}
+
+@mixin hoverLine($height:2px,$color:$color-text-primary){
+  position: relative;
+  &::after{
+    content: '';
+    position: absolute;
+    height:$height;
+    width: 80%;
+    background-color: $color;
+    bottom: -10px;
+    left: 10%;
+  }
+}
+
+@mixin lhtac($lineheight, $center: center) {
+  line-height: $lineheight;
+  text-align: $center;
+}
