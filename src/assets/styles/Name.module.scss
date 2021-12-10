@@ -215,7 +215,7 @@
   .flexrow{
     .flexcol:nth-child(2){
       display: block;
-      @include  singleline-ellipsis(10%);
+      @include  singleline-ellipsis(0%);
     }
   }
 }
@@ -247,7 +247,7 @@
   }
 }
 .contentEditable{
-  width: 90%;
+  width: 100%;
   background-color: #060E23;
   border: 1px solid #1E2C44;
   padding: .5rem;
@@ -263,7 +263,22 @@
 }
 
 @media screen and (min-width: 576px){
-
+  
+.records{
+  .flexrow{
+    .flexcol:nth-child(2){
+      width: auto;
+      flex: 1;
+    }
+    .flexcol:last-child{
+      width: 120px;
+          text-align: right;
+    }
+  }
+}
+  .contentEditable{
+    width: 100%;
+  }
   .name-content{
     padding-top: 80px;
       :global{
@@ -323,6 +338,7 @@
           margin-left: auto;
           align-self: center;
           margin-top: 0px;
+          
         }
       }
       

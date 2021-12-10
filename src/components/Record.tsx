@@ -20,10 +20,13 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
   const { ...auth } = useAuthWallet();
   const [recordSaveLoading, setRecordSaveLoading] = useState(false);
   const serviceApi = new ServiceApi();
-  const [record, SetRecord] = useState<string>('');
+  const [recordVal, setRecordVal] = useState<string>('');
+  const [ischangeRecordVal, setIschangeRecordVal] = useState(false);
   const [isController, setIsController] = useState(false);
+
   const handleRecordChange = (e: any) => {
-    SetRecord(e.target.value);
+    setIschangeRecordVal(true)
+    setRecordVal(e.target.value);
   };
 
   const notToast = (msg) => {
@@ -35,13 +38,16 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
   }
 
   useEffect(() => {
-    if (auth.principal?.toText() === registant || auth.principal?.toText() === controller) setIsController(true);
-    value ? SetRecord(value) : SetRecord('Not set');
-  }, [auth, value,controller, registant]);
+    if (auth.principal?.toText() === registant || auth.principal?.toText() === controller) setIsController(true); 
+  }, [auth, controller, registant]);
 
-  const RecordSet = async () => {
+  useEffect(() => {
+    value ? setRecordVal(value) : setRecordVal('Not set');
+  }, [value])
+
+  const recordSet = async () => {
     setRecordSaveLoading(true);
-    serviceApi.setRecord(name, recordKey, record).then(res => {
+    serviceApi.setRecord(name, recordKey, recordVal).then(res => {
       if (res) {
         toast.success('Set record Done', {
           position: "top-center",
@@ -56,6 +62,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
         });
       }
       setRecordSaveLoading(false);
+      setIschangeRecordVal(false)
     })
       .catch(err => {
         toast('Set record failed', {
@@ -68,47 +75,44 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
 
   const handleSetRecord = () => {
     if (recordKey === 'token.btc') {
-      isBTCAddress(record) ? RecordSet() : notToast('Invalid BTC address');
+      isBTCAddress(recordVal) ? recordSet() : notToast('Invalid BTC address');
     } else if (recordKey === 'token.eth') {
-      isETHAddress(record) ? RecordSet() : notToast('Invalid ETH address');
+      isETHAddress(recordVal) ? recordSet() : notToast('Invalid ETH address');
     } else if (recordKey === 'token.ltc') {
-      isLTCAddress(record) ? RecordSet() : notToast('Invalid ETH address');
+      isLTCAddress(recordVal) ? recordSet() : notToast('Invalid LTC address');
     } else if (recordKey === 'email') {
-      isEmail(record) ? RecordSet() : notToast('Invalid email address');
+      isEmail(recordVal) ? recordSet() : notToast('Invalid email address');
     } else {
-      RecordSet();
+      recordSet();
     }
   }
 
   return (
     <div className={styles.flexrow}>
       <div className={styles.flexcol}>
-        {title === 'Canister'?'':title}
+        {title === 'Canister' ? '' : title}
       </div>
       {
         !isController ?
           <div className={styles.flexcol}>
-            <span className={styles['d-text']}>{record}</span>
-            {value && <CopyToClipboard text={record} />}
+            <span className={styles['d-text']}>{recordVal}</span>
+            {value && <CopyToClipboard text={recordVal} />}
           </div> :
           <div className={styles.flexcol}>
-            <input type="text" className={styles.contentEditable}
-              value={record}
+            <input type="text" 
+              className={styles.contentEditable}
+              value={recordVal}
               onChange={e => {
                 handleRecordChange(e);
               }} />
           </div>
       }
       <div className={styles.flexcol}>
-        {isController &&
+        {isController && ischangeRecordVal &&
           <button className={styles['btn-save']}
             disabled={recordSaveLoading}
-            onClick={() => {
-              handleSetRecord()
-            }}>
-            {
-              recordSaveLoading && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />
-            }Save
+            onClick={() => { handleSetRecord() }}>
+            {recordSaveLoading && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}Save
           </button>
         }
       </div>

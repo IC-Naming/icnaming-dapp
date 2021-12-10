@@ -19,7 +19,6 @@ export const SearchInput = (props: Props) => {
     }
   }
 
-
   const goSearch = () => {
     if (value.length > 3) {
       history.push(`/search/${value}`)

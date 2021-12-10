@@ -1,14 +1,9 @@
 import { Actor, HttpAgent, Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
-// import dfxConfig from "../../dfx.json";
 export const IC_HOST = "https://ic0.app";
 
 const isLocalEnv = false;
 
-/* function getHost() {
-  // Setting host to undefined will default to the window location
-  return isLocalEnv ? dfxConfig.networks.local.bind : IC_HOST;
-} */
 
 // export const host = getHost();
 export const host = IC_HOST;
