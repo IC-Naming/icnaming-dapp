@@ -19,7 +19,8 @@ export const Search = (props) => {
   const [word, setWord] = useState<string | Principal>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [isSearchAddress, setIsSearchAddress] = useState<boolean>(false)
-  const [isNotIcp, setIsNotIcp] = useState<any>('')
+  const [isNotIcp, setIsNotIcp] = useState<boolean>(false)
+  const [notIcpword, setNotIcpword] = useState<string>('')
   const [nameSearchResult, setNameSearchResult] = useState<NameModel>();
   const [namesOfRegistrant, setNamesOfRegistrant] = useState<any>();
   const [namesOfController, setNamesOfController] = useState<any>();
@@ -39,17 +40,24 @@ export const Search = (props) => {
       // if word is string
       if (typeof word === 'string') {
         let searchName = '';
-        if (word.split('.').length > 1 && word.split('.')[word.split('.').length - 1] !== 'icp') {
-          setLoading(false)
-          setIsNotIcp(word.split('.')[word.split('.').length - 1]);
-          return;
-        } else if (word.split('.').length > 1 && word.split('.')[word.split('.').length - 1] === 'icp') {
-          setIsNotIcp(true);
-          searchName = word
-        } else {
-          setIsNotIcp(true);
-          searchName = `${word}.icp`
+        if (!word.endsWith('.')) {
+          if (word.split('.').length > 1 && word.split('.')[word.split('.').length - 1] !== 'icp') {
+            setLoading(false)
+            setIsNotIcp(true)
+            setNotIcpword(word.split('.')[word.split('.').length - 1]);
+            return;
+          } else if (word.split('.').length > 1 && word.split('.')[word.split('.').length - 1] === 'icp') {
+            setIsNotIcp(false);
+            searchName = word
+          } else {
+            setIsNotIcp(false);
+            searchName = `${word}.icp`
+          }
+        }else{
+          setIsNotIcp(false);
+          searchName = `${word}icp`
         }
+        
 
         serviceApi.available(searchName).then(async res => {
           let expireAt = ''
@@ -154,7 +162,7 @@ export const Search = (props) => {
                       !isSearchAddress ?
                         isNotIcp ?
                         <div className={styles.noicp}>
-                            .{isNotIcp} DNSSEC support coming soon!
+                            .{notIcpword} DNSSEC support coming soon!
                           </div>
                           :
                           <div className={styles.list}>
