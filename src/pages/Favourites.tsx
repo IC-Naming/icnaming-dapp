@@ -5,12 +5,11 @@ import { Container } from 'react-bootstrap';
 import { useAuthWallet } from '../context/AuthWallet';
 import ServiceApi from '../utils/ServiceApi';
 import dateFormat from "dateformat";
-export const Favourites = (props) => {
+export const Favourites = () => {
   const { ...authWallet } = useAuthWallet();
   const serviceApi = new ServiceApi();
   const [loading, setLoading] = useState<boolean>(true)
   const [nameResult, setNameResult] = useState<any>();
-
   useEffect(() => {
     setLoading(true)
     const getMyFavoriteNames = async () => {
@@ -26,7 +25,13 @@ export const Favourites = (props) => {
         const myFavoriteNamesWithExpireAt = myFavoriteNames.map(async (item: any) => {
           const available = await serviceApi.available(item);
           const expireAtOfName = await serviceApi.expireAtOf(item);
-          return { name: item, available: available, expireAt: expireAtOfName > 0 ? 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime") : '' }
+          const isMyAccount = await serviceApi.getRegistrantOfName(item) || false;
+          return {
+            name: item,
+            available: available,
+            isMyAccount: isMyAccount.toText() === authWallet.principal?.toText() ? true : false,
+            expireAt: expireAtOfName > 0 ? 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime") : ''
+          }
         })
         Promise.all(myFavoriteNamesWithExpireAt).then(res => {
           setNameResult(res)
@@ -58,7 +63,12 @@ export const Favourites = (props) => {
                         <div className={styles.list}>
                           {
                             nameResult?.map((item, index) => {
-                              return <Card key={index} name={item?.name} regTime={item?.expireAt} available={item?.available} favorite={true} />
+                              return <Card key={index}
+                                name={item?.name}
+                                regTime={item?.expireAt}
+                                available={item?.available}
+                                isMyAccount={item?.isMyAccount}
+                                favorite={true} />
                             })
                           }
                         </div>

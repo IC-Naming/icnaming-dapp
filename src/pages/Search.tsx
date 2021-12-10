@@ -33,12 +33,11 @@ export const Search = (props) => {
     }
   }
 
-
   useEffect(() => {
     if (word && serviceApi) {
       // if word is string
       if (typeof word === 'string') {
-        const searchName = `${word}.icp`;
+        const searchName = word.indexOf(".icp") !== -1 ? word : `${word}.icp`
         serviceApi.available(searchName).then(async res => {
           let expireAt = ''
           if (!res) {
@@ -101,7 +100,7 @@ export const Search = (props) => {
         });
       }
     }
-  }, [word,authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
+  }, [word, authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const wordParam = props.match.params.word;

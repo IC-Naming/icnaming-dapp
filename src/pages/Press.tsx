@@ -20,25 +20,25 @@ export const Press = () => {
           <div className="row">
             <div className="col-md-4">
               <a className={`${styles['img-logo']} img-fluid`} href={press}>
-                <div className={styles['img-w']}><img className="img-fluid" alt="ICNAMING Logo" style={{height:'60%'}} src={logo1} /></div>
+                <div className={styles['img-w']}><img alt="ICNAMING Logo" style={{height:'60%'}} src={logo1} /></div>
                 <div>
-                  <strong>ICNAMING logo</strong> <i className={styles["icon-download"]}></i>
+                  <strong>ICNAMING LOGO</strong> <i className={styles["icon-download"]}></i>
                 </div>
               </a>
             </div>
             <div className="col-md-4">
               <a className={`${styles['img-logo']} img-fluid`} href={press}>
-                <div className={styles['img-w']}><img className="img-fluid" alt="ICNAMING Logo" style={{height:'60%'}} src={logo2} /></div>
+                <div className={styles['img-w']}><img alt="ICNAMING Logo" style={{height:'60%'}} src={logo2} /></div>
                 <div>
-                  <strong>ICNAMING logo</strong> <i className={styles["icon-download"]}></i>
+                  <strong>ICNAMING LOGO</strong> <i className={styles["icon-download"]}></i>
                 </div>
               </a>
             </div>
             <div className="col-md-4">
               <a className={`${styles['img-logo']} img-fluid`} href={press}>
-                <div className={styles['img-w']}><img className="img-fluid" alt="ICNAMING Logo" src={logo3} /></div>
+                <div className={styles['img-w']}><img alt="ICNAMING Logo" src={logo3} /></div>
                 <div>
-                  <strong>ICNAMING logo</strong> <i className={styles["icon-download"]}></i>
+                  <strong>ICNAMING LOGO</strong> <i className={styles["icon-download"]}></i>
                 </div>
               </a>
             </div>

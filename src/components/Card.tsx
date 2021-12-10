@@ -16,10 +16,11 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
   const history = useHistory();
   const serviceApi = new ServiceApi();
   const [isFavorite, SetIsFavorite] = React.useState(false)
+  
   React.useEffect(() => {
     SetIsFavorite(favorite)
   }, [favorite])
-
+  
   const changeLocalFavorite = async (name) => {
     let myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]')
     if (isFavorite) {

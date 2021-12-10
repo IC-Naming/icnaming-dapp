@@ -5,9 +5,9 @@ import { Link } from "react-router-dom";
 import { ConnectWallets } from "./ConnectWallets";
 import { useAuthWallet } from "../context/AuthWallet";
 import { formatAddress } from '../utils/helper';
-import Copy from 'copy-to-clipboard';
+// import Copy from 'copy-to-clipboard';
 import ServiceApi from '../utils/ServiceApi';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export const Header = () => {
@@ -41,6 +41,13 @@ export const Header = () => {
       setCurrentPcIndex(index)
     }
   }
+
+  const logout = async () =>{
+    authWallet.quitWallet();
+    history.push('/');
+    setCurrentPcIndex(0)
+    setCurrentIndex(0)
+  }
   
   const getMyFavoriteNames = async () => {
     if (authWallet.walletAddress) {
@@ -59,13 +66,8 @@ export const Header = () => {
           <div className={styles.wallet}>
             <i className="bi bi-person"></i>
             <span className={styles.address}>{formatAddress(authWallet.walletAddress)}</span>
-            <i className="bi bi-files" onClick={() => {
-              Copy(String(authWallet.walletAddress));
-              toast.success('Clipboard', {
-                position: "top-center",
-                autoClose: 2000,
-                theme: 'dark'
-              })
+            <i className="bi bi-box-arrow-right" onClick={() => {
+              logout()
             }}></i>
           </div>
           :
@@ -86,6 +88,12 @@ export const Header = () => {
         { title: 'Home', path: '/' },
         { title: 'My Account', path: '/myaccount' },
         { title: 'Favourites', path: '/favourites' },
+        { title: 'FAQ', path: '/faq' },
+        { title: 'About', path: '/about' }
+      ])
+    }else{
+      setNavitems([
+        { title: 'Home', path: '/' },
         { title: 'FAQ', path: '/faq' },
         { title: 'About', path: '/about' }
       ])

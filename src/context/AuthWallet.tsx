@@ -123,7 +123,7 @@ function useProvideAuthWallet() {
     setAccountId('')
     setWalletAddress('')
     setPrincipal(undefined)
-    // window.ic?.plug?.disconnect()
+    window.ic?.plug?.disconnect()
   }
 
   return {
