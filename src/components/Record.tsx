@@ -32,13 +32,16 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
 
   // isCanisterAddress
   const isCanisterAddress = (address: string) => {
-    try {
-      Principal.fromText(address);
-      return true;
+    if(address!==''){
+      try {
+        Principal.fromText(address);
+        return true;
+      }
+      catch (e) {
+        return false;
+      }
     }
-    catch (e) {
-      return false
-    }
+    return true;
   }
 
   const notToast = (msg) => {

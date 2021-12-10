@@ -58,7 +58,6 @@ export const Search = (props) => {
           searchName = `${word}icp`
         }
         
-
         serviceApi.available(searchName).then(async res => {
           let expireAt = ''
           if (!res) {
