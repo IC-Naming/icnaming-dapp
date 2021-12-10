@@ -33,6 +33,15 @@
     @include no-wrap();
   }
 }
+.noicp{
+  color: #c8d0e2;
+  background: linear-gradient(
+180deg, #101B34 0%, #060E23 100%);
+  padding: 2.5rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid #1E2C44;
+  text-align: center;
+}
 .search-result{
   :global{
     .nav-tabs{

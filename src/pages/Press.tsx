@@ -15,7 +15,7 @@ export const Press = () => {
           <span>Press kit</span>
         </div>
         <div className={styles['press-content']}>
-          <h1>ICNAMING</h1>
+          <h1>IC NAMING</h1>
           <h2>The ICNAMING logo</h2>
           <div className="row">
             <div className="col-md-4">

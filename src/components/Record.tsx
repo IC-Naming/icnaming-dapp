@@ -6,6 +6,7 @@ import ServiceApi from "../utils/ServiceApi";
 import { Spinner } from "react-bootstrap";
 import { CopyToClipboard } from ".";
 import { isBTCAddress, isETHAddress, isLTCAddress, isEmail } from "../utils/helper";
+import { Principal } from "@dfinity/principal";
 
 interface Props {
   name: string;
@@ -28,6 +29,17 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
     setIschangeRecordVal(true)
     setRecordVal(e.target.value);
   };
+
+  // isCanisterAddress
+  const isCanisterAddress = (address: string) => {
+    try {
+      Principal.fromText(address);
+      return true;
+    }
+    catch (e) {
+      return false
+    }
+  }
 
   const notToast = (msg) => {
     toast.error(msg, {
@@ -82,6 +94,8 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
       isLTCAddress(recordVal) ? recordSet() : notToast('Invalid LTC address');
     } else if (recordKey === 'email') {
       isEmail(recordVal) ? recordSet() : notToast('Invalid email address');
+    } else if (recordKey === 'canister.icp') {
+      isCanisterAddress(recordVal) ? recordSet() : notToast('Invalid Canister address');
     } else {
       recordSet();
     }
