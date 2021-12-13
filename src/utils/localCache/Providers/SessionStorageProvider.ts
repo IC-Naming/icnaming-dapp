@@ -11,6 +11,10 @@ export class SessionStorageCache implements ILocalCache {
   constructor(ttl?: number) {
     this._cacheExpiryTime = ttl || this._defaultCacheExpiryTime;
   }
+
+  public delete = async (key: string) => {
+    removeItem(key);
+  };
   public get(key) {
     key = this.generateKey(key);
 
@@ -129,7 +133,7 @@ export class SessionStorageCache implements ILocalCache {
     }
   };
 
-  private calculateExpiryDate(cacheExpiryTime?:number) {
+  private calculateExpiryDate(cacheExpiryTime?: number) {
     let expiry = cacheExpiryTime ?? this._cacheExpiryTime;
     let expiryDateInMilliseconds = new Date(
       Date.now() + expiry * 1000

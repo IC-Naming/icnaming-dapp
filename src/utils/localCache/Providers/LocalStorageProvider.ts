@@ -11,6 +11,9 @@ export class LocalStorageCache implements ILocalCache {
   constructor(ttl?: number) {
     this._cacheExpiryTime = ttl || this._defaultCacheExpiryTime;
   }
+  public delete = async (key: string) => {
+    removeItem(key);
+  };
   public get(key) {
     key = this.generateKey(key);
 
@@ -24,7 +27,7 @@ export class LocalStorageCache implements ILocalCache {
   }
 
   public set = async (key: string, value: any, ttl?: number) => {
-    console.log(key)
+    console.log(key);
     const expiryDateInMilliseconds = this.calculateExpiryDate(ttl);
     let valueToSet: any = { value: value, expiry: expiryDateInMilliseconds };
 
@@ -130,7 +133,7 @@ export class LocalStorageCache implements ILocalCache {
     }
   };
 
-  private calculateExpiryDate(cacheExpiryTime?:number) {
+  private calculateExpiryDate(cacheExpiryTime?: number) {
     let expiry = cacheExpiryTime ?? this._cacheExpiryTime;
     let expiryDateInMilliseconds = new Date(
       Date.now() + expiry * 1000

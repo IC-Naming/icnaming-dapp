@@ -9,7 +9,7 @@ describe("IndexedDBCache", () => {
   const cacheVal = { test: "just test", value: 1 };
   const cacheKey2 = "__test_cache_key2";
   const cacheVal2 = { test: "just test2", value: 2 };
-  const ttl = 10;
+  const ttl = 100;
   const delay = (ms) =>
     new Promise((resolve, reject) => setTimeout(resolve, ms));
 
@@ -35,6 +35,17 @@ describe("IndexedDBCache", () => {
     it("should get the set value in cache", async () => {
       await globalLocalCache.set(cacheKey, cacheVal, ttl);
       await globalLocalCache.set(cacheKey2, cacheVal2, ttl);
+      expect(await globalLocalCache.get(cacheKey)).toEqual(cacheVal);
+      expect(await globalLocalCache.get(cacheKey2)).toEqual(cacheVal2);
+    });
+
+    it("should get null when delete key in cache", async () => {
+      await globalLocalCache.set(cacheKey, cacheVal, ttl);
+      await globalLocalCache.set(cacheKey2, cacheVal2, ttl);
+      expect(await globalLocalCache.get(cacheKey)).toEqual(cacheVal);
+      expect(await globalLocalCache.get(cacheKey2)).toEqual(cacheVal2);
+      await globalLocalCache.delete(cacheKey);
+      await globalLocalCache.delete(cacheKey2);
       expect(await globalLocalCache.get(cacheKey)).toEqual(cacheVal);
       expect(await globalLocalCache.get(cacheKey2)).toEqual(cacheVal2);
     });
@@ -85,7 +96,6 @@ describe("IndexedDBCache", () => {
     it("should return not null value after flush expired", async () => {
       await globalLocalCache.set(cacheKey, cacheVal, ttl);
       await globalLocalCache.flush(true);
-      await delay(100);
       expect(await globalLocalCache.get(cacheKey)).toEqual(cacheVal);
     });
   });

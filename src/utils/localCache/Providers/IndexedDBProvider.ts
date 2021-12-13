@@ -12,6 +12,14 @@ export class IndexedDBCache implements ILocalCache {
   constructor(ttl?: number) {
     this._cacheExpiryTime = ttl || this._defaultCacheExpiryTime;
   }
+  public delete = (key: string) => {
+    const storeName = this.generateStoreName(this._currentBucket);
+    return new Promise<void>(async (resolve, reject) => {
+      let item = await getItem(this._db, storeName, key);
+      if (!item) resolve();
+      return removeItem(this._db, storeName, key);
+    });
+  };
   public get = async (key) => {
     key = this.generateKey(key);
 
@@ -31,6 +39,7 @@ export class IndexedDBCache implements ILocalCache {
       return value;
     } catch (e) {
       console.log("indexdb cache get failed", e);
+      return null;
     }
   };
 
@@ -156,7 +165,7 @@ export class IndexedDBCache implements ILocalCache {
     }
   };
 
-  private calculateExpiryDate(cacheExpiryTime?:number) {
+  private calculateExpiryDate(cacheExpiryTime?: number) {
     let expiry = cacheExpiryTime ?? this._cacheExpiryTime;
     let expiryDateInMilliseconds = new Date(
       Date.now() + expiry * 1000
