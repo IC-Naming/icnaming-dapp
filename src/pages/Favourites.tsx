@@ -1,28 +1,31 @@
 import { useEffect, useState } from 'react'
 import { Card, CopyToClipboard } from "../components";
 import styles from '../assets/styles/Search.module.scss'
-import { Container } from 'react-bootstrap';
 import { useAuthWallet } from '../context/AuthWallet';
 import ServiceApi from '../utils/ServiceApi';
 import dateFormat from "dateformat";
+import { queryWithCache } from '../utils/localCache';
+import { Container } from 'react-bootstrap';
+
 export const Favourites = () => {
   const { ...authWallet } = useAuthWallet();
   const serviceApi = new ServiceApi();
   const [loading, setLoading] = useState<boolean>(true)
   const [nameResult, setNameResult] = useState<any>();
+
+  const getMyFavourites = async () => {
+    return await queryWithCache(async () => {
+      return await serviceApi.getFavoriteNames()
+    }, 'myNamesOfFavorite')
+  }
+  
   useEffect(() => {
     setLoading(true)
     const getMyFavoriteNames = async () => {
       if (authWallet.walletAddress) {
-        let myFavoriteNames;
-        if (localStorage.getItem('myFavoriteNames')) {
-          myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]')
-        } else {
-          myFavoriteNames = await serviceApi.getFavoriteNames();
-          localStorage.setItem('myFavoriteNames', JSON.stringify(myFavoriteNames));
-        }
+        let myNamesOfFavorite = await getMyFavourites()
 
-        const myFavoriteNamesWithExpireAt = myFavoriteNames.map(async (item: any) => {
+        const myFavoriteNamesWithExpireAt = myNamesOfFavorite.map(async (item: any) => {
           const available = await serviceApi.available(item);
           const expireAtOfName = await serviceApi.expireAtOf(item);
           const isMyAccount = await serviceApi.getRegistrantOfName(item) || false;
@@ -33,7 +36,9 @@ export const Favourites = () => {
             expireAt: expireAtOfName > 0 ? 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime") : ''
           }
         })
-        Promise.all(myFavoriteNamesWithExpireAt).then(res => {
+        queryWithCache(async () => {
+          return await Promise.all(myFavoriteNamesWithExpireAt);
+        },'myFavoriteNamesWithExpireAt').then(res => {
           setNameResult(res)
           setLoading(false)
         })
@@ -84,4 +89,3 @@ export const Favourites = () => {
     </div >
   )
 }
-

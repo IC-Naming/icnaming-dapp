@@ -5,15 +5,12 @@ import { Link } from "react-router-dom";
 import { ConnectWallets } from "./ConnectWallets";
 import { useAuthWallet } from "../context/AuthWallet";
 import { formatAddress } from '../utils/helper';
-// import Copy from 'copy-to-clipboard';
-import ServiceApi from '../utils/ServiceApi';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export const Header = () => {
   const history = useHistory();
   const { ...authWallet } = useAuthWallet();
-  const serviceApi = new ServiceApi();
   const [showWallets, setShowWallets] = useState(false);
 
   const [menuVisible, setMenuVisible] = useState(false)
@@ -48,7 +45,7 @@ export const Header = () => {
     setCurrentPcIndex(0)
     setCurrentIndex(0)
   }
-  
+/*   
   const getMyFavoriteNames = async () => {
     if (authWallet.walletAddress) {
       const myFavoriteNames = await serviceApi.getFavoriteNames();
@@ -57,7 +54,7 @@ export const Header = () => {
   }
   useEffect(() => {
     getMyFavoriteNames()
-  }, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
+  }, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps */
 
   const HeaderWallet = () => {
     return (<div className={`${styles['wallet-wrap']} appheader-wallet-wrap`}>

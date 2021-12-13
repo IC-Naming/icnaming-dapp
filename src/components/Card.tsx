@@ -4,6 +4,7 @@ import styles from '../assets/styles/Card.module.scss'
 import ServiceApi from '../utils/ServiceApi'
 import { useAuthWallet } from '../context/AuthWallet';
 import { toast } from 'react-toastify';
+
 export interface CardProps {
   name: string,
   regTime: string,
@@ -35,7 +36,7 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
     SetIsFavorite(!isFavorite)
     changeLocalFavorite(name)
     serviceApi.addFavoriteName(name).then(res => {
-      console.log("Favorite", res)
+      console.log("addFavorite", res)
     })
   }
 
@@ -43,7 +44,7 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
     SetIsFavorite(!isFavorite)
     changeLocalFavorite(name)
     serviceApi.removeFavoriteName(name).then(res => {
-      console.log("Favorite", res)
+      console.log("removeFavorite", res)
     })
   }
 
