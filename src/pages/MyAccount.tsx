@@ -14,11 +14,19 @@ export const MyAccount = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [namesOfRegistrant, setNamesOfRegistrant] = useState<any>();
   const [namesOfController, setNamesOfController] = useState<any>();
-  
+
+
   const getMyFavourites = async () => {
-    return await queryWithCache(async () => {
-      return await serviceApi.getFavoriteNames()
-    }, 'myNamesOfFavorite')
+    let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
+    if (myFavoriteNamesStorage && myFavoriteNamesStorage.length > 0) {
+      return myFavoriteNamesStorage;
+    } else {
+      return await queryWithCache(async () => {
+        const favoriteNamesSevice = await serviceApi.getFavoriteNames()
+        localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
+        return serviceApi.getFavoriteNames();
+      }, 'myNamesOfFavorite' + authWallet.walletAddress);
+    }
   }
   
   useEffect(() => {
@@ -40,7 +48,7 @@ export const MyAccount = () => {
         // console.log("my address result of registation", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
-        
+
         const names = res.map(n => {
           const expireAt = 'Expires ' + dateFormat(new Date(Number(n.expired_at)), "isoDateTime")
           let fav = myNamesOfFavorite.find(item => item === n.name);
@@ -56,7 +64,6 @@ export const MyAccount = () => {
         setLoading(false)
       });
 
-
       queryWithCache(() => {
         return new Promise((resolve, reject) => {
           serviceApi.getNamesOfController(wordParam).then(data => {
@@ -66,11 +73,10 @@ export const MyAccount = () => {
             reject(errs)
           });
         })
-      }, 'namesOfController' + authWallet.walletAddress, 3000).then(async(res) => {
+      }, 'namesOfController' + authWallet.walletAddress, 3000).then(async (res) => {
         console.log("my address result of controller", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
-        console.log(myNamesOfFavorite)
         const names = res.map(n => {
           let fav = myNamesOfFavorite.find(item => item === n);
           return { name: n, avaiable: false, expireAt: "", favorite: fav }

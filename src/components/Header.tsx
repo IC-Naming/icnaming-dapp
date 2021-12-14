@@ -44,6 +44,8 @@ export const Header = () => {
     history.push('/');
     setCurrentPcIndex(0)
     setCurrentIndex(0)
+    //清除localStorage
+    localStorage.removeItem('myFavoriteNames');
   }
 /*   
   const getMyFavoriteNames = async () => {

@@ -55,7 +55,7 @@ export const Name = (props) => {
             reject(errs)
           });
         })
-      }, name+'details').then(res => {
+      }, name + 'details').then(res => {
         setNameDetails(res);
         getNameDetailsLoaded = true;
         if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
@@ -78,7 +78,7 @@ export const Name = (props) => {
             reject(errs)
           });
         })
-      }, name+'Records').then(res => {
+      }, name + 'Records').then(res => {
         const records = recordsAddress.map(item => {
           const record = res.find(record => record[0] === item.key);
           return record ? { title: item.title, key: item.key, value: record[1] } : { title: item.title, key: item.key, value: "" };

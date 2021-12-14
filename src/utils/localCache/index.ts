@@ -49,6 +49,7 @@ class LocalCache implements ILocalCache {
   set = (key: string, value: any, ttl?: number) =>
     this._cache().set(key, value, ttl);
   get = (key: string) => this._cache().get(key);
+  delete = (key: string) => this._cache().delete(key);
   flush = (expired: boolean) => this._cache().flush(expired);
   flushBucket = (expired: boolean, bucket?: string | undefined) =>
     this._cache().flushBucket(expired, bucket);
@@ -78,3 +79,19 @@ export const queryWithCache = async (
   return item;
 };
 
+export const deleteCache = async (
+  cacheKey: string
+) => {
+  await cache.delete(cacheKey);
+}
+
+export const flushCache = async () => {
+  await cache.flush(true);
+}
+
+export const flushCacheBucket = async (
+  expired: boolean,
+  bucket?: string
+) => {
+  await cache.flushBucket(expired, bucket);
+}

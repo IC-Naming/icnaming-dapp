@@ -14,20 +14,30 @@ export const Favourites = () => {
   const [nameResult, setNameResult] = useState<any>();
 
   const getMyFavourites = async () => {
-    return await queryWithCache(async () => {
-      return await serviceApi.getFavoriteNames()
-    }, 'myNamesOfFavorite')
+   
+    let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
+    if (myFavoriteNamesStorage && myFavoriteNamesStorage.length > 0) {
+      return myFavoriteNamesStorage;
+    } else {
+      return await queryWithCache(async () => {
+        const favoriteNamesSevice = await serviceApi.getFavoriteNames()
+        localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
+        return serviceApi.getFavoriteNames();
+      }, 'myNamesOfFavorite' + authWallet.walletAddress);
+    }
   }
-  
+
   useEffect(() => {
     setLoading(true)
     const getMyFavoriteNames = async () => {
       if (authWallet.walletAddress) {
         let myNamesOfFavorite = await getMyFavourites()
-
+        console.log('myFavoriteNames', myNamesOfFavorite)
         const myFavoriteNamesWithExpireAt = myNamesOfFavorite.map(async (item: any) => {
+          // console.log('each item', item)
+          let expireAtOfName = 0
           const available = await serviceApi.available(item);
-          const expireAtOfName = await serviceApi.expireAtOf(item);
+          if (available) expireAtOfName = await serviceApi.expireAtOf(item);
           const isMyAccount = await serviceApi.getRegistrantOfName(item) || false;
           return {
             name: item,
@@ -36,14 +46,18 @@ export const Favourites = () => {
             expireAt: expireAtOfName > 0 ? 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime") : ''
           }
         })
-        queryWithCache(async () => {
+        const res: any = await Promise.all(myFavoriteNamesWithExpireAt);
+        setNameResult(res)
+        setLoading(false)
+        /* queryWithCache(async () => {
           return await Promise.all(myFavoriteNamesWithExpireAt);
-        },'myFavoriteNamesWithExpireAt').then(res => {
+        }, 'myFavoriteNamesWithExpireAt' + authWallet.walletAddress).then(res => {
           setNameResult(res)
           setLoading(false)
-        })
+        }) */
       }
     }
+
     getMyFavoriteNames()
   }, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
 

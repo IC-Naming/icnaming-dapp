@@ -7,6 +7,7 @@ import { Spinner } from "react-bootstrap";
 import { CopyToClipboard } from ".";
 import { isBTCAddress, isETHAddress, isLTCAddress, isEmail } from "../utils/helper";
 import { Principal } from "@dfinity/principal";
+import { deleteCache } from '../utils/localCache';
 
 interface Props {
   name: string;
@@ -32,7 +33,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
 
   // isCanisterAddress
   const isCanisterAddress = (address: string) => {
-    if(address!==''){
+    if (address !== '') {
       try {
         Principal.fromText(address);
         return true;
@@ -53,7 +54,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
   }
 
   useEffect(() => {
-    if (auth.principal?.toText() === registant || auth.principal?.toText() === controller) setIsController(true); 
+    if (auth.principal?.toText() === registant || auth.principal?.toText() === controller) setIsController(true);
   }, [auth, controller, registant]);
 
   useEffect(() => {
@@ -69,6 +70,8 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
           autoClose: 2000,
           theme: "dark",
         });
+        console.log('clear Records cache')
+        deleteCache(name + 'Records')
       } else {
         toast.error('Set record failed', {
           position: "top-center",
@@ -116,9 +119,12 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
             {value && <CopyToClipboard text={recordVal} />}
           </div> :
           <div className={styles.flexcol}>
-            <input type="text" 
+            <input type="text"
               className={styles.contentEditable}
               value={recordVal}
+              onFocus={(e) => {
+                if(e.target.value === 'Not set')setRecordVal('');
+              }}
               onChange={e => {
                 handleRecordChange(e);
               }} />
