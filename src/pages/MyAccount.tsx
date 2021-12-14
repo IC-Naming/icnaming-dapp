@@ -28,7 +28,7 @@ export const MyAccount = () => {
       }, 'myNamesOfFavorite' + authWallet.walletAddress);
     }
   }
-  
+
   useEffect(() => {
     if (authWallet.walletAddress) {
       const wordParam: Principal = Principal.fromText(authWallet.walletAddress);
@@ -44,7 +44,7 @@ export const MyAccount = () => {
             reject(errs)
           });
         })
-      }, 'getNamesOfRegistrant' + authWallet.walletAddress, 3000).then(async (res) => {
+      }, 'getNamesOfRegistrant' + authWallet.walletAddress).then(async (res) => {
         // console.log("my address result of registation", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
@@ -73,7 +73,7 @@ export const MyAccount = () => {
             reject(errs)
           });
         })
-      }, 'namesOfController' + authWallet.walletAddress, 3000).then(async (res) => {
+      }, 'namesOfController' + authWallet.walletAddress).then(async (res) => {
         console.log("my address result of controller", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()

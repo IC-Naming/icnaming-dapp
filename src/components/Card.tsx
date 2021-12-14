@@ -38,9 +38,9 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
     changeLocalFavorite(name)
     serviceApi.addFavoriteName(name).then(res => {
       if (res) {
-        console.log('clear cache of myNamesOfFavorite')
+        console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
+        deleteCache('favoriteall' + authWallet.walletAddress)
         deleteCache('myNamesOfFavorite' + authWallet.walletAddress);
-        // deleteCache("myFavoriteNamesWithExpireAt")
         console.log("addFavorite", res)
       }
     })
@@ -51,9 +51,9 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
     changeLocalFavorite(name)
     serviceApi.removeFavoriteName(name).then(res => {
       if (res) {
-        console.log('clear cache of myNamesOfFavorite')
+        console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
+        deleteCache('favoriteall' + authWallet.walletAddress)
         deleteCache('myNamesOfFavorite' + authWallet.walletAddress);
-        // deleteCache("myFavoriteNamesWithExpireAt")
         console.log("removeFavorite", res)
       }
     })

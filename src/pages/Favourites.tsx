@@ -14,11 +14,12 @@ export const Favourites = () => {
   const [nameResult, setNameResult] = useState<any>();
 
   const getMyFavourites = async () => {
-   
+    console.log('origin local');
     let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
     if (myFavoriteNamesStorage && myFavoriteNamesStorage.length > 0) {
       return myFavoriteNamesStorage;
     } else {
+      console.log('origin serivce api');
       return await queryWithCache(async () => {
         const favoriteNamesSevice = await serviceApi.getFavoriteNames()
         localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
@@ -34,7 +35,6 @@ export const Favourites = () => {
         let myNamesOfFavorite = await getMyFavourites()
         console.log('myFavoriteNames', myNamesOfFavorite)
         const myFavoriteNamesWithExpireAt = myNamesOfFavorite.map(async (item: any) => {
-          // console.log('each item', item)
           let expireAtOfName = 0
           const available = await serviceApi.available(item);
           if (available) expireAtOfName = await serviceApi.expireAtOf(item);
@@ -46,15 +46,16 @@ export const Favourites = () => {
             expireAt: expireAtOfName > 0 ? 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime") : ''
           }
         })
-        const res: any = await Promise.all(myFavoriteNamesWithExpireAt);
+        const res = await Promise.all(myFavoriteNamesWithExpireAt);
         setNameResult(res)
         setLoading(false)
         /* queryWithCache(async () => {
-          return await Promise.all(myFavoriteNamesWithExpireAt);
-        }, 'myFavoriteNamesWithExpireAt' + authWallet.walletAddress).then(res => {
+          return Promise.all(myFavoriteNamesWithExpireAt);
+        }, 'favoriteall').then(res => {
+          console.log(res)
           setNameResult(res)
           setLoading(false)
-        }) */
+        }); */
       }
     }
 

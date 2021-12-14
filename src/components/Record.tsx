@@ -123,7 +123,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
               className={styles.contentEditable}
               value={recordVal}
               onFocus={(e) => {
-                if(e.target.value === 'Not set')setRecordVal('');
+                if (e.target.value === 'Not set') setRecordVal('');
               }}
               onChange={e => {
                 handleRecordChange(e);
