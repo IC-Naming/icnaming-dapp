@@ -13,7 +13,7 @@ export class SessionStorageCache implements ILocalCache {
   }
 
   public delete = async (key: string) => {
-    removeItem(key);
+    removeItem(this.generateKey(key));
   };
   public get(key) {
     key = this.generateKey(key);

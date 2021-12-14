@@ -46,8 +46,8 @@ describe("LocalStorageCache", () => {
       expect(await globalLocalCache.get(cacheKey2)).toEqual(cacheVal2);
       await globalLocalCache.delete(cacheKey);
       await globalLocalCache.delete(cacheKey2);
-      expect(await globalLocalCache.get(cacheKey)).toEqual(cacheVal);
-      expect(await globalLocalCache.get(cacheKey2)).toEqual(cacheVal2);
+      expect(await globalLocalCache.get(cacheKey)).toEqual(null);
+      expect(await globalLocalCache.get(cacheKey2)).toEqual(null);
     });
 
     it("should return when switch bucket", async () => {

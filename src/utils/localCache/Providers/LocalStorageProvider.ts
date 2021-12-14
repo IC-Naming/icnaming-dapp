@@ -12,7 +12,7 @@ export class LocalStorageCache implements ILocalCache {
     this._cacheExpiryTime = ttl || this._defaultCacheExpiryTime;
   }
   public delete = async (key: string) => {
-    removeItem(key);
+    removeItem(this.generateKey(key));
   };
   public get(key) {
     key = this.generateKey(key);

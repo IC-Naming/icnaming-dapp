@@ -14,24 +14,21 @@ export class IndexedDBCache implements ILocalCache {
   }
   public delete = (key: string) => {
     const storeName = this.generateStoreName(this._currentBucket);
-    return new Promise<void>(async (resolve, reject) => {
-      let item = await getItem(this._db, storeName, key);
-      if (!item) resolve();
-      return removeItem(this._db, storeName, key);
-    });
+    const cacheKey = this.generateKey(key);
+    return removeItem(this._db, storeName, cacheKey);
   };
   public get = async (key) => {
-    key = this.generateKey(key);
+    const cacheKey = this.generateKey(key);
 
     try {
       const storeName = this.generateStoreName(this._currentBucket);
-      let item = await getItem(this._db, storeName, key);
+      let item = await getItem(this._db, storeName, cacheKey);
 
       if (!item) return null;
 
       let { expiry } = JSON.parse(item);
       if (isExpired(expiry)) {
-        removeItem(this._db, storeName, key);
+        removeItem(this._db, storeName, cacheKey);
         return null;
       }
 
