@@ -6,6 +6,7 @@ import { Container, Tab, Tabs } from 'react-bootstrap';
 import ServiceApi from '../utils/ServiceApi';
 import { useAuthWallet } from '../context/AuthWallet';
 import dateFormat from "dateformat";
+import { queryWithCache } from '../utils/localCache';
 
 export const MyAccount = () => {
   const { ...authWallet } = useAuthWallet();
@@ -13,32 +14,47 @@ export const MyAccount = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [namesOfRegistrant, setNamesOfRegistrant] = useState<any>();
   const [namesOfController, setNamesOfController] = useState<any>();
- 
-  /*  const [myFavourites, setMyFavourites] = useState<any>();
-    const getMyFavoriteNames = async () => {
-    let myFavoriteNames = await serviceApi.getFavoriteNames()
-    return (myFavoriteNames);
-  } */
+
+
+  const getMyFavourites = async () => {
+    let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
+    if (myFavoriteNamesStorage && myFavoriteNamesStorage.length > 0) {
+      return myFavoriteNamesStorage;
+    } else {
+      return await queryWithCache(async () => {
+        const favoriteNamesSevice = await serviceApi.getFavoriteNames()
+        localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
+        return serviceApi.getFavoriteNames();
+      }, 'myNamesOfFavorite' + authWallet.walletAddress);
+    }
+  }
+
   useEffect(() => {
     if (authWallet.walletAddress) {
       const wordParam: Principal = Principal.fromText(authWallet.walletAddress);
       let getNamesOfRegistrantLoaded = false;
       let getNamesOfControllerLoaded = false;
 
-      serviceApi.getNamesOfRegistrant(wordParam).then(res => {
-        console.log("my address result of registation", res)
+      queryWithCache(() => {
+        return new Promise((resolve, reject) => {
+          serviceApi.getNamesOfRegistrant(wordParam).then(data => {
+            resolve(data)
+          }).catch(errs => {
+            console.log(errs)
+            reject(errs)
+          });
+        })
+      }, 'getNamesOfRegistrant' + authWallet.walletAddress).then(async (res) => {
+        // console.log("my address result of registation", res)
         // for each res ,map it to NameModel
+        let myNamesOfFavorite = await getMyFavourites()
+
         const names = res.map(n => {
           const expireAt = 'Expires ' + dateFormat(new Date(Number(n.expired_at)), "isoDateTime")
-          let fav = false;
-
-          const myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
-          if (myFavoriteNames) {
-            fav = myFavoriteNames.find(item => item === n.name);
-          }
-
+          let fav = myNamesOfFavorite.find(item => item === n.name);
           return { name: n.name, avaiable: false, expireAt, favorite: fav }
         })
+
         setNamesOfRegistrant(names)
         getNamesOfRegistrantLoaded = true;
         if (getNamesOfRegistrantLoaded && getNamesOfControllerLoaded)
@@ -47,23 +63,33 @@ export const MyAccount = () => {
         console.log(err)
         setLoading(false)
       });
-      serviceApi.getNamesOfController(wordParam).then(res => {
+
+      queryWithCache(() => {
+        return new Promise((resolve, reject) => {
+          serviceApi.getNamesOfController(wordParam).then(data => {
+            resolve(data)
+          }).catch(errs => {
+            console.log(errs)
+            reject(errs)
+          });
+        })
+      }, 'namesOfController' + authWallet.walletAddress).then(async (res) => {
         console.log("my address result of controller", res)
         // for each res ,map it to NameModel
+        let myNamesOfFavorite = await getMyFavourites()
         const names = res.map(n => {
-          return { name: n, avaiable: false, expireAt: "" }
+          let fav = myNamesOfFavorite.find(item => item === n);
+          return { name: n, avaiable: false, expireAt: "", favorite: fav }
         })
         setNamesOfController(names)
         getNamesOfControllerLoaded = true;
         if (getNamesOfRegistrantLoaded && getNamesOfControllerLoaded)
           setLoading(false)
-      }
-      ).catch(err => {
+      }).catch(err => {
         console.log(err)
         setLoading(false)
-      });
+      })
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authWallet.walletAddress])
 
@@ -85,7 +111,6 @@ export const MyAccount = () => {
                     <CopyToClipboard text={authWallet.walletAddress} />
                   </div>
                   <div className={styles['search-result']}>
-
                     <Tabs defaultActiveKey="registrant" className="mb-3">
                       <Tab eventKey="registrant" title="Registrant">
                         {
@@ -115,10 +140,8 @@ export const MyAccount = () => {
                       </Tab>
                     </Tabs>
                   </div>
-
                 </>
             }
-
           </Container>
         </div>
       </div>

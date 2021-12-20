@@ -19,6 +19,8 @@ export const Search = (props) => {
   const [word, setWord] = useState<string | Principal>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [isSearchAddress, setIsSearchAddress] = useState<boolean>(false)
+  const [isNotIcp, setIsNotIcp] = useState<boolean>(false)
+  const [notIcpword, setNotIcpword] = useState<string>('')
   const [nameSearchResult, setNameSearchResult] = useState<NameModel>();
   const [namesOfRegistrant, setNamesOfRegistrant] = useState<any>();
   const [namesOfController, setNamesOfController] = useState<any>();
@@ -37,7 +39,25 @@ export const Search = (props) => {
     if (word && serviceApi) {
       // if word is string
       if (typeof word === 'string') {
-        const searchName = word.indexOf(".icp") !== -1 ? word : `${word}.icp`
+        let searchName = '';
+        if (!word.endsWith('.')) {
+          if (word.split('.').length > 1 && word.split('.')[word.split('.').length - 1] !== 'icp') {
+            setLoading(false)
+            setIsNotIcp(true)
+            setNotIcpword(word.split('.')[word.split('.').length - 1]);
+            return;
+          } else if (word.split('.').length > 1 && word.split('.')[word.split('.').length - 1] === 'icp') {
+            setIsNotIcp(false);
+            searchName = word
+          } else {
+            setIsNotIcp(false);
+            searchName = `${word}.icp`
+          }
+        }else{
+          setIsNotIcp(false);
+          searchName = `${word}icp`
+        }
+        
         serviceApi.available(searchName).then(async res => {
           let expireAt = ''
           if (!res) {
@@ -126,7 +146,8 @@ export const Search = (props) => {
                 :
                 <>
                   {
-                    !isSearchAddress ? <div className={styles['search-name']}><span>{word}</span></div>
+                    !isSearchAddress
+                      ? <div className={styles['search-name']}><span>{word}</span></div>
                       :
                       <div className={styles['search-address']}>
                         <span className={styles.icon}><i className="bi bi-person"></i></span>
@@ -136,13 +157,20 @@ export const Search = (props) => {
                   }
                   <div className={styles['search-result']}>
                     {
+
                       !isSearchAddress ?
-                        <div className={styles.list}>
-                          <Card name={nameSearchResult?.name || ''}
-                            regTime={nameSearchResult?.expireAt || ''}
-                            available={nameSearchResult?.available || false}
-                            favorite={nameSearchResult?.favorite || false} />
-                        </div>
+                        isNotIcp ?
+                        <div className={styles.noicp}>
+                            .{notIcpword} DNSSEC support coming soon!
+                          </div>
+                          :
+                          <div className={styles.list}>
+                            <Card name={nameSearchResult?.name || ''}
+                              regTime={nameSearchResult?.expireAt || ''}
+                              available={nameSearchResult?.available || false}
+                              favorite={nameSearchResult?.favorite || false} />
+                          </div>
+                          
                         :
                         <Tabs defaultActiveKey="registrant" className="mb-3">
                           <Tab eventKey="registrant" title="Registrant">

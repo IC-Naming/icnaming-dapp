@@ -20,7 +20,7 @@ export const SearchInput = (props: Props) => {
   }
 
   const goSearch = () => {
-    if (value.length > 3) {
+    if (value.split('.')[0].length > 3) {
       history.push(`/search/${value}`)
     } else {
       toast.error("second level name must be more than 3 characters", {

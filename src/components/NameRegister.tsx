@@ -33,22 +33,31 @@ export const NameRegister = (props) => {
     const signer = provider.getSigner();
     const message = `${props.name}${auth.principal?.toText() || ""}`;
     const signature = await signer.signMessage(message);
-    const regResult = await serviceApi.registerName(props.name, ethWalletAddress, auth.principal?.toText() || "", signature);
-
-    if (regResult === true) {
-      toast('Register name success', {
-        position: "top-center",
-        autoClose: 2000,
-        theme: "dark",
-      });
-    } else {
+    // const regResult = await 
+    serviceApi.registerName(props.name, ethWalletAddress, auth.principal?.toText() || "", signature).then(regResult => {
+      console.log('regResult',regResult)
+      if (regResult === true) {
+        toast('Register name success', {
+          position: "top-center",
+          autoClose: 2000,
+          theme: "dark",
+        });
+      } else {
+        toast('Register name failed', {
+          position: "top-center",
+          autoClose: 2000,
+          theme: "dark",
+        });
+      }
+      setLoadingSubmit(false)
+    }).catch(err => {
+      console.log(err)
       toast('Register name failed', {
         position: "top-center",
         autoClose: 2000,
         theme: "dark",
       });
-    }
-    setLoadingSubmit(false)
+    })
   }
 
   const getCurrentEthWallet = () => {
@@ -189,6 +198,7 @@ export const NameRegister = (props) => {
                 </div>
                 :
                 <div className="d-grid gap-2">
+                 
                   <button className={styles.btn} disabled={credit > 0 ? false : true} onClick={handleSubmitToRegisterName}>
                     {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                     Submit Request</button>

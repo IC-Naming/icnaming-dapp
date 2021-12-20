@@ -5,8 +5,7 @@ import { Container, Tabs, Tab, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
-
-// import { useQuery } from 'react-query'
+import { queryWithCache } from '../utils/localCache';
 
 export const Name = (props) => {
   const serviceApi = new ServiceApi();
@@ -48,8 +47,15 @@ export const Name = (props) => {
     if (name !== '') {
       let getNameDetailsLoaded = false;
       let getRecordsOfNameLoaded = false;
-      // TODO: react query
-      serviceApi.getNameDetails(name).then(res => {
+      queryWithCache(() => {
+        return new Promise((resolve, reject) => {
+          serviceApi.getNameDetails(name).then(data => {
+            resolve(data)
+          }).catch(errs => {
+            reject(errs)
+          });
+        })
+      }, name + 'details').then(res => {
         setNameDetails(res);
         getNameDetailsLoaded = true;
         if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
@@ -64,8 +70,15 @@ export const Name = (props) => {
         });
       })
 
-      // TODO: react query, if name update record, this cache should be removed
-      serviceApi.getRecordsOfName(name).then(res => {
+      queryWithCache(() => {
+        return new Promise((resolve, reject) => {
+          serviceApi.getRecordsOfName(name).then(data => {
+            resolve(data)
+          }).catch(errs => {
+            reject(errs)
+          });
+        })
+      }, name + 'Records').then(res => {
         const records = recordsAddress.map(item => {
           const record = res.find(record => record[0] === item.key);
           return record ? { title: item.title, key: item.key, value: record[1] } : { title: item.title, key: item.key, value: "" };
@@ -86,6 +99,7 @@ export const Name = (props) => {
           setLoadingName(false);
         }
       }).catch(err => {
+        console.log(err)
         setLoadingName(false);
         toast('Get records of name failed', {
           position: "top-center",
@@ -196,27 +210,27 @@ export const Name = (props) => {
                         {
                           recordsAddress.map((item, index) => {
                             return (
-                              <Record key={index} 
-                              name={name} 
-                              title={item.title} 
-                              recordKey={item.key} 
-                              value={item.value}
-                              registant={nameDetails?.registrant}
-                              controller={nameDetails?.controller}
+                              <Record key={index}
+                                name={name}
+                                title={item.title}
+                                recordKey={item.key}
+                                value={item.value}
+                                registant={nameDetails?.registrant}
+                                controller={nameDetails?.controller}
                               />
                             )
                           })
                         }
                         <div className="line-light"></div>
                         <h3 className={styles['records-subtitle']}>Canister</h3>
-                        <Record name={name} value={canister} title='Canister' recordKey='canister.icp' registant={nameDetails?.registrant} controller={nameDetails?.controller}/>
+                        <Record name={name} value={canister} title='Canister' recordKey='canister.icp' registant={nameDetails?.registrant} controller={nameDetails?.controller} />
                         <div className="line-light"></div>
                         <h3 className={styles['records-subtitle']}>Text Record</h3>
                         {
                           recordsText.map((item, index) => {
                             return (
-                              <Record key={index} name={name} title={item.title} recordKey={item.key} 
-                              value={item.value} registant={nameDetails?.registrant} controller={nameDetails?.controller}/>
+                              <Record key={index} name={name} title={item.title} recordKey={item.key}
+                                value={item.value} registant={nameDetails?.registrant} controller={nameDetails?.controller} />
                             )
                           })
                         }

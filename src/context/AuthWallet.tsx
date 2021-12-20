@@ -118,12 +118,17 @@ function useProvideAuthWallet() {
     getCurrentAccountOfPlug()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
-  const quitWallet = () => {
+  const quitWallet = async () => {
     setAuthWalletConnected(false)
     setAccountId('')
     setWalletAddress('')
     setPrincipal(undefined)
-    window.ic?.plug?.disconnect()
+    if (window.ic.plug.agent) {
+      window.ic?.plug?.disconnect()
+    }else{
+      const authClient = await AuthClient.create();
+      authClient.logout()
+    }
   }
 
   return {

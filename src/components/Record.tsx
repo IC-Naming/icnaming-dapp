@@ -6,6 +6,8 @@ import ServiceApi from "../utils/ServiceApi";
 import { Spinner } from "react-bootstrap";
 import { CopyToClipboard } from ".";
 import { isBTCAddress, isETHAddress, isLTCAddress, isEmail } from "../utils/helper";
+import { Principal } from "@dfinity/principal";
+import { deleteCache } from '../utils/localCache';
 
 interface Props {
   name: string;
@@ -29,6 +31,20 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
     setRecordVal(e.target.value);
   };
 
+  // isCanisterAddress
+  const isCanisterAddress = (address: string) => {
+    if (address !== '') {
+      try {
+        Principal.fromText(address);
+        return true;
+      }
+      catch (e) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   const notToast = (msg) => {
     toast.error(msg, {
       position: "top-center",
@@ -38,7 +54,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
   }
 
   useEffect(() => {
-    if (auth.principal?.toText() === registant || auth.principal?.toText() === controller) setIsController(true); 
+    if (auth.principal?.toText() === registant || auth.principal?.toText() === controller) setIsController(true);
   }, [auth, controller, registant]);
 
   useEffect(() => {
@@ -54,6 +70,8 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
           autoClose: 2000,
           theme: "dark",
         });
+        console.log('clear Records cache')
+        deleteCache(name + 'Records')
       } else {
         toast.error('Set record failed', {
           position: "top-center",
@@ -82,6 +100,8 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
       isLTCAddress(recordVal) ? recordSet() : notToast('Invalid LTC address');
     } else if (recordKey === 'email') {
       isEmail(recordVal) ? recordSet() : notToast('Invalid email address');
+    } else if (recordKey === 'canister.icp') {
+      isCanisterAddress(recordVal) ? recordSet() : notToast('Invalid Canister address');
     } else {
       recordSet();
     }
@@ -99,9 +119,12 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
             {value && <CopyToClipboard text={recordVal} />}
           </div> :
           <div className={styles.flexcol}>
-            <input type="text" 
+            <input type="text"
               className={styles.contentEditable}
               value={recordVal}
+              onFocus={(e) => {
+                if (e.target.value === 'Not set') setRecordVal('');
+              }}
               onChange={e => {
                 handleRecordChange(e);
               }} />

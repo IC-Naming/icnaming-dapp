@@ -1,30 +1,43 @@
 import { useEffect, useState } from 'react'
 import { Card, CopyToClipboard } from "../components";
 import styles from '../assets/styles/Search.module.scss'
-import { Container } from 'react-bootstrap';
 import { useAuthWallet } from '../context/AuthWallet';
 import ServiceApi from '../utils/ServiceApi';
 import dateFormat from "dateformat";
+import { queryWithCache } from '../utils/localCache';
+import { Container } from 'react-bootstrap';
+
 export const Favourites = () => {
   const { ...authWallet } = useAuthWallet();
   const serviceApi = new ServiceApi();
   const [loading, setLoading] = useState<boolean>(true)
   const [nameResult, setNameResult] = useState<any>();
+
+  const getMyFavourites = async () => {
+    console.log('origin local');
+    let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
+    if (myFavoriteNamesStorage && myFavoriteNamesStorage.length > 0) {
+      return myFavoriteNamesStorage;
+    } else {
+      console.log('origin serivce api');
+      return await queryWithCache(async () => {
+        const favoriteNamesSevice = await serviceApi.getFavoriteNames()
+        localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
+        return serviceApi.getFavoriteNames();
+      }, 'myNamesOfFavorite' + authWallet.walletAddress);
+    }
+  }
+
   useEffect(() => {
     setLoading(true)
     const getMyFavoriteNames = async () => {
       if (authWallet.walletAddress) {
-        let myFavoriteNames;
-        if (localStorage.getItem('myFavoriteNames')) {
-          myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]')
-        } else {
-          myFavoriteNames = await serviceApi.getFavoriteNames();
-          localStorage.setItem('myFavoriteNames', JSON.stringify(myFavoriteNames));
-        }
-
-        const myFavoriteNamesWithExpireAt = myFavoriteNames.map(async (item: any) => {
+        let myNamesOfFavorite = await getMyFavourites()
+        console.log('myFavoriteNames', myNamesOfFavorite)
+        const myFavoriteNamesWithExpireAt = myNamesOfFavorite.map(async (item: any) => {
+          let expireAtOfName = 0
           const available = await serviceApi.available(item);
-          const expireAtOfName = await serviceApi.expireAtOf(item);
+          if (available) expireAtOfName = await serviceApi.expireAtOf(item);
           const isMyAccount = await serviceApi.getRegistrantOfName(item) || false;
           return {
             name: item,
@@ -33,12 +46,19 @@ export const Favourites = () => {
             expireAt: expireAtOfName > 0 ? 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime") : ''
           }
         })
-        Promise.all(myFavoriteNamesWithExpireAt).then(res => {
+        const res = await Promise.all(myFavoriteNamesWithExpireAt);
+        setNameResult(res)
+        setLoading(false)
+        /* queryWithCache(async () => {
+          return Promise.all(myFavoriteNamesWithExpireAt);
+        }, 'favoriteall').then(res => {
+          console.log(res)
           setNameResult(res)
           setLoading(false)
-        })
+        }); */
       }
     }
+
     getMyFavoriteNames()
   }, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
 
@@ -84,4 +104,3 @@ export const Favourites = () => {
     </div >
   )
 }
-

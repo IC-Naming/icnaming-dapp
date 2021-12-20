@@ -4,6 +4,8 @@ import styles from '../assets/styles/Card.module.scss'
 import ServiceApi from '../utils/ServiceApi'
 import { useAuthWallet } from '../context/AuthWallet';
 import { toast } from 'react-toastify';
+import { deleteCache } from '../utils/localCache';
+
 export interface CardProps {
   name: string,
   regTime: string,
@@ -16,11 +18,11 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
   const history = useHistory();
   const serviceApi = new ServiceApi();
   const [isFavorite, SetIsFavorite] = React.useState(false)
-  
+
   React.useEffect(() => {
     SetIsFavorite(favorite)
   }, [favorite])
-  
+
   const changeLocalFavorite = async (name) => {
     let myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]')
     if (isFavorite) {
@@ -35,7 +37,12 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
     SetIsFavorite(!isFavorite)
     changeLocalFavorite(name)
     serviceApi.addFavoriteName(name).then(res => {
-      console.log("Favorite", res)
+      if (res) {
+        console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
+        deleteCache('favoriteall' + authWallet.walletAddress)
+        deleteCache('myNamesOfFavorite' + authWallet.walletAddress);
+        console.log("addFavorite", res)
+      }
     })
   }
 
@@ -43,7 +50,12 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
     SetIsFavorite(!isFavorite)
     changeLocalFavorite(name)
     serviceApi.removeFavoriteName(name).then(res => {
-      console.log("Favorite", res)
+      if (res) {
+        console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
+        deleteCache('favoriteall' + authWallet.walletAddress)
+        deleteCache('myNamesOfFavorite' + authWallet.walletAddress);
+        console.log("removeFavorite", res)
+      }
     })
   }
 
