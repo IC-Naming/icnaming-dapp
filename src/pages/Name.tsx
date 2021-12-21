@@ -1,4 +1,4 @@
-import { SearchInput, CopyToClipboard, NameRegister, Record } from "../components";
+import { SearchInput, CopyToClipboard, NameRegister, NameRegisterTestnet, Record } from "../components";
 import styles from "../assets/styles/Name.module.scss";
 import { ConnectWallets } from "../components/ConnectWallets";
 import { Container, Tabs, Tab, OverlayTrigger, Tooltip } from "react-bootstrap";
@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
+import { isMainNetEnv } from "../utils/config";
 
 export const Name = (props) => {
   const serviceApi = new ServiceApi();
@@ -122,6 +123,7 @@ export const Name = (props) => {
   }, [action])
 
   useEffect(() => {
+    
     setName(props.match.params.name || "")
     setAction(props.match.params.action || "")
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,7 +142,12 @@ export const Name = (props) => {
                 :
                 <Tabs activeKey={activeKey} onSelect={(k) => setActiveKey(k || "register")} className="mb-3">
                   <Tab eventKey="register" title="Register">
-                    <NameRegister name={name} available={nameDetails?.available} />
+                    {
+                      isMainNetEnv() ? <NameRegister name={name} available={nameDetails?.available} />
+                        :
+                        <NameRegisterTestnet name={name} available={nameDetails?.available} />
+                    }
+
                   </Tab>
                   <Tab eventKey="details" title="Details">
                     <div className={styles.details}>

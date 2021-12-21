@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import styles from '../assets/styles/Footer.module.scss'
 export const Footer = () => {
   return (
@@ -14,7 +13,7 @@ export const Footer = () => {
             <a href="https://github.com/IC-Naming" className={`${styles['icon']} ${styles['icon-github']}`}>Github</a>
             <a href="https://discord.gg/FJ63ckXn6n" className={`${styles['icon']} ${styles['icon-discord']}`}>Discord</a>
             <span className={styles.divider}></span>
-            <Link to="/presskit" className={`${styles['icon']} ${styles['icon-press']}`} title="press kit">press kit</Link>
+            <a href="https://icnaming.com/presskit" className={`${styles['icon']} ${styles['icon-press']}`} title="press kit">press kit</a>
           </div>
         </div>
       </div>

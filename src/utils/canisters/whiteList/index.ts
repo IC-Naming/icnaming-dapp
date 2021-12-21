@@ -10,3 +10,9 @@ export const createWhiteListQueryActor = () =>
     idlFactory,
     WHITE_LIST_CANISTER_ID
   );
+
+  export const createWhiteListUpdateActor = () =>
+  actorFactory.createActor<WhiteListActor>(
+    idlFactory,
+    WHITE_LIST_CANISTER_ID
+  );
