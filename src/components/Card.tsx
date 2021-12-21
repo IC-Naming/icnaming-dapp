@@ -6,7 +6,6 @@ import { useAuthWallet } from '../context/AuthWallet';
 import { toast } from 'react-toastify';
 import { deleteCache } from '../utils/localCache';
 
-
 export interface CardProps {
   name: string,
   regTime: string,

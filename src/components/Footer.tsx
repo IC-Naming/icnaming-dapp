@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import styles from '../assets/styles/Footer.module.scss'
 export const Footer = () => {
   return (
