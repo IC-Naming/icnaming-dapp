@@ -7,12 +7,13 @@ import { useAuthWallet } from "../context/AuthWallet";
 import { toast } from 'react-toastify';
 import { ethers } from "ethers";
 import ServiceApi from "../utils/ServiceApi";
+import { deleteCache } from '../utils/localCache';
 import { ConnectWallets } from ".";
 declare const window: any;
 
 const renderTooltip = (arg) => (
   <Tooltip id="button-tooltip" {...arg} className={styles.toolipsss}>
-    Connect to your eth wallet and check if your address is in the whitelist. If the address is in the whitelist, there will be a free 4-digit name registration credit
+    Connect to your eth wallet and check if your address is in the whitelist. If the address is in the whitelist, there will be a free 4-digit name registration quota
   </Tooltip>
 );
 
@@ -42,6 +43,7 @@ export const NameRegister = (props) => {
           autoClose: 2000,
           theme: "dark",
         });
+        deleteCache(props.name + 'details')
       } else {
         toast('Register name failed', {
           position: "top-center",
@@ -155,7 +157,7 @@ export const NameRegister = (props) => {
               <Col md={4} sm={12}><p className={styles['text-right']}>ICP</p></Col>
             </Row>
             <Row>
-              <Col md={4} sm={12}>credit
+              <Col md={4} sm={12}>quota
                 {
                   isEthConnected && <OverlayTrigger overlay={renderTooltip}><i className="bi bi-question-circle"></i></OverlayTrigger>
                 }

@@ -9,6 +9,7 @@ import {
 } from "./canisters/registrar";
 import {
   createWhiteListQueryActor,
+  createWhiteListUpdateActor,
   WhiteListActor,
 } from "./canisters/whiteList";
 import {
@@ -39,6 +40,7 @@ export default class ServiceApi {
   private readonly registrarQueryActor: RegistrarActor;
   private readonly registrarUpdateActor: RegistrarActor;
   private readonly whiteListQueryActor: WhiteListActor;
+  private readonly createWhiteListUpdateActor: WhiteListActor;
   private readonly registryQueryActor: RegistryActor;
   private readonly resolverQueryActor: ResolverActor;
   private readonly resolverUpdateActor: ResolverActor;
@@ -48,6 +50,7 @@ export default class ServiceApi {
     this.registrarQueryActor = createRegistrarQueryActor();
     this.registrarUpdateActor = createRegistrarUpdateActor();
     this.whiteListQueryActor = createWhiteListQueryActor();
+    this.createWhiteListUpdateActor = createWhiteListUpdateActor();
     this.registryQueryActor = createRegistryQueryActor();
     this.resolverQueryActor = createResolverQueryActor();
     this.resolverUpdateActor = createResolverUpdateActor();
@@ -86,10 +89,38 @@ export default class ServiceApi {
     });
   };
 
+  // get testCredit
+  public creditOfTestnet = (): Promise<number> => {
+    return executeWithLogging(async () => {
+      const res: any = await this.createWhiteListUpdateActor.testCredit();
+      console.log(res)
+      if (res.Ok) {
+        return Number(res.Ok);
+      } else {
+        return 0;
+      }
+    });
+  };
+
+  //reg name testnet
+   public registerNameTestnet = (name: string): Promise<boolean> => {
+    return executeWithLogging(async () => {
+      console.log('reg name',name)
+      const res:any = await this.createWhiteListUpdateActor.regNameForTest(name)
+      console.log(res)
+      if (res.Ok) {
+        return true;
+      } else {
+        return res.Err.message;
+      }
+    });
+  };
+
   // get credit
   public creditOfEthAddress = (ethAddress: string): Promise<number> => {
     return executeWithLogging(async () => {
       const res: any = await this.whiteListQueryActor.refStatus(ethAddress);
+      console.log('creditOfEthAddress',res);
       if (res.Ok) {
         return Number(res.Ok.credit);
       } else {
