@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SearchInput, Card, CopyToClipboard } from "../components";
 import { Principal } from '@dfinity/principal';
 import styles from '../assets/styles/Search.module.scss'
@@ -14,7 +14,6 @@ export const MyAccount = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [namesOfRegistrant, setNamesOfRegistrant] = useState<any>();
   const [namesOfController, setNamesOfController] = useState<any>();
-
 
   const getMyFavourites = async () => {
     let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
@@ -45,7 +44,7 @@ export const MyAccount = () => {
           });
         })
       }, 'getNamesOfRegistrant' + authWallet.walletAddress).then(async (res) => {
-        // console.log("my address result of registation", res)
+        console.log("my address result of registation", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
 

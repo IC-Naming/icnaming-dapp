@@ -1,3 +1,4 @@
+import React from 'react'
 import { SearchInput, CopyToClipboard, NameRegister, NameRegisterTestnet, Record } from "../components";
 import styles from "../assets/styles/Name.module.scss";
 import { ConnectWallets } from "../components/ConnectWallets";

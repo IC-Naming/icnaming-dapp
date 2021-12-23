@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card, CopyToClipboard } from "../components";
 import styles from '../assets/styles/Search.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
