@@ -29,12 +29,12 @@ export const NameRegister = (props) => {
   const serviceApi = new ServiceApi();
 
   const handleSubmitToRegisterName = async () => {
+    if(loadingSubmit) return
     setLoadingSubmit(true)
     const provider = new ethers.providers.Web3Provider(window.ethereum)
     const signer = provider.getSigner();
     const message = `${props.name}${auth.principal?.toText() || ""}`;
     const signature = await signer.signMessage(message);
-    // const regResult = await 
     serviceApi.registerName(props.name, ethWalletAddress, auth.principal?.toText() || "", signature).then(regResult => {
       console.log('regResult',regResult)
       if (regResult === true) {
@@ -44,6 +44,9 @@ export const NameRegister = (props) => {
           theme: "dark",
         });
         deleteCache(props.name + 'details')
+        deleteCache(props.name + 'details')
+        deleteCache('myNamesOfFavorite' + auth.walletAddress)
+        deleteCache('namesOfController' + auth.walletAddress)
       } else {
         toast('Register name failed', {
           position: "top-center",

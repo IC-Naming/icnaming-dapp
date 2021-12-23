@@ -30,6 +30,7 @@ export const NameRegisterTestnet = (props) => {
     });
   }
   const submitToregisterNameTest = async () => {
+    if (loadingSubmit) return
     setLoadingSubmit(true)
     console.log('reg start')
     serviceApi.registerNameTestnet(props.name).then(regResult => {
@@ -41,6 +42,8 @@ export const NameRegisterTestnet = (props) => {
           theme: "dark",
         });
         deleteCache(props.name + 'details')
+        deleteCache('myNamesOfFavorite' + auth.walletAddress)
+        deleteCache('namesOfController' + auth.walletAddress)
         setCredit(credit - 1)
       } else {
         toastTopcenter(regResult);
@@ -115,7 +118,10 @@ export const NameRegisterTestnet = (props) => {
                 </div>
                 :
                 <div className="d-grid gap-2">
-                  <button className={styles.btn} disabled={credit > 0 ? false : true} onClick={submitToregisterNameTest}>
+                  <button
+                    className={styles.btn}
+                    disabled={credit > 0 ? false : true}
+                    onClick={submitToregisterNameTest}>
                     {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                     Submit Request</button>
                 </div>

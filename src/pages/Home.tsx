@@ -1,3 +1,4 @@
+import React from 'react'
 import { SearchInput } from "../components";
 import styles from '../assets/styles/Home.module.scss'
 export const Home = () => {
