@@ -14,7 +14,6 @@ export const Favourites = () => {
   const [nameResult, setNameResult] = useState<any>();
 
   const getMyFavourites = async () => {
-    console.log('origin local');
     let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
     if (myFavoriteNamesStorage && myFavoriteNamesStorage.length > 0) {
       return myFavoriteNamesStorage;
@@ -30,6 +29,7 @@ export const Favourites = () => {
 
   useEffect(() => {
     setLoading(true)
+    const ac = new AbortController();
     const getMyFavoriteNames = async () => {
       if (authWallet.walletAddress) {
         let myNamesOfFavorite = await getMyFavourites()
@@ -60,7 +60,12 @@ export const Favourites = () => {
     }
 
     getMyFavoriteNames()
-  }, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
+    
+    return () => {
+      console.log('卸载Favourites')
+      ac.abort();
+    }
+  },  [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className={styles.serach}>

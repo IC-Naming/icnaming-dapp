@@ -35,13 +35,27 @@
   display: none;
 }
 .header-logo{
-  background: url('../images/logo192.png') no-repeat center;
+  background: url('../images/logo.png') no-repeat left center;
   background-size: contain;
   font-size: 0;
   height: 2rem;
-  width: 2rem;
+  width: 10rem;
   display: block;
   cursor: pointer;
+  position: relative;
+  .testnetlogo{
+    position: absolute;
+    right: 20px;
+    top: -5px;
+    font-size: 0.625rem;
+    width: 45px;
+    height: 16px;
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    line-height: 15px;
+    background: linear-gradient(270deg, #450DEA 0%, #00CB9E 100%);
+    border-radius: 8px;
+  }
 }
 .navbar-nav{
   display: none;
@@ -244,4 +258,3 @@
   }
   .nav-item{padding: 0 40px;white-space: nowrap; font-size: 16px;}
 }
-  

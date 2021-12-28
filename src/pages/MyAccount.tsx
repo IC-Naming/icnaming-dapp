@@ -27,8 +27,9 @@ export const MyAccount = () => {
       }, 'myNamesOfFavorite' + authWallet.walletAddress);
     }
   }
-
+  
   useEffect(() => {
+    const ac = new AbortController();
     if (authWallet.walletAddress) {
       const wordParam: Principal = Principal.fromText(authWallet.walletAddress);
       let getNamesOfRegistrantLoaded = false;
@@ -88,6 +89,7 @@ export const MyAccount = () => {
         console.log(err)
         setLoading(false)
       })
+      return () => ac.abort();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authWallet.walletAddress])
