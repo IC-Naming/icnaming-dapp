@@ -56,6 +56,7 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
     <Modal
       show={visible}
       onHide={hide}
+      style={{zIndex:1111}}
     >
       <Modal.Header>
         <Modal.Title className="fz-18 connectwallettitle">Select a Wallet</Modal.Title>
