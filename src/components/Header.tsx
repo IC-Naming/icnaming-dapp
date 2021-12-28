@@ -7,7 +7,7 @@ import { useAuthWallet } from "../context/AuthWallet";
 import { formatAddress } from '../utils/helper';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import { isMainNetEnv } from "../utils/config";
 export const Header = () => {
   const history = useHistory();
   const { ...authWallet } = useAuthWallet();
@@ -44,19 +44,8 @@ export const Header = () => {
     history.push('/');
     setCurrentPcIndex(0)
     setCurrentIndex(0)
-    //清除localStorage
     localStorage.removeItem('myFavoriteNames');
   }
-/*   
-  const getMyFavoriteNames = async () => {
-    if (authWallet.walletAddress) {
-      const myFavoriteNames = await serviceApi.getFavoriteNames();
-      localStorage.setItem('myFavoriteNames', JSON.stringify(myFavoriteNames));
-    }
-  }
-  useEffect(() => {
-    getMyFavoriteNames()
-  }, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps */
 
   const HeaderWallet = () => {
     return (<div className={`${styles['wallet-wrap']} appheader-wallet-wrap`}>
@@ -106,7 +95,12 @@ export const Header = () => {
         <span onClick={
           () => {history.push('/')
           houdlePcNav('logo')}
-        } className={`${styles['header-logo']} headerLogo`}>logo</span>
+        } className={`${styles['header-logo']} headerLogo`}>logo
+        {
+          !!!isMainNetEnv() && <span className={styles.testnetlogo}>testnet</span>
+        }
+          
+        </span>
 
         <button className="navbar-toggler" type="button" onClick={() => { houdleNav(null) }}>
           <i className="bi bi-list"></i>

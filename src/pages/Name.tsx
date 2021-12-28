@@ -46,6 +46,7 @@ export const Name = (props) => {
   const [activeKey, setActiveKey] = useState('details');
 
   useEffect(() => {
+    const ac = new AbortController();
     if (name !== '') {
       let getNameDetailsLoaded = false;
       let getRecordsOfNameLoaded = false;
@@ -110,6 +111,7 @@ export const Name = (props) => {
         });
       })
     }
+    return () => ac.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name])
 
