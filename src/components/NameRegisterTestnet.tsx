@@ -9,8 +9,7 @@ import { ConnectWallets } from ".";
 
 const renderTooltip = (arg) => (
   <Tooltip id="button-tooltip" {...arg} className={styles.toolipsss}>
-    Connect to your eth wallet and check if your address is in the whitelist.
-    If the address is in the whitelist, there will be a free 4-digit name registration quota
+    Each user has a test registration quota
   </Tooltip>
 );
 
@@ -57,7 +56,7 @@ export const NameRegisterTestnet = (props) => {
   }
 
   useEffect(() => {
-
+    const ac = new AbortController();
     if (auth.isAuthWalletConnected) {
       setLoadingCredit(true)
       serviceApi.creditOfTestnet()
@@ -71,6 +70,7 @@ export const NameRegisterTestnet = (props) => {
     } else {
       setLoadingCredit(false)
     }
+    return () => ac.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.walletAddress])
 

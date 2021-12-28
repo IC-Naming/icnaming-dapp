@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "start": "env-cmd -f .env.dev react-scripts start",
-    "build:testnet": "set GENERATE_SOURCEMAP=false && env-cmd -f .env.dev react-scripts build",
-    "build:mainnet": "set GENERATE_SOURCEMAP=false && env-cmd -f .env.prod react-scripts build",
+    "build:testnet": "set GENERATE_SOURCEMAP=false&& env-cmd -f .env.dev react-scripts build",
+    "build:mainnet": "set GENERATE_SOURCEMAP=false&& env-cmd -f .env.prod react-scripts build",
     "test": "jest",
     "eject": "react-scripts eject"
   },
