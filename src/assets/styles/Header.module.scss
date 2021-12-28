@@ -5,7 +5,7 @@
   right: 0;
   top: 0;
   height: 54px;
-  z-index: 9;
+  z-index: 1100;
   background: linear-gradient(180deg, #031D49 0%, #062860 100%);
 }
 .navbar{
@@ -139,7 +139,7 @@
   position: fixed;
   width: 100vw;
   height: 100vh;
-  z-index: 999;
+  z-index: 1100;
   top: 0;
   left: 0;
   right: 0;

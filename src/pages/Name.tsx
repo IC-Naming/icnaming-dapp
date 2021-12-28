@@ -167,7 +167,7 @@ export const Name = (props) => {
                           </div>
                           <div className={styles.flexcol}>
                             <OverlayTrigger trigger="click"
-                              overlay={<Tooltip className={styles.commingTip}>Comming soon</Tooltip>}
+                              overlay={<Tooltip className={styles.commingTip}>Coming soon</Tooltip>}
                             >
                               <button className={styles.btn}>Transfer</button>
                             </OverlayTrigger>
@@ -181,7 +181,7 @@ export const Name = (props) => {
                           </div>
                           <div className={styles.flexcol}>
                             <OverlayTrigger trigger="click"
-                              overlay={<Tooltip className={styles.commingTip}>Comming soon</Tooltip>}
+                              overlay={<Tooltip className={styles.commingTip}>Coming soon</Tooltip>}
                             >
                               <button className={styles.btn}>Transfer</button>
                             </OverlayTrigger>
@@ -192,7 +192,7 @@ export const Name = (props) => {
                           <div className={styles.flexcol}>{nameDetails?.expireAt.toString()}</div>
                           <div className={styles.flexcol}>
                             <OverlayTrigger trigger="click"
-                              overlay={<Tooltip className={styles.commingTip}>Comming soon</Tooltip>}
+                              overlay={<Tooltip className={styles.commingTip}>Coming soon</Tooltip>}
                             >
                               <button className={styles.btn}>Renew</button>
                             </OverlayTrigger>
@@ -206,7 +206,7 @@ export const Name = (props) => {
                           </div>
                           <div className={styles.flexcol}>
                             <OverlayTrigger trigger="click"
-                              overlay={<Tooltip className={styles.commingTip}>Comming soon</Tooltip>}
+                              overlay={<Tooltip className={styles.commingTip}>Coming soon</Tooltip>}
                             >
                               <button className={styles.btn}>Set</button>
                             </OverlayTrigger>
