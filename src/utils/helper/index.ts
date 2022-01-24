@@ -1,4 +1,4 @@
 export { formatAddress } from "./addressFormmatter";
-export { isBTCAddress,isETHAddress ,isLTCAddress,isEmail} from "./checkinput";
+export { isValidAddress, isEmail } from "./validator";
 export { numberFormat } from "./numberFormatter";
 export { principalToAccountID } from "./converter";
