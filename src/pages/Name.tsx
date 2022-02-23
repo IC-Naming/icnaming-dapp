@@ -151,12 +151,7 @@ export const Name = (props) => {
                 :
                 <Tabs activeKey={activeKey} onSelect={(k) => setActiveKey(k || "register")} className="mb-3">
                   <Tab eventKey="register" title="Register">
-                    {/* {
-                      isMainNetEnv() ? <NameRegister name={name} available={nameDetails?.available} />
-                        :
-                        
-                    } */}
-                    <Register name={name} available={nameDetails?.available} />
+                    <Register regname={name} available={nameDetails?.available} />
                   </Tab>
                   <Tab eventKey="details" title="Details">
                     <div className={styles.details}>

@@ -7,7 +7,7 @@ interface Props {
 }
 export const SearchInput = (props: Props) => {
   const history = useHistory();
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState<string>('')
   
   const handleChange = (e) => {
     setValue(e.target.value.toLowerCase())

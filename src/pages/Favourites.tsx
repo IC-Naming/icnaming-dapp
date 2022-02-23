@@ -62,7 +62,6 @@ export const Favourites = () => {
     getMyFavoriteNames()
     
     return () => {
-      console.log('卸载Favourites')
       ac.abort();
     }
   },  [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps

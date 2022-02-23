@@ -61,12 +61,12 @@
   display: none;
 }
 .nav-item{
-  span{color: #fff;
+  .nav-link{color: #fff;
     transition: color .3s;
     cursor: pointer;
    &:hover{color: #00CFBB;}
   }
-   &.current{ span{color: #00CFBB;}}
+   &.current{ .nav-link{color: #00CFBB;}}
   }
 .navbar>.container, .navbar>.container-xxl {
   display: flex;

@@ -1,5 +1,5 @@
 import { Principal } from "@dfinity/principal";
-import axios from "axios";
+// import axios from "axios";
 import {
   createRegistrarQueryActor,
   createRegistrarUpdateActor,
@@ -28,7 +28,7 @@ import {
   ResolverActor,
 } from "./canisters/resolver";
 import { createFavoriteActor, FavoritesActor } from "./canisters/favorites";
-import { WHITE_LIST_PROXY_API } from "./config";
+// import { WHITE_LIST_PROXY_API } from "./config";
 import { executeWithLogging } from "./errorLogger";
 import { RegistrationDetails } from "./canisters/registrar/interface";
 import { RegistryDto } from "./canisters/registry/interface";
@@ -82,6 +82,7 @@ export default class ServiceApi {
     if (word.length > 0) {
       return executeWithLogging(async () => {
         const res = await this.registrarQueryActor.available(`${word}`);
+        // console.log('registrarQueryActor.available', res);
         // if res is ErrorInfo
         if ("Ok" in res) {
           return res.Ok;
@@ -104,32 +105,6 @@ export default class ServiceApi {
     });
   };
 
-  // get testCredit
-  public creditOfTestnet = (): Promise<number> => {
-    return executeWithLogging(async () => {
-      const res = await this.createWhiteListUpdateActor.testCredit();
-      console.log(res);
-      if ("Ok" in res) {
-        return Number(res.Ok);
-      } else {
-        throw new CanisterError(res.Err);
-      }
-    });
-  };
-
-  //reg name testnet
-  public registerNameTestnet = (name: string): Promise<boolean> => {
-    return executeWithLogging(async () => {
-      console.log("reg name", name);
-      const res = await this.createWhiteListUpdateActor.regNameForTest(name);
-      console.log(res);
-      if ("Ok" in res) {
-        return res.Ok;
-      } else {
-        throw new CanisterError(res.Err);
-      }
-    });
-  };
 
   //reg name by quota
   public registerNameByQuota = (
@@ -174,7 +149,7 @@ export default class ServiceApi {
   public getPendingOrder = (): Promise<[] | [GetNameOrderResponse]> => {
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_pending_order();
-      console.log(res);
+      console.log('get_pending_order',res);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -192,30 +167,6 @@ export default class ServiceApi {
         return Number(res.Ok.credit);
       } else {
         throw new CanisterError(res.Err);
-      }
-    });
-  };
-
-  // reg name
-  public registerName = (
-    name: string,
-    ethAddress: string,
-    icpAddress: string,
-    signMessage: string
-  ): Promise<boolean> => {
-    return executeWithLogging(async () => {
-      const res = await axios.post(WHITE_LIST_PROXY_API, {
-        name,
-        ethAddress,
-        icpAddress,
-        signMessage,
-      });
-
-      if (res.data.code === 0) {
-        return true;
-      } else {
-        console.log(res.data.message);
-        return false;
       }
     });
   };
@@ -247,8 +198,10 @@ export default class ServiceApi {
       offset: BigInt(0),
       limit: BigInt(100),
     };
+    console.log('getNamesOfRegistrant----------',address)
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_names(address, pagingArgs);
+      console.log('get_names----------',res)
       if ("Ok" in res) {
         return res.Ok.items;
       } else {
@@ -281,6 +234,7 @@ export default class ServiceApi {
   public getRegistrantOfName = (name: string): Promise<Principal> => {
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_owner(name);
+      console.log("getRegistrantOfName", res);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -353,6 +307,20 @@ export default class ServiceApi {
     });
   };
 
+  // get quota
+  public getQuota = (user:Principal,quotaType:number): Promise<number> => {
+    return executeWithLogging(async () => {
+      const quotaParsed: QuotaType = { LenGte: quotaType };
+      const res: any = await this.registrarQueryActor.get_quota(user,quotaParsed);
+      console.log('get_quota',res)
+      if ("Ok" in res) {
+        return Number(res.Ok);
+      } else {
+        throw new CanisterError(res.Err);
+      }
+    });
+  };
+
   // get name details
   public getNameDetails = (name: string): Promise<any> => {
     return executeWithLogging(async () => {
@@ -361,6 +329,7 @@ export default class ServiceApi {
         this.getRegistrationDetailsOfName(name),
         this.getRegistryDetailsOfName(name),
       ]);
+      console.log(values)
       if (values[1].owner && values[2].owner) {
         return {
           name,

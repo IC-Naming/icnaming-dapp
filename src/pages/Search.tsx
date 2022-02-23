@@ -171,7 +171,6 @@ export const Search = (props) => {
                               available={nameSearchResult?.available || false}
                               favorite={nameSearchResult?.favorite || false} />
                           </div>
-
                         :
                         <Tabs defaultActiveKey="registrant" className="mb-3">
                           <Tab eventKey="registrant" title="Registrant">

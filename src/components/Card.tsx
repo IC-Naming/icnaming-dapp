@@ -5,6 +5,7 @@ import ServiceApi from '../utils/ServiceApi'
 import { useAuthWallet } from '../context/AuthWallet';
 import { toast } from 'react-toastify';
 import { deleteCache } from '../utils/localCache';
+import { Modal, Spinner } from "react-bootstrap";
 
 export interface CardProps {
   name: string,
@@ -14,10 +15,12 @@ export interface CardProps {
   favorite: boolean,
 }
 export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccount, favorite }) => {
-  const { ...authWallet } = useAuthWallet();
+  const { ...auth } = useAuthWallet();
   const history = useHistory();
   const serviceApi = new ServiceApi();
-  const [isFavorite, SetIsFavorite] = React.useState(false)
+  const [isFavorite, SetIsFavorite] = React.useState<boolean>(false)
+  const [checkOrderIng, setCheckOrderIng] = React.useState<boolean>(false)
+  const [visible, setVisible] = React.useState<boolean>(false)
 
   React.useEffect(() => {
     SetIsFavorite(favorite)
@@ -39,8 +42,8 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
     serviceApi.addFavoriteName(name).then(res => {
       if (res) {
         console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
-        deleteCache('favoriteall' + authWallet.walletAddress)
-        deleteCache('myNamesOfFavorite' + authWallet.walletAddress);
+        deleteCache('favoriteall' + auth.walletAddress)
+        deleteCache('myNamesOfFavorite' + auth.walletAddress);
         console.log("addFavorite", res)
       }
     })
@@ -52,8 +55,8 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
     serviceApi.removeFavoriteName(name).then(res => {
       if (res) {
         console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
-        deleteCache('favoriteall' + authWallet.walletAddress)
-        deleteCache('myNamesOfFavorite' + authWallet.walletAddress);
+        deleteCache('favoriteall' + auth.walletAddress)
+        deleteCache('myNamesOfFavorite' + auth.walletAddress);
         console.log("removeFavorite", res)
       }
     })
@@ -61,7 +64,7 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
 
   const handleFavorite = (e) => {
     e.stopPropagation();
-    if (authWallet.isAuthWalletConnected) {
+    if (auth.isAuthWalletConnected) {
       if (isFavorite) {
         removeFavorite(e)
       } else {
@@ -74,6 +77,20 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
         theme: 'dark'
       })
     }
+  }
+
+  const checkOrder = () => {
+    setCheckOrderIng(true)
+      serviceApi.getPendingOrder().then(res => {
+        setCheckOrderIng(false)
+        if (res.length !== 0) {
+          setVisible(true)
+        } else {
+          history.push(`/name/${name}/reg`)
+        }
+      }).catch(err => {
+        console.log(err)
+      })
   }
 
   return (
@@ -93,16 +110,42 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
           available ?
             <>
               <div className={styles['card-right']}>
-                <button onClick={e => {
-                  e.stopPropagation();
-                  history.push(`/name/${name}/reg`)
-                }} className={styles['btn-reg']}>register</button>
+                <button onClick={e => { e.stopPropagation(); checkOrder() }} className={styles['btn-reg']}>
+                  {checkOrderIng && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                  register
+                </button>
               </div>
               <div className={styles.available}>Available</div>
             </>
             :
             <div className={styles.unavailable}>Unavailable</div>
       }
+
+      <Modal
+        show={visible}
+        style={{ zIndex: 222222 }}
+        backdrop={true}
+      >
+        <Modal.Header>
+          <Modal.Title className="fz-18 connectwallettitle">Notice</Modal.Title>
+          <button className='close' onClick={e => { e.stopPropagation(); setVisible(false) }}>
+            <i className="bi bi-x-circle"></i>
+          </button>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="line-light mb-3"></div>
+          <div className={styles['notice-main']}>You have a pending order</div>
+        </Modal.Body>
+        <Modal.Footer className={styles['notice-modal-footer']}>
+          <button className={styles['notice-btn']} onClick={(e) => {
+            e.stopPropagation(); setVisible(false)
+          }}>Don`t show again</button>
+          <button className={styles['notice-btn']} onClick={(e) => {
+            e.stopPropagation();
+            history.push(`/name/${name}/reg`)
+          }}>View</button>
+        </Modal.Footer>
+      </Modal>
     </div>
   )
 }

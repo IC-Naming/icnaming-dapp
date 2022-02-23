@@ -1,24 +1,34 @@
 import { useEffect, useState } from "react";
-import { Row, Col, Spinner, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { useHistory } from "react-router-dom";
+import { Principal } from "@dfinity/principal";
+import { Row, Col, Spinner } from "react-bootstrap";
 import styles from '../assets/styles/Name.module.scss'
 import { useAuthWallet } from "../context/AuthWallet";
 import { toast } from 'react-toastify';
 import ServiceApi from "../utils/ServiceApi";
-import { deleteCache } from '../utils/localCache';
+// import { deleteCache } from '../utils/localCache';
 import { ConnectWallets } from ".";
+import { Select, Badge, Avatar } from '@douyinfe/semi-ui';
+const Option = Select.Option;
 
-const renderTooltip = (arg) => (
-  <Tooltip id="button-tooltip" {...arg} className={styles.toolipsss}>
-    Each useration quota has a test registr
-  </Tooltip>
-);
-
-export const Register = (props) => {
+interface RegProps {
+  regname: string;
+  available: boolean;
+}
+export const Register: React.FC<RegProps> = ({ regname, available }) => {
+  const history = useHistory();
   const { ...auth } = useAuthWallet();
-  const [credit, setCredit] = useState(0);
+  const [quotas, setQuotas] = useState<any>([]);
   const [showWallets, setShowWallets] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
-  const [loadingCredit, setLoadingCredit] = useState<boolean>(true);
+  const [loadingQuotas, setLoadingQuotas] = useState<boolean>(false);
+
+  const [calculating, setCalculating] = useState<boolean>(true);
+  const [price, SetPrice] = useState(0)
+  const [cyclesPrice, SetCyclesPrice] = useState(0)
+
+  const [payQuota, setPayQuota] = useState(7)
+
   const serviceApi = new ServiceApi();
 
   const toastTopcenter = (msg) => {
@@ -28,56 +38,85 @@ export const Register = (props) => {
       theme: "dark",
     });
   }
-  const submitToregisterNameTest = async () => {
+
+  const registerVidIcp = async () => {
     if (loadingSubmit) return
     setLoadingSubmit(true)
-    console.log('reg start')
-    serviceApi.registerNameTestnet(props.name).then(regResult => {
-      console.log('regResult', regResult)
-      if (regResult === true) {
-        toast.success('Register name success', {
-          position: "top-center",
-          autoClose: 2000,
-          theme: "dark",
-        });
-        deleteCache(props.name + 'details')
-        deleteCache('myNamesOfFavorite' + auth.walletAddress)
-        deleteCache('namesOfController' + auth.walletAddress)
-        setCredit(credit - 1)
-      } else {
-        toastTopcenter(regResult);
-      }
-      setLoadingSubmit(false)
+    // serviceApi.submitRegisterOrder
+  }
+
+  const registerVidQuota = async () => {
+    if (loadingSubmit) return
+    setLoadingSubmit(true)
+    serviceApi.registerNameByQuota(regname, payQuota).then(res => {
+      console.log(res)
+
     }).catch(err => {
-      console.log(err)
       setLoadingSubmit(false)
-      toastTopcenter('Testnet Register name failed');
+      toastTopcenter(err.message)
     })
   }
 
   useEffect(() => {
-    const ac = new AbortController();
-    if (auth.isAuthWalletConnected) {
-      setLoadingCredit(true)
-      serviceApi.creditOfTestnet()
-        .then(creditRes => {
-          setCredit(creditRes)
-          setLoadingCredit(false)
-        }).catch(err => {
-          setLoadingCredit(false)
-          toastTopcenter('get creditOfTestnet Error');
-        })
+    const namePrice = [
+      3.54,
+      3.22,
+      2.93,
+      2.66,
+      2.42,
+      2.2,
+      2
+    ]
+    let priceLev = 0;
+    if (regname.split('.')[0].length >= 7) {
+      SetCyclesPrice(2)
+      priceLev = 2
     } else {
-      setLoadingCredit(false)
+      priceLev = namePrice[regname.split('.')[0].length - 1]
+      SetCyclesPrice(priceLev)
     }
+    serviceApi.getIcpToCyclesRate().then(res => {
+      console.log('getIcpToCyclesRate', res)
+      SetPrice(priceLev / 10)
+      setCalculating(false)
+    }).catch(err => {
+      setCalculating(false)
+      SetPrice(priceLev / 10)
+      console.log(err)
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [regname])
+
+  /* useEffect(() => {
+    const ac = new AbortController();
+    const checkMyQutas = async () => {
+      setLoadingQuotas(true)
+      if (auth.walletAddress && auth.principal) {
+        const get_MyQuotas = async (user: Principal) => {
+          const quota4 = await serviceApi.getQuota(user, 4);
+          const quota5 = await serviceApi.getQuota(user, 5);
+          const quota6 = await serviceApi.getQuota(user, 6);
+          const quota7 = await serviceApi.getQuota(user, 7);
+          return [quota4, quota5, quota6, quota7]
+        }
+        const res = Promise.all(await get_MyQuotas(auth.principal));
+        console.log(res)
+        setQuotas(res)
+        setLoadingQuotas(false)
+      } else {
+        setLoadingQuotas(false)
+      }
+    }
+    checkMyQutas()
     return () => ac.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.walletAddress])
+  }, [auth.walletAddress]) */
 
   return (
     <div className={styles.register}>
+
       {
-        !props.available ?
+        !available ?
           <div style={{ textAlign: 'center', paddingTop: '.9rem' }}>This name is already registered</div>
           : <>
             <Row>
@@ -87,44 +126,106 @@ export const Register = (props) => {
               </Col>
               <Col md={4} sm={12}><p className={styles['text-right']}>Years</p></Col>
             </Row>
-            <Row>
+            <Row style={{ marginBottom: '1rem' }}>
               <Col md={4} sm={12}>Registration Price</Col>
-              <Col md={4} sm={12} className="text-center">0</Col>
-              <Col md={4} sm={12}><p className={styles['text-right']}>ICP</p></Col>
-            </Row>
-            <Row>
-              <Col md={4} sm={12}>Protocol Fee</Col>
-              <Col md={4} sm={12} className="text-center">0</Col>
-              <Col md={4} sm={12}><p className={styles['text-right']}>ICP</p></Col>
-            </Row>
-            <Row>
-              <Col md={4} sm={12}>quota
-                <OverlayTrigger overlay={renderTooltip}><i className="bi bi-question-circle"></i></OverlayTrigger>
-              </Col>
-              <Col md={4} sm={12} className="text-center" >
-                {
-                  loadingCredit ? <Spinner animation="border" size="sm" style={{ marginRight: 10 }} /> : credit
-                }
-              </Col>
-              <Col md={4} sm={12}>
+              <Col md={4} sm={12} className="text-center">
+                <div style={{ whiteSpace: 'nowrap' }}>
+                  {
+                    calculating
+                      ?
+                      <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />
+                      : price
+                  }
+                  &nbsp;ICP ≈ {cyclesPrice}T Cycles / Year
+                </div>
 
               </Col>
+              <Col md={4} sm={12}>{/* <p className={styles['text-right']}>ICP</p> */}</Col>
             </Row>
+
             {
-              !auth.isAuthWalletConnected
+              !auth.walletAddress
                 ?
                 <div className="d-grid gap-2">
                   <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect ICP Wallet</button>
                 </div>
                 :
-                <div className="d-grid gap-2">
-                  <button
-                    className={styles.btn}
-                    disabled={credit > 0 ? false : true}
-                    onClick={submitToregisterNameTest}>
-                    {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
-                    Submit Request</button>
-                </div>
+                loadingQuotas ?
+                  <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
+                  :
+                  <>
+                    <Row className="mb-3">
+                      <Col md={12} sm={12}>
+                        <button
+                          className={styles.btn}
+                          style={{ margin: 'auto', display: 'block' }}
+                          onClick={registerVidIcp}>
+                          {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                          Register via ICP</button>
+                      </Col>
+                    </Row>
+
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <div style={{ marginRight: 10 }}>
+                        <button
+                          className={styles.btn}
+                          // disabled={quota > 0 ? false : true}
+                          onClick={() => {
+                            registerVidQuota()
+                            history.push(`/pay/${regname}`)
+                          }}>
+                          {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                          Register via Quota</button>
+                      </div>
+
+                      <div>
+                        <Select size='large' className={styles['selcet-quota']} placeholder="please choose you quota">
+                          <Option>please choose you quota</Option>
+                          <Option className={styles['quota-option']}>
+                            <div className={styles['quota-option-con']}>
+                              <Badge count={7} className={styles['quota-option-badge']}>
+                                <Avatar shape='square' className={styles['quota-option-avatar']}>Quota</Avatar>
+                              </Badge>
+                              <span className={styles['quota-num']}>9</span>
+                            </div>
+                            <Badge count='recommend' className={styles.recommend} />
+                          </Option>
+                          <Option className={styles['quota-option']}>
+                            <div className={styles['quota-option-con']}>
+                              <Badge count={6} className={styles['quota-option-badge']}>
+                                <Avatar shape='square' className={styles['quota-option-avatar']}>Quota</Avatar>
+                              </Badge>
+                              <span className={styles['quota-num']}>5</span>
+                            </div>
+                          </Option>
+                          <Option className={styles['quota-option']}>
+                            <div className={styles['quota-option-con']}>
+                              <Badge count={5} className={styles['quota-option-badge']}>
+                                <Avatar shape='square' className={styles['quota-option-avatar']}>Quota</Avatar>
+                              </Badge>
+                              <span className={styles['quota-num']}>3</span>
+                            </div>
+                          </Option>
+                          <Option className={styles['quota-option']}>
+                            <div className={styles['quota-option-con']}>
+                              <Badge count={4} className={styles['quota-option-badge']}>
+                                <Avatar shape='square' className={styles['quota-option-avatar']}>Quota</Avatar>
+                              </Badge>
+                              <span className={styles['quota-num']}>1</span>
+                            </div>
+                          </Option>
+                          {/* {
+                            quotas.map((quota, index) => {
+                              return <Option value={quota} key={index}>Quota{index}:{quota}</Option>
+                            })
+                          } */}
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+
+                    </div>
+                  </>
             }
           </>
       }
