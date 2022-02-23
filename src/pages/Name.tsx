@@ -1,5 +1,5 @@
 import React from 'react'
-import { SearchInput, CopyToClipboard, NameRegister, NameRegisterTestnet, Record } from "../components";
+import { SearchInput, CopyToClipboard, Register, Record } from "../components";
 import styles from "../assets/styles/Name.module.scss";
 import { ConnectWallets } from "../components/ConnectWallets";
 import { Container, Tabs, Tab, OverlayTrigger, Tooltip } from "react-bootstrap";
@@ -7,13 +7,12 @@ import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
-import { isMainNetEnv } from "../utils/config";
 
 export const Name = (props) => {
   const serviceApi = new ServiceApi();
-  const [showWallets, setShowWallets] = useState(false);
+  const [showWallets, setShowWallets] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
-  const [loadingName, setLoadingName] = useState(true);
+  const [loadingName, setLoadingName] = useState<boolean>(true);
   const [nameDetails, setNameDetails] = useState<NameDetails>({
     name: 'ICP',
     available: true,
@@ -122,13 +121,20 @@ export const Name = (props) => {
     } else if (action === 'details') {
       setActiveKey('details')
     }
+    return () => {
+      setActiveKey('details')
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [action])
 
   useEffect(() => {
-    
+
     setName(props.match.params.name || "")
     setAction(props.match.params.action || "")
+    return () => {
+      setName('')
+      setAction('')
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.match.params])
 
@@ -145,12 +151,12 @@ export const Name = (props) => {
                 :
                 <Tabs activeKey={activeKey} onSelect={(k) => setActiveKey(k || "register")} className="mb-3">
                   <Tab eventKey="register" title="Register">
-                    {
+                    {/* {
                       isMainNetEnv() ? <NameRegister name={name} available={nameDetails?.available} />
                         :
-                        <NameRegisterTestnet name={name} available={nameDetails?.available} />
-                    }
-
+                        
+                    } */}
+                    <Register name={name} available={nameDetails?.available} />
                   </Tab>
                   <Tab eventKey="details" title="Details">
                     <div className={styles.details}>

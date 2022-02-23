@@ -1,8 +1,6 @@
 import React from "react";
 import logoipc from '../assets/images/icplogo.png';
 import plugimg from '../assets/images/pluglogo.png';
-import walletimg from '../assets/images/walletlogo.png';
-import maskimg from '../assets/images/masklogo.png';
 import styles from "../assets/styles/ConnectWallets.module.scss";
 import { Row, Col, Modal } from "react-bootstrap";
 import { useAuthWallet } from "../context/AuthWallet";
@@ -45,13 +43,6 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
     })
   }
 
-  const showMessage = (msg) => {
-    toast.info(msg, {
-      position: "top-center",
-      autoClose: 2000,
-      theme: 'dark'
-    })
-  }
   return (
     <Modal
       show={visible}
@@ -78,18 +69,6 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
             <button className={styles["btn-connect"]} onClick={connPlugWallet}>
               <img src={plugimg} alt="plug" />
               <span>Plug</span>
-            </button>
-          </Col>
-          <Col sm="6">
-            <button className={styles["btn-connect"]} onClick={() => { showMessage('After the support') }}>
-              <img src={maskimg} alt="MetaMask" />
-              <span>MetaMask</span>
-            </button>
-          </Col>
-          <Col sm="6">
-            <button className={styles["btn-connect"]} onClick={() => { showMessage('After the support') }}>
-              <img src={walletimg} alt="Wallet Connect" />
-              <span>Wallet Connect</span>
             </button>
           </Col>
         </Row>

@@ -7,3 +7,4 @@ export * from './Card';
 export * from './Record';
 export * from './NameRegister';
 export * from './NameRegisterTestnet';
+export * from './Register';
