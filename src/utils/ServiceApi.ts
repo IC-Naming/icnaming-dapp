@@ -33,6 +33,7 @@ import { executeWithLogging } from "./errorLogger";
 import { RegistrationDetails } from "./canisters/registrar/interface";
 import { RegistryDto } from "./canisters/registry/interface";
 import { CanisterError } from "./exception";
+import { createNNSActor, NNSActor } from "./canisters/nns";
 
 export interface NameDetails {
   name: string;
@@ -51,6 +52,7 @@ export default class ServiceApi {
   private readonly resolverQueryActor: ResolverActor;
   private readonly resolverUpdateActor: ResolverActor;
   private readonly favoritesActor: FavoritesActor;
+  private readonly nnsActor: NNSActor;
 
   public constructor() {
     this.registrarQueryActor = createRegistrarQueryActor();
@@ -61,6 +63,15 @@ export default class ServiceApi {
     this.resolverQueryActor = createResolverQueryActor();
     this.resolverUpdateActor = createResolverUpdateActor();
     this.favoritesActor = createFavoriteActor();
+    this.nnsActor = createNNSActor();
+  }
+
+  // get icp to cycles rate
+  public async getIcpToCyclesRate(): Promise<bigint> {
+    return executeWithLogging(async () => {
+      const rate = await this.nnsActor.get_icp_to_cycles_conversion_rate();
+      return rate;
+    });
   }
 
   /* Registrar */
