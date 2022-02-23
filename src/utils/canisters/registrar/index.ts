@@ -1,21 +1,20 @@
 import { actorFactory } from "../actorFactory";
 import {
   _SERVICE,
-  Result,
-  Result_1,
-  Result_2,
-  Result_3,
+  BooleanActorResponse,
   GetPageInput,
   RegistrationDto,
   QuotaType as QuotaType_1,
+  GetNameExpiresActorResponse,
+  GetDetailsActorResponse
 } from "./interface";
 import { idlFactory } from "./did";
 import { REGISTRAR_ID } from "./canisterId";
 export type RegistrarActor = _SERVICE;
-export type AvailableResult = Result;
-export type NameExpireResult = Result_1;
-export type NamesOfAddressResult = Result_2;
-export type RegisterResult = Result_3;
+export type AvailableResult = BooleanActorResponse;
+export type NameExpireResult = GetNameExpiresActorResponse;
+export type NamesOfAddressResult = GetDetailsActorResponse;
+export type RegisterResult = BooleanActorResponse;
 export type PagingArgs = GetPageInput;
 export type SearchResult = AvailableResult | NamesOfAddressResult;
 export type Registration = RegistrationDto;
