@@ -46,5 +46,4 @@ export interface _SERVICE {
       arg_3: bigint,
       arg_4: Principal,
     ) => Promise<Result_1>,
-  'set_top_name' : () => Promise<Result_5>,
 }

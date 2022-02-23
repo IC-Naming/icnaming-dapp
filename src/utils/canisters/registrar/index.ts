@@ -7,6 +7,7 @@ import {
   Result_3,
   GetPageInput,
   RegistrationDto,
+  QuotaType as QuotaType_1,
 } from "./interface";
 import { idlFactory } from "./did";
 import { REGISTRAR_ID } from "./canisterId";
@@ -18,6 +19,7 @@ export type RegisterResult = Result_3;
 export type PagingArgs = GetPageInput;
 export type SearchResult = AvailableResult | NamesOfAddressResult;
 export type Registration = RegistrationDto;
+export type QuotaType = QuotaType_1;
 export const createRegistrarQueryActor = () =>
   actorFactory.createActorWithAnonymousIdentity<RegistrarActor>(
     idlFactory,

@@ -6,6 +6,7 @@ import { Principal } from '@dfinity/principal';
 import { useAuthWallet } from '../context/AuthWallet';
 import ServiceApi from '../utils/ServiceApi';
 import dateFormat from "dateformat";
+import { IC_EXTENSION } from '../utils/config';
 
 interface NameModel {
   name: string;
@@ -51,13 +52,13 @@ export const Search = (props) => {
             searchName = word
           } else {
             setIsNotIcp(false);
-            searchName = `${word}.icp`
+            searchName = `${word}.${IC_EXTENSION}`
           }
-        }else{
+        } else {
           setIsNotIcp(false);
-          searchName = `${word}icp`
+          searchName = `${word}${IC_EXTENSION}`
         }
-        
+
         serviceApi.available(searchName).then(async res => {
           let expireAt = ''
           if (!res) {
@@ -160,7 +161,7 @@ export const Search = (props) => {
 
                       !isSearchAddress ?
                         isNotIcp ?
-                        <div className={styles.noicp}>
+                          <div className={styles.noicp}>
                             .{notIcpword} DNSSEC support coming soon!
                           </div>
                           :
@@ -170,7 +171,7 @@ export const Search = (props) => {
                               available={nameSearchResult?.available || false}
                               favorite={nameSearchResult?.favorite || false} />
                           </div>
-                          
+
                         :
                         <Tabs defaultActiveKey="registrant" className="mb-3">
                           <Tab eventKey="registrant" title="Registrant">

@@ -8,7 +8,7 @@ const getRegistrarId = (): Principal => {
     return Principal.fromText("j6dzz-gaaaa-aaaak-aab3q-cai");
   }
   if (isTestNetEnv()) {
-    return Principal.fromText("gp7wx-fyaaa-aaaag-qaauq-cai");
+    return Principal.fromText("onof3-pyaaa-aaaal-qac6a-cai");
   }
   throw new Error("Unknown environment");
 };

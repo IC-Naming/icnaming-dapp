@@ -8,6 +8,11 @@ import {
   Registration,
 } from "./canisters/registrar";
 import {
+  GetNameOrderResponse,
+  QuotaType,
+  SubmitOrderResponse,
+} from "./canisters/registrar/interface";
+import {
   createWhiteListQueryActor,
   createWhiteListUpdateActor,
   WhiteListActor,
@@ -27,14 +32,15 @@ import { WHITE_LIST_PROXY_API } from "./config";
 import { executeWithLogging } from "./errorLogger";
 import { RegistrationDetails } from "./canisters/registrar/interface";
 import { RegistryDto } from "./canisters/registry/interface";
+import { CanisterError } from "./exception";
 
 export interface NameDetails {
   name: string;
   available: boolean;
-  registrant: Principal|string;
-  controller: Principal|string;
-  resolver: Principal|string;
-  expireAt: Date|string;
+  registrant: Principal | string;
+  controller: Principal | string;
+  resolver: Principal | string;
+  expireAt: Date | string;
 }
 export default class ServiceApi {
   private readonly registrarQueryActor: RegistrarActor;
@@ -64,13 +70,12 @@ export default class ServiceApi {
     // if word is string and not empty
     if (word.length > 0) {
       return executeWithLogging(async () => {
-        const res: any = await this.registrarQueryActor.available(`${word}`);
+        const res = await this.registrarQueryActor.available(`${word}`);
         // if res is ErrorInfo
-        if (res.Ok) {
+        if ("Ok" in res) {
           return res.Ok;
         } else {
-          console.log(res.Err);
-          return false;
+          throw new CanisterError(res.Err);
         }
       });
     } else return Promise.reject(new Error("Invalid search word"));
@@ -79,12 +84,11 @@ export default class ServiceApi {
   // get name expires
   public expireAtOf = (name: string): Promise<number> => {
     return executeWithLogging(async () => {
-      const res: any = await this.registrarQueryActor.get_name_expires(name);
-      if (res.Ok) {
+      const res = await this.registrarQueryActor.get_name_expires(name);
+      if ("Ok" in res) {
         return Number(res.Ok);
       } else {
-        console.log(res.Err);
-        return 0;
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -92,26 +96,78 @@ export default class ServiceApi {
   // get testCredit
   public creditOfTestnet = (): Promise<number> => {
     return executeWithLogging(async () => {
-      const res: any = await this.createWhiteListUpdateActor.testCredit();
-      console.log(res)
-      if (res.Ok) {
+      const res = await this.createWhiteListUpdateActor.testCredit();
+      console.log(res);
+      if ("Ok" in res) {
         return Number(res.Ok);
       } else {
-        return 0;
+        throw new CanisterError(res.Err);
       }
     });
   };
 
   //reg name testnet
-   public registerNameTestnet = (name: string): Promise<boolean> => {
+  public registerNameTestnet = (name: string): Promise<boolean> => {
     return executeWithLogging(async () => {
-      console.log('reg name',name)
-      const res:any = await this.createWhiteListUpdateActor.regNameForTest(name)
-      console.log(res)
-      if (res.Ok) {
-        return true;
+      console.log("reg name", name);
+      const res = await this.createWhiteListUpdateActor.regNameForTest(name);
+      console.log(res);
+      if ("Ok" in res) {
+        return res.Ok;
       } else {
-        return res.Err.message;
+        throw new CanisterError(res.Err);
+      }
+    });
+  };
+
+  //reg name by quota
+  public registerNameByQuota = (
+    name: string,
+    quota: number
+  ): Promise<boolean> => {
+    return executeWithLogging(async () => {
+      console.log("reg name", name);
+      // convert quota to QuotaType
+      const quotaParsed: QuotaType = { LenGte: quota };
+      const res = await this.registrarUpdateActor.register_with_quota(
+        name,
+        quotaParsed
+      );
+      console.log(res);
+      if ("Ok" in res) {
+        return res.Ok;
+      } else {
+        throw new CanisterError(res.Err);
+      }
+    });
+  };
+
+  // submit order
+  public submitRegisterOrder = (
+    name: string,
+    years: number
+  ): Promise<SubmitOrderResponse> => {
+    return executeWithLogging(async () => {
+      console.log("reg name", name);
+      const res = await this.registrarUpdateActor.submit_order({ name, years });
+      console.log(res);
+      if ("Ok" in res) {
+        return res.Ok;
+      } else {
+        throw new CanisterError(res.Err);
+      }
+    });
+  };
+
+  // get pending order
+  public getPendingOrder = (): Promise<[] | [GetNameOrderResponse]> => {
+    return executeWithLogging(async () => {
+      const res = await this.registrarQueryActor.get_pending_order();
+      console.log(res);
+      if ("Ok" in res) {
+        return res.Ok;
+      } else {
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -120,12 +176,11 @@ export default class ServiceApi {
   public creditOfEthAddress = (ethAddress: string): Promise<number> => {
     return executeWithLogging(async () => {
       const res: any = await this.whiteListQueryActor.refStatus(ethAddress);
-      console.log('creditOfEthAddress',res);
-      if (res.Ok) {
+      console.log("creditOfEthAddress", res);
+      if ("Ok" in res) {
         return Number(res.Ok.credit);
       } else {
-        console.log(res.Err);
-        return 0;
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -160,18 +215,17 @@ export default class ServiceApi {
     key: string,
     value: string
   ): Promise<boolean> => {
-    console.table({name:name ,key:key, value:value});
+    console.table({ name: name, key: key, value: value });
     return executeWithLogging(async () => {
-      const res: any = await this.resolverUpdateActor.set_record_value(name, [
+      const res = await this.resolverUpdateActor.set_record_value(name, [
         [key, value],
       ]);
-      console.log('setRecord',res);
-      if (res.Ok) {
-        
-        return true;
+      console.log("setRecord", res);
+      if ("Ok" in res) {
+        return res.Ok;
+      } else {
+        throw new CanisterError(res.Err);
       }
-      console.log(res.Err);
-      return false;
     });
   };
 
@@ -183,36 +237,31 @@ export default class ServiceApi {
       limit: BigInt(100),
     };
     return executeWithLogging(async () => {
-      const res: any = await this.registrarQueryActor.get_names(
-        address,
-        pagingArgs
-      );
-      if (res.Ok) {
+      const res = await this.registrarQueryActor.get_names(address, pagingArgs);
+      if ("Ok" in res) {
         return res.Ok.items;
       } else {
-        console.log(res.Err);
-        return [];
+        throw new CanisterError(res.Err);
       }
     });
   };
 
   public getNamesOfController = (
     address: Principal
-  ): Promise<Array<Registration>> => {
+  ): Promise<Array<string>> => {
     const pagingArgs: PagingArgs = {
       offset: BigInt(0),
       limit: BigInt(100),
     };
     return executeWithLogging(async () => {
-      const res: any = await this.registryQueryActor.get_controlled_names(
+      const res = await this.registryQueryActor.get_controlled_names(
         address,
         pagingArgs
       );
-      if (res.Ok) {
+      if ("Ok" in res) {
         return res.Ok.items;
       } else {
-        console.log(res.Err);
-        return [];
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -220,12 +269,11 @@ export default class ServiceApi {
   // get name's registrant
   public getRegistrantOfName = (name: string): Promise<Principal> => {
     return executeWithLogging(async () => {
-      const res: any = await this.registrarQueryActor.get_owner(name);
-      if (res.Ok) {
+      const res = await this.registrarQueryActor.get_owner(name);
+      if ("Ok" in res) {
         return res.Ok;
       } else {
-        console.log(res.Err);
-        return Principal.anonymous();
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -233,12 +281,11 @@ export default class ServiceApi {
   // get name's controller
   public getControllerOfName = (name: string): Promise<Principal> => {
     return executeWithLogging(async () => {
-      const res: any = await this.registryQueryActor.get_owner(name);
-      if (res.Ok) {
+      const res = await this.registryQueryActor.get_owner(name);
+      if ("Ok" in res) {
         return res.Ok;
       } else {
-        console.log(res.Err);
-        return Principal.anonymous();
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -246,12 +293,11 @@ export default class ServiceApi {
   // get name's resolver
   public getResolverOfName = (name: string): Promise<Principal> => {
     return executeWithLogging(async () => {
-      const res: any = await this.registryQueryActor.get_resolver(name);
-      if (res.Ok) {
+      const res = await this.registryQueryActor.get_resolver(name);
+      if ("Ok" in res) {
         return res.Ok;
       } else {
-        console.log(res.Err);
-        return Principal.anonymous();
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -261,12 +307,11 @@ export default class ServiceApi {
     name: string
   ): Promise<RegistrationDetails> => {
     return executeWithLogging(async () => {
-      const res: any = await this.registrarQueryActor.get_details(name);
-      if (res.Ok) {
+      const res = await this.registrarQueryActor.get_details(name);
+      if ("Ok" in res) {
         return res.Ok;
       } else {
-        console.log(res.Err);
-        return {};
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -276,12 +321,11 @@ export default class ServiceApi {
     name: string
   ): Promise<Array<[string, string]>> => {
     return executeWithLogging(async () => {
-      const res: any = await this.resolverQueryActor.get_record_value(name);
-      if (res.Ok) {
+      const res = await this.resolverQueryActor.get_record_value(name);
+      if ("Ok" in res) {
         return res.Ok;
       } else {
-        console.log(res.Err);
-        return [];
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -290,11 +334,10 @@ export default class ServiceApi {
   public getRegistryDetailsOfName = (name: string): Promise<RegistryDto> => {
     return executeWithLogging(async () => {
       const res: any = await this.registryQueryActor.get_details(name);
-      if (res.Ok) {
+      if ("Ok" in res) {
         return res.Ok;
       } else {
-        console.log(res.Err);
-        return {};
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -305,7 +348,7 @@ export default class ServiceApi {
       const values = await Promise.all([
         this.available(name),
         this.getRegistrationDetailsOfName(name),
-        this.getRegistryDetailsOfName(name)
+        this.getRegistryDetailsOfName(name),
       ]);
       if (values[1].owner && values[2].owner) {
         return {
@@ -316,9 +359,9 @@ export default class ServiceApi {
           resolver: values[2].resolver.toText(),
           expireAt: new Date(Number(values[1].expired_at)),
         };
-      }else{
+      } else {
         return {
-          name: 'ICP',
+          name: "ICP",
           available: values[0],
           registrant: "Not owned",
           controller: "Not owned",
@@ -326,19 +369,17 @@ export default class ServiceApi {
           expireAt: "No Expire set",
         };
       }
-      
     });
   };
 
   // get favorite names
-  public getFavoriteNames = (): Promise<Array<[string, string]>> => {
+  public getFavoriteNames = (): Promise<Array<string>> => {
     return executeWithLogging(async () => {
-      const res: any = await this.favoritesActor.get_favorites();
-      if (res.Ok) {
+      const res = await this.favoritesActor.get_favorites();
+      if ("Ok" in res) {
         return res.Ok;
       } else {
-        console.log(res.Err);
-        return [];
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -347,11 +388,10 @@ export default class ServiceApi {
   public addFavoriteName = (name: string): Promise<boolean> => {
     return executeWithLogging(async () => {
       const res: any = await this.favoritesActor.add_favorite(name);
-      if (res.Ok ) {
-        return true;
+      if ("Ok" in res) {
+        return res.Ok;
       } else {
-        console.log(res.Err);
-        return false;
+        throw new CanisterError(res.Err);
       }
     });
   };
@@ -360,11 +400,10 @@ export default class ServiceApi {
   public removeFavoriteName = (name: string): Promise<boolean> => {
     return executeWithLogging(async () => {
       const res: any = await this.favoritesActor.remove_favorite(name);
-      if (res.Ok) {
-        return true;
+      if ("Ok" in res) {
+        return res.Ok;
       } else {
-        console.log(res.Err);
-        return false;
+        throw new CanisterError(res.Err);
       }
     });
   };

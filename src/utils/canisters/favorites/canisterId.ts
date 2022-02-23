@@ -8,7 +8,7 @@ const getFavoriteId = (): Principal => {
     return Principal.fromText("gfftf-pqaaa-aaaaj-aadza-cai");
   }
   if (isTestNetEnv()) {
-    return Principal.fromText("v2uxy-3iaaa-aaaal-qaana-cai");
+    return Principal.fromText("oyjuw-oqaaa-aaaal-qac5q-cai");
   }
   throw new Error("Unknown environment");
 };
