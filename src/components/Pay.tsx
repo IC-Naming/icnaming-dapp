@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import styles from '../assets/styles/Name.module.scss'
 import ServiceApi from "../utils/ServiceApi";
 import {BlockIndex, Tokens} from "../utils/canisters/ledger/interface";
+declare var window: any;
 
 interface PayPorps {
   regname: string;
@@ -72,7 +73,7 @@ export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota, 
     }
 
     try {
-      const result = await window.ic.requestTransfer({
+      const result = await window.ic.plug.requestTransfer({
         to: arrayToHex(order.payment_account_id),
         amount: order.price_icp_in_e8s,
         opts: {
