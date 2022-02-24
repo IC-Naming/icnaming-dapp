@@ -3,22 +3,17 @@ import { Row, Col, Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from '../assets/styles/Name.module.scss'
-// import { useAuthWallet } from "../context/AuthWallet";
-// import { toast } from 'react-toastify';
 import ServiceApi from "../utils/ServiceApi";
 import {BlockIndex, Tokens} from "../utils/canisters/ledger/interface";
-declare const window: any;
 
 interface PayPorps {
   regname: string;
   payType: string;
   payYears: number;
   payQuota: number;
-  order: any,
   hide: () => void;
 }
-export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota, order, hide }) => {
-  // const { ...auth } = useAuthWallet();
+export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota, hide }) => {
   const history = useHistory();
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [hasRefund, setHasRefund] = useState<boolean>(false)
@@ -54,15 +49,15 @@ export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota, 
           position: 'top-center',
           theme: 'dark'
         })
-
       })
     }
   }
 
   const payVidIcp = async () => {
     if (loadingSubmit) return
+    setLoadingSubmit(true)
     let orderResult = await serviceApi.getPendingOrder();
-    if (orderResult.length == 0) {
+    if (orderResult.length === 0) {
       toast.error('no pending order', {
         position: 'top-center',
         theme: 'dark'
@@ -125,7 +120,7 @@ export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota, 
         <Row>
           <Col md={4} sm={12}>Registration Period </Col>
           <Col md={4} sm={12} className="text-center">
-            {payYears}Years
+            {payYears} Years
           </Col>
           <Col md={4} sm={12}>
             {payQuota}
@@ -162,7 +157,7 @@ export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota, 
                   </Col>
                 </Row>
                 <div className="d-grid gap-2">
-                  <button className={styles.btn} onClick={() => { payVidIcp() }}>
+                  <button className={styles.btn} onClick={() => {  }}>
                     {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                     Refund
                   </button>
@@ -172,14 +167,14 @@ export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota, 
               <>
                 <Row>
                   <Col md={4} sm={12}>Registration to Price</Col>
-                  <Col md={4} sm={12} className="text-center">0 ICP ≈ 2T Cycles</Col>
+                  <Col md={4} sm={12} className="text-center">0 ICP ≈ 2 T Cycles</Col>
                   <Col md={4} sm={12}></Col>
                 </Row>
                 <div className="d-grid gap-2">
                   <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <button className={styles.btn} onClick={() => { cancelRegisterOrder() }} style={{ marginRight: 10 }}
                     >Cancel</button>
-                    <button className={styles.btn} onClick={() => { }}>
+                    <button className={styles.btn} onClick={() => { payVidIcp() }}>
                       {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                       Pay
                     </button>
