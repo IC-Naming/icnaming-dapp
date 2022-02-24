@@ -68,18 +68,18 @@ export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota, 
     }
     let order = orderResult[0];
     const arrayToHex = (arr: Array<number>) => {
-      return arr.map(item => {
-        return item.toString(16)
-      }).join('')
+      return arr.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"), "")
     }
 
     try {
+      const accountId = arrayToHex(order.payment_account_id);
+      console.log(`account id: ${accountId}`);
       const result = await window.ic.plug.requestTransfer({
-        to: IC_NAMING_LEDGER_ID,
-        amount: order.price_icp_in_e8s,
+        to: arrayToHex(order.payment_account_id),
+        amount: Number(order.price_icp_in_e8s),
         opts: {
           fee: 10000,
-          memo: order.payment_memo.ICP,
+          memo: order.payment_memo.ICP.toString(),
         },
       });
 
@@ -88,6 +88,7 @@ export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota, 
         theme: 'dark'
       })
     } catch (err) {
+      setLoadingSubmit(false)
       toast.error(`fail transfer with error: ${err}`, {
         position: 'top-center',
         theme: 'dark'
