@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import styles from '../assets/styles/Name.module.scss'
 import ServiceApi from "../utils/ServiceApi";
 import {BlockIndex, Tokens} from "../utils/canisters/ledger/interface";
+import {IC_NAMING_LEDGER_ID} from "../utils/canisters/icNamingLedger/canisterId";
 declare var window: any;
 
 interface PayPorps {
@@ -74,7 +75,7 @@ export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota, 
 
     try {
       const result = await window.ic.plug.requestTransfer({
-        to: arrayToHex(order.payment_account_id),
+        to: IC_NAMING_LEDGER_ID,
         amount: order.price_icp_in_e8s,
         opts: {
           fee: 10000,
