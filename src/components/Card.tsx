@@ -3,9 +3,13 @@ import { useHistory } from "react-router-dom";
 import styles from '../assets/styles/Card.module.scss'
 import ServiceApi from '../utils/ServiceApi'
 import { useAuthWallet } from '../context/AuthWallet';
+import { useOrder } from '../context/Order';
 import { toast } from 'react-toastify';
 import { deleteCache } from '../utils/localCache';
 import { Modal, Spinner } from "react-bootstrap";
+import {
+  GetNameOrderResponse
+} from "../utils/canisters/registrar/interface";
 
 export interface CardProps {
   name: string,
@@ -16,12 +20,13 @@ export interface CardProps {
 }
 export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccount, favorite }) => {
   const { ...auth } = useAuthWallet();
+  const { ...payOrder } = useOrder()
   const history = useHistory();
   const serviceApi = new ServiceApi();
   const [isFavorite, SetIsFavorite] = React.useState<boolean>(false)
   const [checkOrderIng, setCheckOrderIng] = React.useState<boolean>(false)
   const [visible, setVisible] = React.useState<boolean>(false)
-
+  const [order, setOrder] = React.useState<[] | GetNameOrderResponse>([])
   React.useEffect(() => {
     SetIsFavorite(favorite)
   }, [favorite])
@@ -80,17 +85,28 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
   }
 
   const checkOrder = () => {
-    setCheckOrderIng(true)
+    if (auth.walletAddress) {
+      setCheckOrderIng(true)
       serviceApi.getPendingOrder().then(res => {
         setCheckOrderIng(false)
         if (res.length !== 0) {
           setVisible(true)
+          payOrder.createOrder(res[0]);
+          setOrder(res[0])
         } else {
           history.push(`/name/${name}/reg`)
         }
       }).catch(err => {
         console.log(err)
       })
+    } else {
+      history.push(`/name/${name}/reg`)
+    }
+  }
+
+  const viewOrder = () => {
+    console.log(order)
+    history.push(`/name/${name}/reg`)
   }
 
   return (
@@ -138,11 +154,8 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
         </Modal.Body>
         <Modal.Footer className={styles['notice-modal-footer']}>
           <button className={styles['notice-btn']} onClick={(e) => {
-            e.stopPropagation(); setVisible(false)
-          }}>Don`t show again</button>
-          <button className={styles['notice-btn']} onClick={(e) => {
             e.stopPropagation();
-            history.push(`/name/${name}/reg`)
+            viewOrder()
           }}>View</button>
         </Modal.Footer>
       </Modal>

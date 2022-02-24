@@ -93,6 +93,9 @@
     padding: 0 15px;
     outline: none;
     transition: all 0.3s ease 0s;
+    .btn-via-icp{
+      
+    }
     &:hover,&:focus{
       background: rgba(0, 255, 230, 0.3);
       border: 1px solid #00FFE6
@@ -263,14 +266,30 @@
   }
 }
 
+.btn-wrap{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .selcet-quota{
+  margin-left: 10px;
   min-width: 200px !important;
   border: 1px solid #00CFBB !important;
+  background: rgba(0, 207, 187, 0.1) !important;
   border-radius: 12px !important;
+  transition: .3s all;
+  &:hover{
+    background: rgba(0, 255, 230, 0.3) !important;
+      border: 1px solid #00FFE6 !important;
+  }
   :global{
     .semi-select-selection-text{
       overflow: visible !important;
-      color: #c8d0e2;
+      color: #00CFBB;
+      font-size: 16px;
+    }
+    .semi-select-arrow{
+      color: #00CFBB;
     }
     .semi-badge{display: none;}
     .semi-badge+span{display: none;}
@@ -278,7 +297,6 @@
   
   .quota-option-con{
     :global{.semi-badge{display: inline-block;}}
-    
   }
 }
 
@@ -293,26 +311,28 @@
   
 }
 .quota-option-avatar{
-  width: 70px !important;
+  width: 60px !important;
   height: 24px !important;
   border-radius: 4px !important;
-  justify-content: flex-start !important;
+  // justify-content: flex-start !important;
   // margin-right:20px !important;
   display:inline-block;
-  background: linear-gradient(270deg, #450DEA 0%, #00CB9E 100%) !important;
-  .quota-num{
-    background-color: green;
-  }
+  // background: linear-gradient(270deg, #450DEA 0%, #00CB9E 100%) !important;
+  
   :global{
     .semi-avatar-label{
       font-size: 12px !important;
     }
     .semi-avatar-content{
-      transform: none !important;
-      position: static !important;
-      padding-left: 8px;
+      // transform: none !important;
+      // position: static !important;
+      // padding-left: 8px;
     }
   }
+}
+.quota-num{
+  padding-left: 10px;
+  display: inline-block !important;
 }
 .quota-option-badge{
   // position: static !important;
@@ -324,10 +344,13 @@
   min-width: 16px !important;
   line-height: 14px !important;
   background: #ff2ec7 !important;
-   
-  
 }
 
+
+.pay-content{
+  position: relative;
+  top: -145px;
+}
 @media screen and (min-width: 576px){
   
 .records{

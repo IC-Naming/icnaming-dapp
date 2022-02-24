@@ -9,6 +9,7 @@ import {
 } from "./canisters/registrar";
 import {
   GetNameOrderResponse,
+  PriceTableItem,
   QuotaType,
   SubmitOrderResponse,
 } from "./canisters/registrar/interface";
@@ -66,11 +67,21 @@ export default class ServiceApi {
     this.nnsActor = createNNSActor();
   }
 
-  // get icp to cycles rate
-  public async getIcpToCyclesRate(): Promise<bigint> {
+  // get icp && cycles
+  public async getIcpToCycles(nameLen: number): Promise<PriceTableItem> {
+    // console.log('nameLen', nameLen)
     return executeWithLogging(async () => {
-      const rate = await this.nnsActor.get_icp_to_cycles_conversion_rate();
-      return rate;
+      const res = await this.registrarQueryActor.get_price_table();
+      if ('Ok' in res) {
+        const t = res.Ok.items.find(x => x.len === nameLen);
+        if (t) {
+          return t;
+        } else {
+          throw ('length not found');
+        }
+      } else {
+        throw new CanisterError(res.Err);
+      }
     });
   }
 
@@ -82,12 +93,13 @@ export default class ServiceApi {
     if (word.length > 0) {
       return executeWithLogging(async () => {
         const res = await this.registrarQueryActor.available(`${word}`);
-        // console.log('registrarQueryActor.available', res);
+        // console.log('registrarQueryActor-available', res);
         // if res is ErrorInfo
         if ("Ok" in res) {
           return res.Ok;
         } else {
-          throw new CanisterError(res.Err);
+          // throw new CanisterError(res.Err);
+          return false;
         }
       });
     } else return Promise.reject(new Error("Invalid search word"));
@@ -145,11 +157,23 @@ export default class ServiceApi {
     });
   };
 
+  // cancel order
+  public cancelRegisterOrder = () => {
+    return executeWithLogging(async () => {
+      const res = await this.registrarUpdateActor.cancel_order();
+      if ("Ok" in res) {
+        return res.Ok;
+      } else {
+        throw new CanisterError(res.Err);
+      }
+    });
+  }
+
   // get pending order
   public getPendingOrder = (): Promise<[] | [GetNameOrderResponse]> => {
     return executeWithLogging(async () => {
-      const res = await this.registrarQueryActor.get_pending_order();
-      console.log('get_pending_order',res);
+      const res = await this.registrarUpdateActor.get_pending_order();
+      console.log('get_pending_order', res);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -198,10 +222,10 @@ export default class ServiceApi {
       offset: BigInt(0),
       limit: BigInt(100),
     };
-    console.log('getNamesOfRegistrant----------',address)
+    console.log('getNamesOfRegistrant----------', address)
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_names(address, pagingArgs);
-      console.log('get_names----------',res)
+      console.log('get_names----------', res)
       if ("Ok" in res) {
         return res.Ok.items;
       } else {
@@ -238,7 +262,8 @@ export default class ServiceApi {
       if ("Ok" in res) {
         return res.Ok;
       } else {
-        throw new CanisterError(res.Err);
+        return Principal.anonymous();
+        // throw new CanisterError(res.Err);
       }
     });
   };
@@ -276,7 +301,13 @@ export default class ServiceApi {
       if ("Ok" in res) {
         return res.Ok;
       } else {
-        throw new CanisterError(res.Err);
+        // throw new CanisterError(res.Err);
+        return {
+          'owner': Principal.anonymous(),
+          'name': '',
+          'created_at': BigInt(0),
+          'expired_at': BigInt(0),
+        }
       }
     });
   };
@@ -287,10 +318,13 @@ export default class ServiceApi {
   ): Promise<Array<[string, string]>> => {
     return executeWithLogging(async () => {
       const res = await this.resolverQueryActor.get_record_value(name);
+      console.log('get_record_value', res)
       if ("Ok" in res) {
         return res.Ok;
       } else {
-        throw new CanisterError(res.Err);
+        console.log(res.Err)
+        return [];
+        // throw new CanisterError(res.Err);
       }
     });
   };
@@ -302,17 +336,23 @@ export default class ServiceApi {
       if ("Ok" in res) {
         return res.Ok;
       } else {
-        throw new CanisterError(res.Err);
+        // throw new CanisterError(res.Err);
+        return {
+          'ttl': BigInt(0),
+          'resolver': Principal.anonymous(),
+          'owner': Principal.anonymous(),
+          'name': '',
+        }
       }
     });
   };
 
   // get quota
-  public getQuota = (user:Principal,quotaType:number): Promise<number> => {
+  public getQuota = (user: Principal, quotaType: number): Promise<number> => {
     return executeWithLogging(async () => {
       const quotaParsed: QuotaType = { LenGte: quotaType };
-      const res: any = await this.registrarQueryActor.get_quota(user,quotaParsed);
-      console.log('get_quota',res)
+      const res: any = await this.registrarUpdateActor.get_quota(user, quotaParsed);
+      console.log('get_quota', res)
       if ("Ok" in res) {
         return Number(res.Ok);
       } else {
@@ -324,29 +364,28 @@ export default class ServiceApi {
   // get name details
   public getNameDetails = (name: string): Promise<any> => {
     return executeWithLogging(async () => {
-      const values = await Promise.all([
-        this.available(name),
-        this.getRegistrationDetailsOfName(name),
-        this.getRegistryDetailsOfName(name),
-      ]);
-      console.log(values)
-      if (values[1].owner && values[2].owner) {
-        return {
-          name,
-          available: values[0],
-          registrant: values[1].owner.toText(),
-          controller: values[2].owner.toText(),
-          resolver: values[2].resolver.toText(),
-          expireAt: new Date(Number(values[1].expired_at)),
-        };
-      } else {
+      const isAvailable = await this.available(name)
+      if (isAvailable) {
         return {
           name: "ICP",
-          available: values[0],
-          registrant: "Not owned",
-          controller: "Not owned",
+          available: true,
+          registrant: "Not owner",
+          controller: "Not owner",
           resolver: "No Resolver set",
           expireAt: "No Expire set",
+        };
+      } else {
+        const values = await Promise.all([
+          this.getRegistrationDetailsOfName(name),
+          this.getRegistryDetailsOfName(name),
+        ]);
+        return {
+          name: name,
+          available: false,
+          registrant: values[0].owner.toText(),
+          controller: values[1].owner.toText(),
+          resolver: values[1].resolver.toText(),
+          expireAt: new Date(Number(values[0].expired_at)),
         };
       }
     });

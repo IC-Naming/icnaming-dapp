@@ -37,7 +37,7 @@ export const Favourites = () => {
         const myFavoriteNamesWithExpireAt = myNamesOfFavorite.map(async (item: any) => {
           let expireAtOfName = 0
           const available = await serviceApi.available(item);
-          if (available) expireAtOfName = await serviceApi.expireAtOf(item);
+          if (!available) expireAtOfName = await serviceApi.expireAtOf(item);
           const isMyAccount = await serviceApi.getRegistrantOfName(item) || false;
           return {
             name: item,

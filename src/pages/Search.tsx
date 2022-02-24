@@ -59,18 +59,18 @@ export const Search = (props) => {
           searchName = `${word}${IC_EXTENSION}`
         }
 
-        serviceApi.available(searchName).then(async res => {
-          let expireAt = ''
-          if (!res) {
-            const expireAtOfName = await serviceApi.expireAtOf(searchName);
-            expireAt = 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime")
-          }
+        serviceApi.available(searchName).then(async available => {
+          let expireAt = available ?'': 'Expires ' + dateFormat(new Date(await serviceApi.expireAtOf(searchName)), "isoDateTime")
           let fav = false;
           if (authWallet.walletAddress) {
             const myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
             fav = myFavoriteNames.find(item => item === searchName)
           }
-          setNameSearchResult({ name: searchName, available: res, expireAt, favorite: fav })
+          const testss = {
+            name: searchName, available: available, expireAt, favorite: fav
+          }
+          console.log(testss)
+          setNameSearchResult({ name: searchName, available: available, expireAt, favorite: fav })
           setLoading(false)
         }).catch(err => {
           console.log(err)

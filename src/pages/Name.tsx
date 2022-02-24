@@ -1,7 +1,7 @@
-import React from 'react'
-import { SearchInput, CopyToClipboard, Register, Record } from "../components";
+import { SearchInput, CopyToClipboard, Record, Register } from "../components";
 import styles from "../assets/styles/Name.module.scss";
 import { ConnectWallets } from "../components/ConnectWallets";
+import { useOrder } from '../context/Order';
 import { Container, Tabs, Tab, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
@@ -9,10 +9,11 @@ import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
 
 export const Name = (props) => {
+  const { ...payOrder } = useOrder()
   const serviceApi = new ServiceApi();
   const [showWallets, setShowWallets] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
-  const [loadingName, setLoadingName] = useState<boolean>(true);
+  const [loadingName, setLoadingName] = useState<boolean>(false);
   const [nameDetails, setNameDetails] = useState<NameDetails>({
     name: 'ICP',
     available: true,
@@ -49,6 +50,7 @@ export const Name = (props) => {
     if (name !== '') {
       let getNameDetailsLoaded = false;
       let getRecordsOfNameLoaded = false;
+
       queryWithCache(() => {
         return new Promise((resolve, reject) => {
           serviceApi.getNameDetails(name).then(data => {
@@ -58,12 +60,14 @@ export const Name = (props) => {
           });
         })
       }, name + 'details').then(res => {
+        console.log(res)
         setNameDetails(res);
         getNameDetailsLoaded = true;
         if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
           setLoadingName(false);
         }
       }).catch(err => {
+        console.log(err)
         setLoadingName(false);
         toast('Get name details failed', {
           position: "top-center",
@@ -71,6 +75,7 @@ export const Name = (props) => {
           theme: "dark",
         });
       })
+
 
       queryWithCache(() => {
         return new Promise((resolve, reject) => {
@@ -82,7 +87,11 @@ export const Name = (props) => {
         })
       }, name + 'Records').then(res => {
         const records = recordsAddress.map(item => {
-          const record = res.find(record => record[0] === item.key);
+          const record = res.find(record => {
+            console.log(record)
+            return record[0] === item.key
+          }
+          );
           return record ? { title: item.title, key: item.key, value: record[1] } : { title: item.title, key: item.key, value: "" };
         })
         setRecordsAddress(records);
@@ -95,7 +104,6 @@ export const Name = (props) => {
 
         const canister = res.find(record => record[0] === 'canister.icp');
         canister ? setCanister(canister[1]) : setCanister("");
-
         getRecordsOfNameLoaded = true;
         if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
           setLoadingName(false);
@@ -128,8 +136,12 @@ export const Name = (props) => {
   }, [action])
 
   useEffect(() => {
-
-    setName(props.match.params.name || "")
+    console.log(payOrder.name)
+    if (payOrder.name) {
+      setName(payOrder.name)
+    } else {
+      setName(props.match.params.name || "")
+    }
     setAction(props.match.params.action || "")
     return () => {
       setName('')
@@ -151,7 +163,7 @@ export const Name = (props) => {
                 :
                 <Tabs activeKey={activeKey} onSelect={(k) => setActiveKey(k || "register")} className="mb-3">
                   <Tab eventKey="register" title="Register">
-                    <Register regname={name} available={nameDetails?.available} />
+                    <Register regname={props.match.params.name} available={nameDetails?.available} />
                   </Tab>
                   <Tab eventKey="details" title="Details">
                     <div className={styles.details}>
