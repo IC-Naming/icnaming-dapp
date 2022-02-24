@@ -20,7 +20,6 @@ interface RegProps {
 export const Register: React.FC<RegProps> = ({ regname, available }) => {
   let nameLen = regname.split('.')[0].length >= 7 ? 7 : regname.split('.')[0].length;
   const { ...auth } = useAuthWallet();
-  const { ...payOrder } = useOrder();
   const [quotas, setQuotas] = useState<Array<number>>([]);
   const [showWallets, setShowWallets] = useState(false);
 
@@ -32,7 +31,6 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const [price, SetPrice] = useState<any>(0)
   const [cyclesPrice, SetCyclesPrice] = useState<any>(0)
 
-  const [order, setOrder] = useState<SubmitOrderResponse>()
   const [payQuotaLen, setPayQuotaLen] = useState<number>(7)
   const [payType, setPayType] = useState<string>('icp')
 
@@ -46,7 +44,6 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     serviceApi.submitRegisterOrder(regname, 1).then(res => {
       console.log(res)
       if (res) {
-        setOrder(res)
         setPayVisable(true)
         setLoadingSubmit(false)
       }
@@ -95,7 +92,6 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   }, [regname])
 
   useEffect(() => {
-
     const checkMyQuotas = async () => {
       setLoadingQuotas(true)
       if (auth.walletAddress && auth.principal) {
@@ -122,21 +118,10 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.walletAddress])
 
-  useEffect(() => {
-    console.log(payOrder.name)
-    // console.log('New' in payOrder.status)
-    if (payOrder.name) {
-      if ('New' in payOrder.status) {
-        setPayVisable(true)
-        setPayType('icp')
-      }
-    }
-  }, [payOrder])
-
   return (
     <>
       {
-        payVisable ? <Pay regname={regname} payType={payType} payYears={1} order={order} payQuota={payQuotaLen}
+        payVisable ? <Pay regname={regname} payType={payType} payYears={1} payQuota={payQuotaLen}
           hide={() => { setPayVisable(false) }} /> :
           <div className={styles.register}>
             {
