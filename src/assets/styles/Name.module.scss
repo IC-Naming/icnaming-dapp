@@ -340,9 +340,9 @@
 .pendingOrder-modal{
   :global{
     .semi-modal-content{
-      background: none !important;
-      border:none !important;
-      box-shadow: none !important;
+      background: linear-gradient(180deg, #334773 0%, #1C2A4A 100%) !important;
+      // border:none !important;
+      // box-shadow: none !important;
     }
   }
 }
@@ -354,12 +354,16 @@
   justify-content: center;
   width: 100%;
   font-size: 16px!important;
+  padding: 1.5rem 0;
   :global{
     .semi-spin{margin-right: 10px;}
     .semi-spin-wrapper{color: #00CFBB;}
   }
 }
 
+.superscript{
+  vertical-align:super
+}
 
 @media screen and (min-width: 576px){
   

@@ -14,7 +14,7 @@ const routeMaps =[
   { path: "/myaccount",exact:true, name: "MyAccount", component: MyAccount, auth: true ,comingsoon:false },
   { path: "/favourites",exact:true, name: "Favourites", component: Favourites, auth: true ,comingsoon:false },
   { path: "/name/:name/:action",exact:true, name: "Name", component: Name, auth: false ,comingsoon:false },
-  { path: "/pay/:paytype/:name/:quotalen",exact:true, name: "Pay", component: Pay, auth: true ,comingsoon:false },
+  { path: "/pay",exact:true, name: "Pay", component: Pay, auth: true ,comingsoon:false },
   { path: "/faq", name: "Faq",exact:true, component: Faq, auth: false ,comingsoon:false },
   { path: "/comingsoon",exact:true, name: "ComingSoon", component: ComingSoon, auth: false ,comingsoon:false },
   { path: "/404",exact:false, name: "NotFind", component: Error, auth: false ,comingsoon:false },

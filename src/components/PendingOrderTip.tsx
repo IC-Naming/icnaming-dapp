@@ -4,13 +4,12 @@ import styles from '../assets/styles/Card.module.scss'
 import { Modal } from "react-bootstrap";
 export interface PendingOrderTipProps {
   visible: boolean,
-  name: string,
   hide: () => void,
 }
-export const PendingOrderTip: React.FC<PendingOrderTipProps> = ({ visible, hide, name }) => {
+export const PendingOrderTip: React.FC<PendingOrderTipProps> = ({ visible, hide }) => {
   const history = useHistory();
   const viewOrder = () => {
-    history.push(`/pay/icp/${name}/0`)
+    history.push(`/pay`)
   }
   return (
     <Modal

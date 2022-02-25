@@ -1,19 +1,18 @@
-import { useEffect, useState } from "react";
-import { Principal } from "@dfinity/principal";
+import React, { useEffect, useState } from "react";
 import { Row, Col, Spinner } from "react-bootstrap";
 import styles from '../assets/styles/Name.module.scss'
 import { useAuthWallet } from "../context/AuthWallet";
+import { useMyInfo } from "../context/MyInfo";
 import { toast } from 'react-toastify';
 import ServiceApi from "../utils/ServiceApi";
 import { useHistory } from "react-router-dom";
-import BigNumber from "bignumber.js";
 // import { deleteCache } from '../utils/localCache';
 import { ConnectWallets } from ".";
 import { PendingOrderTip } from "./PendingOrderTip";
 import { CanisterError } from "../utils/exception";
-import { Select, Avatar, Modal, Spin } from '@douyinfe/semi-ui';
+import { Select, Avatar } from '@douyinfe/semi-ui';
+import { ModalTipFull } from "./ModalTipFull";
 const Option = Select.Option;
-
 interface RegProps {
   regname: string;
   available: boolean;
@@ -21,29 +20,33 @@ interface RegProps {
 export const Register: React.FC<RegProps> = ({ regname, available }) => {
   let nameLen = regname.split('.')[0].length >= 7 ? 7 : regname.split('.')[0].length;
   const { ...auth } = useAuthWallet();
+  const { ...myInfo } = useMyInfo();
   const history = useHistory();
   const serviceApi = new ServiceApi();
-  const [showWallets, setShowWallets] = useState(false);
-  const [pendingOrderTipVisible, setPendingOrderTipVisible] = useState(false);
-
-  const [name, setName] = useState<string>(regname)
-  const [calculating, setCalculating] = useState<boolean>(true);
-  const [price, SetPrice] = useState<any>(0)
-  const [cyclesPrice, SetCyclesPrice] = useState<any>(0)
-
-  const [quotas, setQuotas] = useState<Array<number>>([]);
+  const [showWallets, setShowWallets] = useState<boolean>(false);
+  const [pendingOrderTipVisible, setPendingOrderTipVisible] = useState<boolean>(false);
   const [loadingPending, setLoadingPending] = useState<boolean>(false);
-  const [loadingQuotas, setLoadingQuotas] = useState<boolean>(false);
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
+  const [icpToCycles, SetIcpToCycles] = useState<string>('');
+  const [quotas, setQuotas] = useState<Array<number>>([]);
+
+  const errorToast = (msg: string) => {
+    toast.error(msg, {
+      position: 'top-center',
+      autoClose: 1000,
+      theme: 'dark',
+    })
+  }
 
   const registerVidIcp = async () => {
-    if (loadingSubmit || calculating) return
+    if (loadingSubmit) return
     setLoadingSubmit(true)
-    serviceApi.submitRegisterOrder(name, 1).then(res => {
+    serviceApi.submitRegisterOrder(regname, 1).then(res => {
       console.log('registerVidIcp', res)
       if (res) {
         setLoadingSubmit(false)
-        history.push(`/pay/icp/${name}/0`)
+        myInfo.createOrder({ name: regname, nameLen: regname.split('.')[0].length, payYears: 1, payType: 'icp' });
+        history.push(`/pay`)
       }
     }).catch(err => {
       console.log(err)
@@ -52,99 +55,80 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
         if (err.code === 22) {
           setPendingOrderTipVisible(true)
         } else {
-          toast.error(err.message, {
-            position: 'top-center',
-            theme: 'dark'
-          })
+          errorToast(err.message)
         }
       }
     })
   }
 
   const registerVidQuota = async (e) => {
+    // if qouta length is 0, return
     if (quotas[e - 4] > 0) {
       if (nameLen >= e) {
-        history.push(`/pay/quota/${name}/${e}`)
+        myInfo.createOrder({ name: regname, nameLen: regname.split('.')[0].length, payYears: 1, payType: 'quota', quotaType: e });
+        history.push(`/pay`);
+        return
       } else {
-        toast.error(`Name must be at least ${nameLen} characters long`, {
-          position: 'top-center',
-          theme: 'dark'
-        })
+        errorToast(`Name must be at least ${nameLen} characters long`)
       }
     } else {
-      toast.error(`Has no quota for len_gte ${e}`, {
-        position: 'top-center',
-        theme: 'dark'
-      })
+      errorToast(`Has no quota for len_gte ${e}`)
     }
   }
 
   useEffect(() => {
-    serviceApi.getIcpToCycles(nameLen).then(res => {
-      SetPrice(new BigNumber(res.price_in_icp_e8s.toString()).div(100000000).toString())
-      SetCyclesPrice(new BigNumber(res.price_in_xdr_permyriad.toString()).div(10000).toString())
-      setCalculating(false)
-    }).catch(err => {
-      setCalculating(false)
-      console.log(err)
-    })
-    return () => {
-      setCalculating(false)
-      SetPrice(0)
-      SetCyclesPrice(0)
+    const icpToCycles = localStorage.getItem('icpToCycles')
+    if (icpToCycles) {
+      const icpToCyclesObj = JSON.parse(icpToCycles)
+      SetIcpToCycles(`${icpToCyclesObj[nameLen - 1].icp} ICP ≈ ${icpToCyclesObj[nameLen - 1].cycles} T Cycles / Year`)
+    } else {
+      SetIcpToCycles('')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [regname])
-
-  const checkMyQuotas = async () => {
-    setLoadingQuotas(true)
-    if (auth.principal) {
-      const get_MyQuotas = (user: Principal) => {
-        const quota4 = serviceApi.getQuota(user, 4);
-        const quota5 = serviceApi.getQuota(user, 5);
-        const quota6 = serviceApi.getQuota(user, 6);
-        const quota7 = serviceApi.getQuota(user, 7);
-        return Promise.all([quota4, quota5, quota6, quota7])
-      }
-      const res = await get_MyQuotas(auth.principal);
-      setQuotas(res)
-      setLoadingQuotas(false)
-    } else {
-      setLoadingQuotas(false)
-    }
-  }
-
-  const checkPendingOrder = async () => {
-    setLoadingPending(true)
-    serviceApi.getPendingOrder().then(res => {
-      setLoadingPending(false)
-      if (res.length !== 0) {
-        setPendingOrderTipVisible(true)
-        setName(res[0].name)
-      } else {
-        checkMyQuotas()
-      }
-    })
-  }
+  }, [regname, myInfo.icpToCycles])
 
   useEffect(() => {
-    console.log('available & have walletAddress', auth.walletAddress && !available)
-    if (auth.walletAddress && !available) {
-      checkPendingOrder()
+    if (auth.principal) {
+      const myQuotas = localStorage.getItem('myQuotas');
+      if (myQuotas && myQuotas.length > 0) {
+        const myQuotasArr = JSON.parse(myQuotas)
+        setQuotas(myQuotasArr)
+      } else if (myInfo.quotas.length > 0) {
+        console.log(myInfo.quotas)
+      }
     }
     return () => {
       setQuotas([])
-      setLoadingQuotas(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.walletAddress, available])
+  }, [auth.principal, myInfo.quotas])
+
+  useEffect(() => {
+    // if available is true, then show the check pending order modal
+    if (auth.walletAddress && available) {
+      setLoadingPending(true)
+      console.log('check pending order', myInfo.hasPendingOrder)
+      myInfo.checkPendingOrder()
+      if (myInfo.hasPendingOrder) {
+        setLoadingPending(false)
+        setPendingOrderTipVisible(true)
+      } else {
+        setLoadingPending(false)
+      }
+    }
+    return () => {
+      setLoadingPending(false)
+      setPendingOrderTipVisible(false)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth.walletAddress, available, myInfo.hasPendingOrder])
 
   return (
     <div className={styles.register}>
       {
         !available ?
           <div style={{ textAlign: 'center', paddingTop: '.9rem' }}>This name is already registered</div>
-          : <>
+          : <React.Fragment>
             <Row>
               <Col md={4} sm={12}>Registration Period </Col>
               <Col md={4} sm={12} className="text-center">
@@ -155,16 +139,11 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
             <Row style={{ marginBottom: '1.5rem' }}>
               <Col md={4} sm={12}>Registration Price</Col>
               <Col md={4} sm={12} className="text-center">
-                <div style={{ whiteSpace: 'nowrap' }}>
-                  {
-                    calculating
-                      ?
-                      <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />
-                      : `${price} ICP ≈ ${cyclesPrice}T Cycles / Year`
-                  }
-                </div>
+                {
+                  icpToCycles ? <p style={{ whiteSpace: 'nowrap' }}>{icpToCycles}</p> : <Spinner animation="border" size="sm" />
+                }
               </Col>
-              <Col md={4} sm={12}>{/* <p className={styles['text-right']}>ICP</p> */}</Col>
+              <Col md={4} sm={12}></Col>
             </Row>
             {
               !auth.walletAddress
@@ -173,16 +152,17 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                   <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect Wallet</button>
                 </div>
                 :
-                loadingQuotas ?
+                quotas.length === 0 ?
                   <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
                   :
                   <div className={styles['btn-wrap']}>
-
                     <button
                       className={`${styles.btn} ${styles['btn-via-icp']}`}
                       onClick={registerVidIcp}>
                       {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
-                      Register via ICP</button>
+                      Register via ICP
+                    </button>
+
                     <Select size='large' className={styles['selcet-quota']}
                       placeholder="please choose you quota"
                       onChange={(e) => {
@@ -190,6 +170,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                       }}>
                       <Option>Register via Quota</Option>
                       {
+                        quotas.length > 0 &&
                         quotas.map((quota, index) => {
                           return <Option className={styles['quota-option']} key={index} value={index + 4}>
                             <div className={styles['quota-option-con']}>
@@ -204,25 +185,15 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                     </Select>
                   </div>
             }
-          </>
+          </React.Fragment>
       }
       <ConnectWallets visible={showWallets} hide={() => { setShowWallets(false) }} />
       <PendingOrderTip visible={pendingOrderTipVisible}
         hide={() => { setPendingOrderTipVisible(false) }}
-        name={name}
       />
-      <Modal
-        header={null}
-        footer={null}
-        visible={loadingPending}
-        centered={true}
-        className={styles['pendingOrder-modal']}
-      >
-        <div className={styles['pendingOrder-modal-text']}>
-          <Spin size="middle" /><p>check your pendingOrder</p>
-        </div>
-      </Modal>
-    </div>
+      <ModalTipFull visible={loadingPending || loadingSubmit} text={
+        loadingPending ? 'check your pendingOrder' : 'Creating an order'} />
 
+    </div>
   )
 }

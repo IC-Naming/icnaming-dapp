@@ -29,7 +29,6 @@ export const Favourites = () => {
 
   useEffect(() => {
     setLoading(true)
-    const ac = new AbortController();
     const getMyFavoriteNames = async () => {
       if (authWallet.walletAddress) {
         let myNamesOfFavorite = await getMyFavourites()
@@ -58,13 +57,13 @@ export const Favourites = () => {
         }); */
       }
     }
-
     getMyFavoriteNames()
-    
     return () => {
-      ac.abort();
+      setLoading(false);
+      setNameResult(null);
     }
-  },  [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },  [authWallet.walletAddress])
 
   return (
     <div className={styles.serach}>

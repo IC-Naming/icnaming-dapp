@@ -44,6 +44,7 @@ export const Header = () => {
     setCurrentPcIndex(0)
     setCurrentIndex(0)
     localStorage.removeItem('myFavoriteNames');
+    localStorage.removeItem('myQuotas');
   }
 
   const HeaderWallet = () => {
