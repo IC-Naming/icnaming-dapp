@@ -6,12 +6,12 @@ import { useAuthWallet } from "../context/AuthWallet";
 import { toast } from 'react-toastify';
 import ServiceApi from "../utils/ServiceApi";
 import { useHistory } from "react-router-dom";
-// import { SubmitOrderResponse } from "../utils/canisters/registrar/interface";
 import BigNumber from "bignumber.js";
 // import { deleteCache } from '../utils/localCache';
 import { ConnectWallets } from ".";
-import { Select, Avatar } from '@douyinfe/semi-ui';
 import { PendingOrderTip } from "./PendingOrderTip";
+import { CanisterError } from "../utils/exception";
+import { Select, Avatar, Modal, Spin } from '@douyinfe/semi-ui';
 const Option = Select.Option;
 
 interface RegProps {
@@ -26,32 +26,37 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const [showWallets, setShowWallets] = useState(false);
   const [pendingOrderTipVisible, setPendingOrderTipVisible] = useState(false);
 
-
+  const [name, setName] = useState<string>(regname)
   const [calculating, setCalculating] = useState<boolean>(true);
   const [price, SetPrice] = useState<any>(0)
   const [cyclesPrice, SetCyclesPrice] = useState<any>(0)
 
   const [quotas, setQuotas] = useState<Array<number>>([]);
+  const [loadingPending, setLoadingPending] = useState<boolean>(false);
   const [loadingQuotas, setLoadingQuotas] = useState<boolean>(false);
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
-  
+
   const registerVidIcp = async () => {
     if (loadingSubmit || calculating) return
     setLoadingSubmit(true)
-    serviceApi.getPendingOrder().then(res => {
-      if (res.length !== 0){
-        setPendingOrderTipVisible(true)
-      }else{
-        serviceApi.submitRegisterOrder(regname, 1).then(res => {
-          console.log('registerVidIcp',res)
-          if (res) {
-            setLoadingSubmit(false)
-            history.push('/pay')
-          }
-        }).catch(err => {
-          console.log(err)
-          setLoadingSubmit(false)
-        })
+    serviceApi.submitRegisterOrder(name, 1).then(res => {
+      console.log('registerVidIcp', res)
+      if (res) {
+        setLoadingSubmit(false)
+        history.push(`/pay/icp/${name}/0`)
+      }
+    }).catch(err => {
+      console.log(err)
+      setLoadingSubmit(false)
+      if (err instanceof CanisterError) {
+        if (err.code === 22) {
+          setPendingOrderTipVisible(true)
+        } else {
+          toast.error(err.message, {
+            position: 'top-center',
+            theme: 'dark'
+          })
+        }
       }
     })
   }
@@ -59,7 +64,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const registerVidQuota = async (e) => {
     if (quotas[e - 4] > 0) {
       if (nameLen >= e) {
-        // setPayQuotaLen(e)
+        history.push(`/pay/quota/${name}/${e}`)
       } else {
         toast.error(`Name must be at least ${nameLen} characters long`, {
           position: 'top-center',
@@ -91,31 +96,48 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [regname])
 
-  useEffect(() => {
-    const checkMyQuotas = async () => {
-      setLoadingQuotas(true)
-      if (auth.walletAddress && auth.principal) {
-        const get_MyQuotas = (user: Principal) => {
-          const quota4 = serviceApi.getQuota(user, 4);
-          const quota5 = serviceApi.getQuota(user, 5);
-          const quota6 = serviceApi.getQuota(user, 6);
-          const quota7 = serviceApi.getQuota(user, 7);
-          return Promise.all([quota4, quota5, quota6, quota7])
-        }
-        const res = await get_MyQuotas(auth.principal);
-        setQuotas(res)
-        setLoadingQuotas(false)
-      } else {
-        setLoadingQuotas(false)
+  const checkMyQuotas = async () => {
+    setLoadingQuotas(true)
+    if (auth.principal) {
+      const get_MyQuotas = (user: Principal) => {
+        const quota4 = serviceApi.getQuota(user, 4);
+        const quota5 = serviceApi.getQuota(user, 5);
+        const quota6 = serviceApi.getQuota(user, 6);
+        const quota7 = serviceApi.getQuota(user, 7);
+        return Promise.all([quota4, quota5, quota6, quota7])
       }
+      const res = await get_MyQuotas(auth.principal);
+      setQuotas(res)
+      setLoadingQuotas(false)
+    } else {
+      setLoadingQuotas(false)
     }
-    checkMyQuotas()
+  }
+
+  const checkPendingOrder = async () => {
+    setLoadingPending(true)
+    serviceApi.getPendingOrder().then(res => {
+      setLoadingPending(false)
+      if (res.length !== 0) {
+        setPendingOrderTipVisible(true)
+        setName(res[0].name)
+      } else {
+        checkMyQuotas()
+      }
+    })
+  }
+
+  useEffect(() => {
+    console.log('available & have walletAddress', auth.walletAddress && !available)
+    if (auth.walletAddress && !available) {
+      checkPendingOrder()
+    }
     return () => {
       setQuotas([])
       setLoadingQuotas(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.walletAddress])
+  }, [auth.walletAddress, available])
 
   return (
     <div className={styles.register}>
@@ -148,7 +170,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
               !auth.walletAddress
                 ?
                 <div className="d-grid gap-2">
-                  <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect ICP Wallet</button>
+                  <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect Wallet</button>
                 </div>
                 :
                 loadingQuotas ?
@@ -185,7 +207,21 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
           </>
       }
       <ConnectWallets visible={showWallets} hide={() => { setShowWallets(false) }} />
-      <PendingOrderTip visible={pendingOrderTipVisible} hide={() => { setPendingOrderTipVisible(false) }} />
+      <PendingOrderTip visible={pendingOrderTipVisible}
+        hide={() => { setPendingOrderTipVisible(false) }}
+        name={name}
+      />
+      <Modal
+        header={null}
+        footer={null}
+        visible={loadingPending}
+        centered={true}
+        className={styles['pendingOrder-modal']}
+      >
+        <div className={styles['pendingOrder-modal-text']}>
+          <Spin size="middle" /><p>check your pendingOrder</p>
+        </div>
+      </Modal>
     </div>
 
   )

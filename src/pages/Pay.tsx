@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -6,30 +6,23 @@ import styles from '../assets/styles/Name.module.scss'
 import ServiceApi from "../utils/ServiceApi";
 declare var window: any;
 
-interface PayPorps {
-  regname: string;
-  payType: string;
-  payYears: number;
-  payQuota: number;
-}
-export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota }) => {
+export const Pay = (props) => {
   const history = useHistory();
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [loadingCancel, setLoadingCancel] = useState<boolean>(false);
   const [hasRefund, setHasRefund] = useState<boolean>(false)
   const serviceApi = new ServiceApi();
-  /*  useEffect(() => {
-     console.log(regname)
-     console.log(payType)
-     setLoadingSubmit(false)
-     // eslint-disable-next-line react-hooks/exhaustive-deps
-   }, [regname]) */
+  useEffect(() => {
+    console.log(props.match.params.paytype)
+    console.log(props.match.params.name)
+    console.log(props.match.params.quotalen)
+  }, [])
 
   const payVidQuota = async () => {
     if (loadingSubmit) return
     setLoadingSubmit(true)
-    if (payQuota) {
-      serviceApi.registerNameByQuota(regname, payQuota).then(res => {
+    if (props.match.params.quotalen) {
+      serviceApi.registerNameByQuota(props.match.params.name, props.match.params.quotalen).then(res => {
         if (res === true) {
           toast.success('success', {
             position: 'top-center',
@@ -118,21 +111,18 @@ export const Pay: React.FC<PayPorps> = ({ regname, payType, payYears, payQuota }
     <div className={styles['name-wrap']}>
       <div className="container pt-5">
         <div className={`${styles['name-content']} ${styles['pay-content']}`}>
+          <h1 className={`${styles.title} text-right`}>{props.match.params.name}</h1>
           <div className={styles.register}>
             <Row>
               <Col md={4} sm={12}>Registration Period </Col>
               <Col md={4} sm={12} className="text-center">
-                {payYears} Years
+                1 Years
               </Col>
-              <Col md={4} sm={12}>
-                {payQuota}
-                {payType}
-                {regname}
-              </Col>
+              <Col md={4} sm={12}></Col>
             </Row>
 
             {
-              payType === 'quota' ?
+              props.match.params.paytype === 'quota' ?
                 <>
                   <Row>
                     <Col md={4} sm={12}>Registration to pay</Col>
