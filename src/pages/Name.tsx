@@ -1,7 +1,6 @@
 import { SearchInput, CopyToClipboard, Record, Register } from "../components";
 import styles from "../assets/styles/Name.module.scss";
 import { ConnectWallets } from "../components/ConnectWallets";
-import { useAuthWallet } from "../context/AuthWallet";
 import { Container, Tabs, Tab, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
@@ -9,7 +8,6 @@ import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
 
 export const Name = (props) => {
-  const { ...auth } = useAuthWallet()
   const serviceApi = new ServiceApi();
   const [showWallets, setShowWallets] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
@@ -60,7 +58,7 @@ export const Name = (props) => {
           });
         })
       }, name + 'details').then(res => {
-        console.log(res)
+        // console.log('details',res)
         setNameDetails(res);
         getNameDetailsLoaded = true;
         if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
@@ -75,7 +73,6 @@ export const Name = (props) => {
           theme: "dark",
         });
       })
-
 
       queryWithCache(() => {
         return new Promise((resolve, reject) => {
@@ -136,31 +133,14 @@ export const Name = (props) => {
   }, [action])
 
   useEffect(() => {
-    const chectPendingOrder = async () => {
-      /*  if (auth.walletAddress) {
-         
-       }else{
-         setName(props.match.params.name || "")
-       } */
-
-      let orderResult = await serviceApi.getPendingOrder();
-      console.log(orderResult)
-      if (orderResult.length !== 0) {
-        let order = orderResult[0];
-        setName(order.name)
-      } else {
-        setName(props.match.params.name || "")
-      }
-
-    }
-    chectPendingOrder()
+    setName(props.match.params.name || "")
     setAction(props.match.params.action || "")
     return () => {
       setName('')
       setAction('')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.match.params, auth.walletAddress])
+  }, [props.match.params])
 
   return (
     <div className={styles['name-wrap']}>

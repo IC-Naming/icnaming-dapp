@@ -1,5 +1,4 @@
 import { Principal } from "@dfinity/principal";
-// import axios from "axios";
 import {
   createRegistrarQueryActor,
   createRegistrarUpdateActor,
@@ -73,12 +72,8 @@ export default class ServiceApi {
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_price_table();
       if ('Ok' in res) {
-        const t = res.Ok.items.find(x => x.len === nameLen);
-        if (t) {
-          return t;
-        } else {
-          throw ('length not found');
-        }
+        const t:PriceTableItem = res.Ok.items.find(x => x.len === nameLen)!;
+        return t;
       } else {
         throw new CanisterError(res.Err);
       }
@@ -173,7 +168,7 @@ export default class ServiceApi {
   public getPendingOrder = (): Promise<[] | [GetNameOrderResponse]> => {
     return executeWithLogging(async () => {
       const res = await this.registrarUpdateActor.get_pending_order();
-      console.log('get_pending_order', res);
+      // console.log('get_pending_order', res);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -318,7 +313,7 @@ export default class ServiceApi {
   ): Promise<Array<[string, string]>> => {
     return executeWithLogging(async () => {
       const res = await this.resolverQueryActor.get_record_value(name);
-      console.log('get_record_value', res)
+      // console.log('get_record_value', res)
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -352,7 +347,6 @@ export default class ServiceApi {
     return executeWithLogging(async () => {
       const quotaParsed: QuotaType = { LenGte: quotaType };
       const res: any = await this.registrarUpdateActor.get_quota(user, quotaParsed);
-      console.log('get_quota', res)
       if ("Ok" in res) {
         return Number(res.Ok);
       } else {

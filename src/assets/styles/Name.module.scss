@@ -93,9 +93,6 @@
     padding: 0 15px;
     outline: none;
     transition: all 0.3s ease 0s;
-    .btn-via-icp{
-      
-    }
     &:hover,&:focus{
       background: rgba(0, 255, 230, 0.3);
       border: 1px solid #00FFE6
@@ -323,11 +320,6 @@
     .semi-avatar-label{
       font-size: 12px !important;
     }
-    .semi-avatar-content{
-      // transform: none !important;
-      // position: static !important;
-      // padding-left: 8px;
-    }
   }
 }
 .quota-num{
@@ -346,11 +338,6 @@
   background: #ff2ec7 !important;
 }
 
-
-.pay-content{
-  position: relative;
-  top: -145px;
-}
 @media screen and (min-width: 576px){
   
 .records{

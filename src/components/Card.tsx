@@ -6,10 +6,8 @@ import { useAuthWallet } from '../context/AuthWallet';
 import { useOrder } from '../context/Order';
 import { toast } from 'react-toastify';
 import { deleteCache } from '../utils/localCache';
-import { Modal, Spinner } from "react-bootstrap";
-import {
-  GetNameOrderResponse
-} from "../utils/canisters/registrar/interface";
+import { Spinner } from "react-bootstrap";
+import { PendingOrderTip } from './PendingOrderTip';
 
 export interface CardProps {
   name: string,
@@ -26,7 +24,6 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
   const [isFavorite, SetIsFavorite] = React.useState<boolean>(false)
   const [checkOrderIng, setCheckOrderIng] = React.useState<boolean>(false)
   const [visible, setVisible] = React.useState<boolean>(false)
-  const [order, setOrder] = React.useState<[] | GetNameOrderResponse>([])
   React.useEffect(() => {
     SetIsFavorite(favorite)
   }, [favorite])
@@ -92,21 +89,17 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
         if (res.length !== 0) {
           setVisible(true)
           payOrder.createOrder(res[0]);
-          setOrder(res[0])
+          history.push('/pay')
         } else {
           history.push(`/name/${name}/reg`)
         }
       }).catch(err => {
         console.log(err)
+        setCheckOrderIng(false)
       })
     } else {
       history.push(`/name/${name}/reg`)
     }
-  }
-
-  const viewOrder = () => {
-    console.log(order)
-    history.push(`/name/${name}/reg`)
   }
 
   return (
@@ -137,28 +130,7 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
             <div className={styles.unavailable}>Unavailable</div>
       }
 
-      <Modal
-        show={visible}
-        style={{ zIndex: 222222 }}
-        backdrop={true}
-      >
-        <Modal.Header>
-          <Modal.Title className="fz-18 connectwallettitle">Notice</Modal.Title>
-          <button className='close' onClick={e => { e.stopPropagation(); setVisible(false) }}>
-            <i className="bi bi-x-circle"></i>
-          </button>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="line-light mb-3"></div>
-          <div className={styles['notice-main']}>You have a pending order</div>
-        </Modal.Body>
-        <Modal.Footer className={styles['notice-modal-footer']}>
-          <button className={styles['notice-btn']} onClick={(e) => {
-            e.stopPropagation();
-            viewOrder()
-          }}>View</button>
-        </Modal.Footer>
-      </Modal>
+      <PendingOrderTip visible={visible} hide={() => { setVisible(false) }} />
     </div>
   )
 }
