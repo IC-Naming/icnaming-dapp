@@ -1,0 +1,61 @@
+.modal-wrap-icpPay{
+  :global{
+    .semi-modal-content{
+      background: linear-gradient(180deg, #334773 0%, #1C2A4A 100%) !important;
+      padding-bottom: 1.5rem;
+    }
+    .semi-modal-body{
+      min-height: 200px;
+    }
+  }
+}
+
+.paymentIcpTimeline{
+  padding-top: 2rem;
+  :global{
+    .semi-timeline-item-content{
+      font-size: 16px;
+    }
+  }
+}
+.success-icpreg{
+  color: #00CFBB;
+  font-size: 1.6rem;
+  line-height: 160%;
+  font-family: "AlibabaPuHuiTiR";
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 1.5rem 0;
+  min-height: 200px;
+}
+.btn-wrap{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn{
+  min-width: 150px;
+  font-family: "AlibabaPuHuiTiR";
+  height: 36px;
+  background: rgba(0, 207, 187, 0.1);
+  border-radius: 12px;
+  border: 1px solid #00CFBB;
+  color: #00CFBB;
+  padding: 0 15px;
+  outline: none;
+  transition: all 0.3s ease 0s;
+  font-size: 16px;
+  &:hover,&:focus{
+    background: rgba(0, 255, 230, 0.3);
+    border: 1px solid #00FFE6
+  }
+  &[disabled],&[disabled=true]{
+    cursor: not-allowed;
+    background: #0B142A !important;
+    border: 1px solid #525F7A;
+    color: #66728C;
+  }
+}

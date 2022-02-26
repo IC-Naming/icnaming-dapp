@@ -10,7 +10,7 @@ import { useHistory } from "react-router-dom";
 import { ConnectWallets } from ".";
 import { PendingOrderTip } from "./PendingOrderTip";
 import { CanisterError } from "../utils/exception";
-import { Select, Avatar } from '@douyinfe/semi-ui';
+import { Select } from '@douyinfe/semi-ui';
 import { ModalTipFull } from "./ModalTipFull";
 const Option = Select.Option;
 interface RegProps {
@@ -29,7 +29,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [icpToCycles, SetIcpToCycles] = useState<string>('');
   const [quotas, setQuotas] = useState<Array<any>>([]);
-  const [quotaLoading,setQuotaLoading] = useState<boolean>(true);
+  const [quotaLoading, setQuotaLoading] = useState<boolean>(true);
   const [recomQuota, setRecomQuota] = useState<number>(0);
   const errorToast = (msg: string) => {
     toast.error(msg, {
@@ -39,38 +39,42 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     })
   }
 
-
   const registerVidIcp = async () => {
     if (loadingSubmit) return
-    if (regname.split('.')[0].length >= 7) {
-      setLoadingSubmit(true)
-      serviceApi.submitRegisterOrder(regname, 1).then(res => {
-        console.log('registerVidIcp', res)
-        if (res) {
-          setLoadingSubmit(false)
-          myInfo.createOrder({
-            name: res.order.name,
-            nameLen: res.order.name.split('.')[0].length,
-            payYears: res.order.years,
-            payStatus: res.order.status,
-            payType: 'icp'
-          });
-          history.push(`/pay`)
-        }
-      }).catch(err => {
-        console.log(err)
-        setLoadingSubmit(false)
-        if (err instanceof CanisterError) {
-          if (err.code === 22) {
-            setPendingOrderTipVisible(true)
-          } else {
-            errorToast(err.message)
+    if (myInfo.hasPendingOrder) {
+      setPendingOrderTipVisible(true)
+    }else{
+      if (regname.split('.')[0].length >= 7) {
+        setLoadingSubmit(true)
+        serviceApi.submitRegisterOrder(regname, 1).then(res => {
+          console.log('registerVidIcp', res)
+          if (res) {
+            setLoadingSubmit(false)
+            myInfo.createOrder({
+              name: res.order.name,
+              nameLen: res.order.name.split('.')[0].length,
+              payYears: res.order.years,
+              payStatus: res.order.status,
+              payType: 'icp'
+            });
+            history.push(`/pay`)
           }
-        }
-      })
-    } else {
-      errorToast('Name length must less than 7')
+        }).catch(err => {
+          console.log(err)
+          setLoadingSubmit(false)
+          if (err instanceof CanisterError) {
+            if (err.code === 22) {
+              setPendingOrderTipVisible(true)
+            } else {
+              errorToast(err.message)
+            }
+          }
+        })
+      } else {
+        errorToast('Name length must less than 7')
+      }
     }
+
   }
 
   const registerVidQuota = async (e) => {
@@ -214,7 +218,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
         hide={() => { setPendingOrderTipVisible(false) }}
       />
       <ModalTipFull visible={loadingPending || loadingSubmit} text={
-        loadingPending ? 'check your pendingOrder' : 'Creating an order'} />
+        loadingPending ? 'check your pendingOrder' : 'Creating order'} />
 
     </div>
   )
