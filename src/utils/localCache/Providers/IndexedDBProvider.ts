@@ -1,4 +1,4 @@
-import { ILocalCache } from "../ILocalCache";
+import { ILocalCache, jsonParse, jsonStringify } from "../ILocalCache";
 export class IndexedDBCache implements ILocalCache {
   private _prefix = "idb"; //Prefix for keys
   private BUCKETS_DATA_KEY = `${this._prefix}-buckets`;
@@ -26,13 +26,13 @@ export class IndexedDBCache implements ILocalCache {
 
       if (!item) return null;
 
-      let { expiry } = JSON.parse(item);
+      let { expiry } = jsonParse(item);
       if (isExpired(expiry)) {
         removeItem(this._db, storeName, cacheKey);
         return null;
       }
 
-      let { value } = JSON.parse(item as string);
+      let { value } = jsonParse(item as string);
       return value;
     } catch (e) {
       console.log("indexdb cache get failed", e);
@@ -45,7 +45,7 @@ export class IndexedDBCache implements ILocalCache {
     let valueToSet: any = { value: value, expiry: expiryDateInMilliseconds };
 
     try {
-      valueToSet = JSON.stringify(valueToSet);
+      valueToSet = jsonStringify(valueToSet);
     } catch (e) {
       console.log(`Couldn't convert value to JSON, e: ${e}`);
     }
@@ -156,7 +156,7 @@ export class IndexedDBCache implements ILocalCache {
   private fetchBucketsFromLocalStorage = () => {
     let buckets = localStorage.getItem(this.BUCKETS_DATA_KEY);
     if (buckets) {
-      this._buckets = JSON.parse(buckets);
+      this._buckets = jsonParse(buckets);
     } else {
       this._buckets = [];
     }
@@ -254,7 +254,7 @@ function removeExpiredItem(db, bucket, key) {
   return new Promise<boolean>(async (resolve, reject) => {
     const item: any = await getItem(db, bucket, key);
     if (item) {
-      let { expiry } = JSON.parse(item);
+      let { expiry } = jsonParse(item);
       if (isExpired(expiry)) {
         removeItem(db, bucket, key);
         return true;

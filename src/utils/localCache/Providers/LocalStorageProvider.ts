@@ -1,4 +1,4 @@
-import { ILocalCache } from "../ILocalCache";
+import { ILocalCache, jsonParse, jsonStringify } from "../ILocalCache";
 export class LocalStorageCache implements ILocalCache {
   private _prefix = "lsc"; //Prefix for keys
   private BUCKETS_DATA_KEY = `${this._prefix}-buckets`;
@@ -22,7 +22,7 @@ export class LocalStorageCache implements ILocalCache {
     if (!item || removeExpiredItem(key)) {
       return null;
     }
-    let { value } = JSON.parse(item);
+    let { value } = jsonParse(item);
     return value;
   }
 
@@ -32,7 +32,7 @@ export class LocalStorageCache implements ILocalCache {
     let valueToSet: any = { value: value, expiry: expiryDateInMilliseconds };
 
     try {
-      valueToSet = JSON.stringify(valueToSet);
+      valueToSet = jsonStringify(valueToSet);
     } catch (e) {
       console.log(`Couldn't convert value to JSON, e: ${e}`);
     }
@@ -46,7 +46,7 @@ export class LocalStorageCache implements ILocalCache {
         this.eachKey((key) => {
           const item = getItem(key);
           if (item) {
-            const { expiry } = JSON.parse(item);
+            const { expiry } = jsonParse(item);
             storedItems.push({ key, value: item, expiry });
           }
         });
@@ -127,7 +127,7 @@ export class LocalStorageCache implements ILocalCache {
   private fetchBucketsFromLocalStorage = () => {
     let buckets = localStorage.getItem(this.BUCKETS_DATA_KEY);
     if (buckets) {
-      this._buckets = JSON.parse(buckets);
+      this._buckets = jsonParse(buckets);
     } else {
       this._buckets = [];
     }
@@ -162,7 +162,7 @@ function isExpired(expiryDateInMilliseconds) {
 function removeExpiredItem(key) {
   let item = getItem(key);
   if (item) {
-    let { expiry } = JSON.parse(item);
+    let { expiry } = jsonParse(item);
     if (isExpired(expiry)) {
       removeItem(key);
       return true;
