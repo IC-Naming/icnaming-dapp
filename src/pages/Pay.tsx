@@ -8,6 +8,7 @@ import payStyles from '../assets/styles/Pay.module.scss'
 import { ModalTipFull } from "../components/ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
 import ServiceApi from "../utils/ServiceApi";
+import { CanisterError } from "../utils/exception";
 declare var window: any;
 
 export const Pay = (props) => {
@@ -76,15 +77,29 @@ export const Pay = (props) => {
     }
   }
 
+  const checkAvailable = async () => {
+    const available = await serviceApi.available(myInfo.orderInfo.name).catch(err => {
+      errorToast(err.message)
+    });
+    if (available) {
+      payVidIcp();
+    }else{
+      errorToast('Name is not available')
+    }
+  }
   const payVidIcp = async () => {
     if (loadingSubmit) return
     setLoadingSubmit(true)
     setIcpPayIng(true)
+    
+    
     let orderResult = await serviceApi.getPendingOrder();
     console.log(orderResult)
     if (orderResult.length === 0) {
       errorToast('no pending order')
       return
+    } else if ("WaitingToRefund" in orderResult[0].status) {
+      setHasRefund(true)
     }
     let order = orderResult[0];
     const arrayToHex = (arr: Array<number>) => {
@@ -109,13 +124,20 @@ export const Pay = (props) => {
         theme: 'dark'
       })
       let result = await serviceApi.confirmOrder(payResult.height);
-      setLoadingSubmit(false)
+
       if (result) {
+        setSystemStatus(true)
+        setIcpPayIng(true)
+        setTimeout(() => {
+          history.push('/myaccount')
+        }, 2500);
+
         toast.success('You got the name! please check it out from MyAccount', {
           position: 'top-center',
           theme: 'dark'
         })
       } else {
+        setSystemStatus(false)
         errorToast('fail confirm order')
       }
     } catch (err) {
@@ -127,10 +149,6 @@ export const Pay = (props) => {
     }
   }
 
-  // TODO: check system status
-  const checkSystemStatus = async () => {
-    
-  }
 
   const cancelRegisterOrder = async () => {
     if (loadingSubmit) return
@@ -147,10 +165,16 @@ export const Pay = (props) => {
         history.push(`/search/${myInfo.orderInfo.name.split('.')[0]}`)
       }
     }).catch(err => {
-      setLoadingCancelOrder(false)
-      errorToast(err.message)
+      if (err instanceof CanisterError) {
+        setLoadingCancelOrder(false)
+        errorToast(err.message)
+      }
       console.log('cancelRegisterOrder', err)
     })
+  }
+
+  const refund = async () => {
+    console.log('refund----------------')
   }
 
   return (
@@ -193,7 +217,7 @@ export const Pay = (props) => {
                       </Col>
                     </Row>
                     <div className="d-grid gap-2">
-                      <button className={styles.btn} onClick={() => { }}>
+                      <button className={styles.btn} onClick={() => { refund() }}>
                         {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                         Refund
                       </button>
@@ -212,7 +236,7 @@ export const Pay = (props) => {
                         >
                           {loadingCancelOrder && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                           Cancel</button>
-                        <button className={styles.btn} onClick={() => { payVidIcp() }}>
+                        <button className={styles.btn} onClick={() => { checkAvailable() }}>
                           {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                           Pay
                         </button>
@@ -228,12 +252,14 @@ export const Pay = (props) => {
       <Modal
         header={null}
         footer={null}
-        visible={true}
+        visible={loadingSubmit}
         maskClosable={false}
         className={payStyles['modal-wrap-icpPay']}
       >
         <Timeline className={payStyles['paymentIcpTimeline']}>
-          <Timeline.Item type="ongoing">Payment in progress</Timeline.Item>
+          {
+            !systemStatus && <Timeline.Item type="ongoing">Payment in progress</Timeline.Item>
+          }
           {
             icpPayIng ? null :
               icpPayStatus ?
@@ -246,19 +272,19 @@ export const Pay = (props) => {
           }
         </Timeline>
         {
-          !icpPayStatus &&
-          <div className={payStyles['btn-wrap']}>
-            <button className={payStyles['btn']} onClick={() => { setLoadingSubmit(false) }}>
-              Cancle
-            </button>
-            <button className={payStyles['btn']} style={{ marginLeft: 10 }}
-              onClick={() => { setLoadingSubmit(false) }}
-            >
-              Continue to pay
-            </button>
-          </div>
+          icpPayIng ? null :
+            !icpPayStatus &&
+            <div className={payStyles['btn-wrap']}>
+              <button className={payStyles['btn']} onClick={() => { setLoadingSubmit(false) }}>
+                cancel
+              </button>
+              <button className={payStyles['btn']} style={{ marginLeft: 10 }}
+                onClick={() => { setLoadingSubmit(false) }}
+              >
+                Continue to pay
+              </button>
+            </div>
         }
-
         {
           systemStatus && <div className={payStyles['success-icpreg']}>
             Registered successfully<br />
@@ -267,6 +293,5 @@ export const Pay = (props) => {
         }
       </Modal>
     </div>
-
   )
 }

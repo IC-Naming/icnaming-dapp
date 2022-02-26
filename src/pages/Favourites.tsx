@@ -6,9 +6,10 @@ import ServiceApi from '../utils/ServiceApi';
 import dateFormat from "dateformat";
 import { queryWithCache } from '../utils/localCache';
 import { Container } from 'react-bootstrap';
+import { CanisterError } from '../utils/exception';
 
 export const Favourites = () => {
-  const { ...authWallet } = useAuthWallet();
+  const { ...auth } = useAuthWallet();
   const serviceApi = new ServiceApi();
   const [loading, setLoading] = useState<boolean>(true)
   const [nameResult, setNameResult] = useState<any>();
@@ -23,38 +24,40 @@ export const Favourites = () => {
         const favoriteNamesSevice = await serviceApi.getFavoriteNames()
         localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
         return serviceApi.getFavoriteNames();
-      }, 'myNamesOfFavorite' + authWallet.walletAddress);
+      }, 'myNamesOfFavorite' + auth.walletAddress);
     }
   }
 
   useEffect(() => {
     setLoading(true)
     const getMyFavoriteNames = async () => {
-      if (authWallet.walletAddress) {
+      if (auth.walletAddress) {
         let myNamesOfFavorite = await getMyFavourites()
-        console.log('myFavoriteNames', myNamesOfFavorite)
-        const myFavoriteNamesWithExpireAt = myNamesOfFavorite.map(async (item: any) => {
-          let expireAtOfName = 0
-          const available = await serviceApi.available(item);
-          if (!available) expireAtOfName = await serviceApi.expireAtOf(item);
+        const myFavoriteNamesWithExpireAt = myNamesOfFavorite.map(async (item: string) => {
           const isMyAccount = await serviceApi.getRegistrantOfName(item) || false;
+          const available = await serviceApi.available(item).catch(err => {
+            if (err instanceof CanisterError) return false;
+          });
+          const expireAtOfName = !available ? await serviceApi.expireAtOf(item) : 0;
           return {
             name: item,
             available: available,
-            isMyAccount: isMyAccount.toText() === authWallet.principal?.toText() ? true : false,
+            isMyAccount: isMyAccount.toText() === auth.principal?.toText() ? true : false,
             expireAt: expireAtOfName > 0 ? 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime") : ''
           }
         })
-        const res = await Promise.all(myFavoriteNamesWithExpireAt);
+        /* const res = await Promise.all(myFavoriteNamesWithExpireAt)
         setNameResult(res)
-        setLoading(false)
-        /* queryWithCache(async () => {
-          return Promise.all(myFavoriteNamesWithExpireAt);
-        }, 'favoriteall').then(res => {
-          console.log(res)
+        setLoading(false) */
+        queryWithCache(async () => {
+          return await Promise.all(myFavoriteNamesWithExpireAt);
+        }, 'favoriteall' + auth.walletAddress).then(res => {
           setNameResult(res)
           setLoading(false)
-        }); */
+        }).catch(err => {
+          console.log(err)
+          setLoading(false)
+        });
       }
     }
     getMyFavoriteNames()
@@ -63,7 +66,7 @@ export const Favourites = () => {
       setNameResult(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },  [authWallet.walletAddress])
+  }, [auth.walletAddress])
 
   return (
     <div className={styles.serach}>
@@ -77,8 +80,8 @@ export const Favourites = () => {
                 <>
                   <div className={styles['search-address']}>
                     <span className={styles.icon}><i className="bi bi-person"></i></span>
-                    <span className={styles.address}>{authWallet.walletAddress}</span>
-                    <CopyToClipboard text={authWallet.walletAddress} />
+                    <span className={styles.address}>{auth.walletAddress}</span>
+                    <CopyToClipboard text={auth.walletAddress} />
                   </div>
                   <div className={styles['search-result']}>
                     {

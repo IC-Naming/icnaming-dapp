@@ -6,7 +6,6 @@ import { useMyInfo } from "../context/MyInfo";
 import { toast } from 'react-toastify';
 import ServiceApi from "../utils/ServiceApi";
 import { useHistory } from "react-router-dom";
-// import { deleteCache } from '../utils/localCache';
 import { ConnectWallets } from ".";
 import { PendingOrderTip } from "./PendingOrderTip";
 import { CanisterError } from "../utils/exception";
@@ -47,7 +46,6 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
       if (regname.split('.')[0].length >= 7) {
         setLoadingSubmit(true)
         serviceApi.submitRegisterOrder(regname, 1).then(res => {
-          console.log('registerVidIcp', res)
           if (res) {
             setLoadingSubmit(false)
             myInfo.createOrder({
@@ -127,6 +125,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   }, [auth.principal, myInfo.quotas])
 
   useEffect(() => {
+    console.log('available---------------------------',available)
     // if available is true, then show the check pending order modal
     if (auth.walletAddress && available) {
       setLoadingPending(true)

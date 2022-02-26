@@ -7,6 +7,8 @@ import { useAuthWallet } from '../context/AuthWallet';
 import ServiceApi from '../utils/ServiceApi';
 import dateFormat from "dateformat";
 import { IC_EXTENSION } from '../utils/config';
+import { CanisterError } from '../utils/exception';
+import { toast } from 'react-toastify';
 
 interface NameModel {
   name: string;
@@ -36,6 +38,16 @@ export const Search = (props) => {
     }
   }
 
+  const creatNameSearchResult = async (searchName,available) => {
+    let expireAt = available ? '' : 'Expires ' + dateFormat(new Date(await serviceApi.expireAtOf(searchName)), "isoDateTime")
+    let fav = false;
+    if (authWallet.walletAddress) {
+      const myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
+      fav = myFavoriteNames.find(item => item === searchName) || false;
+    }
+    setNameSearchResult({ name: searchName, available: available, expireAt, favorite: fav })
+    setLoading(false)
+  }
   useEffect(() => {
     if (word && serviceApi) {
       // if word is string
@@ -59,17 +71,19 @@ export const Search = (props) => {
           searchName = `${word}${IC_EXTENSION}`
         }
         serviceApi.available(searchName).then(async available => {
-          let expireAt = available ?'': 'Expires ' + dateFormat(new Date(await serviceApi.expireAtOf(searchName)), "isoDateTime")
-          let fav = false;
-          if (authWallet.walletAddress) {
-            const myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
-            fav = myFavoriteNames.find(item => item === searchName) || false; 
-          }
-          setNameSearchResult({ name: searchName, available: available, expireAt, favorite: fav })
-          setLoading(false)
+          creatNameSearchResult(searchName, available);
         }).catch(err => {
-          console.log(err)
-          setLoading(false)
+          if (err instanceof CanisterError) {
+            if (err.code === 9) {
+              creatNameSearchResult(searchName, false);
+            } else {
+              toast.error(err.message, {
+                position: "top-center",
+                autoClose: 2000,
+                theme: "dark"
+              })
+            }
+          }
         });
       }
       // if word is principal

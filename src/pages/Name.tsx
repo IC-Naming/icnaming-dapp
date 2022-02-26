@@ -1,11 +1,11 @@
-import { SearchInput, CopyToClipboard, Record, Register } from "../components";
+import { SearchInput, CopyToClipboard, Record, Register, ConnectWallets } from "../components";
 import styles from "../assets/styles/Name.module.scss";
-import { ConnectWallets } from "../components/ConnectWallets";
 import { Container, Tabs, Tab, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { toast } from 'react-toastify';
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
+import { CanisterError } from "../utils/exception";
 
 export const Name = (props) => {
   const serviceApi = new ServiceApi();
@@ -49,7 +49,7 @@ export const Name = (props) => {
       let getNameDetailsLoaded = false;
       let getRecordsOfNameLoaded = false;
 
-      queryWithCache(() => {
+      /* queryWithCache(() => {
         return new Promise((resolve, reject) => {
           serviceApi.getNameDetails(name).then(data => {
             resolve(data)
@@ -58,7 +58,7 @@ export const Name = (props) => {
           });
         })
       }, name + 'details').then(res => {
-        // console.log('details',res)
+        console.log('details', res)
         setNameDetails(res);
         getNameDetailsLoaded = true;
         if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
@@ -67,12 +67,32 @@ export const Name = (props) => {
       }).catch(err => {
         console.log(err)
         setLoadingName(false);
-        toast('Get name details failed', {
+        toast.error('Get name details failed', {
           position: "top-center",
           autoClose: 2000,
           theme: "dark",
         });
-      })
+      }) */
+
+      serviceApi.getNameDetails(name).then(res => {
+        console.log(name)
+        console.log('details', res)
+        setNameDetails(res);
+        getNameDetailsLoaded = true;
+        if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
+          setLoadingName(false);
+        }
+      }).catch(err => {
+        if(err in CanisterError){
+          console.log(err.message)
+        }
+        setLoadingName(false);
+        toast.error('Get name details failed', {
+          position: "top-center",
+          autoClose: 2000,
+          theme: "dark",
+        });
+      });
 
       queryWithCache(() => {
         return new Promise((resolve, reject) => {
@@ -108,7 +128,7 @@ export const Name = (props) => {
       }).catch(err => {
         console.log(err)
         setLoadingName(false);
-        toast('Get records of name failed', {
+        toast.error('Get records of name failed', {
           position: "top-center",
           autoClose: 2000,
           theme: "dark",

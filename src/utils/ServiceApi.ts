@@ -80,21 +80,19 @@ export default class ServiceApi {
     });
   }
 
-  /* Registrar */
-
+ 
   // names or addresses search
   public available = (word: string): Promise<boolean> => {
     // if word is string and not empty
     if (word.length > 0) {
       return executeWithLogging(async () => {
         const res = await this.registrarQueryActor.available(`${word}`);
-        // console.log('registrarQueryActor-available', res);
+        console.log('registrarQueryActor-available', res);
         // if res is ErrorInfo
         if ("Ok" in res) {
           return res.Ok;
         } else {
-          // throw new CanisterError(res.Err);
-          return false;
+          throw new CanisterError(res.Err);
         }
       });
     } else return Promise.reject(new Error("Invalid search word"));
@@ -111,8 +109,7 @@ export default class ServiceApi {
       }
     });
   };
-
-
+   /* Registrar */
   //reg name by quota
   public registerNameByQuota = (
     name: string,
@@ -168,7 +165,7 @@ export default class ServiceApi {
   public getPendingOrder = (): Promise<[] | [GetNameOrderResponse]> => {
     return executeWithLogging(async () => {
       const res = await this.registrarUpdateActor.get_pending_order();
-      console.log('get_pending_order', res);
+      // console.log('get_pending_order', res);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -265,7 +262,7 @@ export default class ServiceApi {
   public getRegistrantOfName = (name: string): Promise<Principal> => {
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_owner(name);
-      console.log("getRegistrantOfName", res);
+      // console.log("getRegistrantOfName", res);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -370,7 +367,8 @@ export default class ServiceApi {
   // get name details
   public getNameDetails = (name: string): Promise<any> => {
     return executeWithLogging(async () => {
-      const isAvailable = await this.available(name)
+      const isAvailable = await this.available(name).catch(() => false);
+      console.log('getNameDetails =========== isAvailable',isAvailable)
       if (isAvailable) {
         return {
           name: "ICP",

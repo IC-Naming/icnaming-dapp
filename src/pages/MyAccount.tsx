@@ -38,10 +38,8 @@ export const MyAccount = () => {
       queryWithCache(() => {
         return new Promise((resolve, reject) => {
           serviceApi.getNamesOfRegistrant(wordParam).then(data => {
-            console.log(data)
             resolve(data)
           }).catch(errs => {
-            console.log(errs)
             reject(errs)
           });
         })
@@ -70,7 +68,6 @@ export const MyAccount = () => {
           serviceApi.getNamesOfController(wordParam).then(data => {
             resolve(data)
           }).catch(errs => {
-            console.log(errs)
             reject(errs)
           });
         })

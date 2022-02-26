@@ -1,5 +1,6 @@
 import React from "react";
 import { Collapse, Table } from "@douyinfe/semi-ui";
+import styles from '../assets/styles/Faq.module.scss';
 export const Faq: React.FC = () => {
   const columns = [
     {
@@ -61,13 +62,8 @@ export const Faq: React.FC = () => {
   ]
   return (
     <div className="container pt-5">
-      <div style={{
-        maxWidth: 960,
-        margin: 'auto',
-        paddingTop: '2.75rem',
-        paddingBottom: 100
-      }}>
-        <div style={{ paddingTop: "20px", color: '#fff' }}>
+      <div className={styles['faq-wrap']}>
+        <div style={{ paddingTop: "20px"}}>
           <Collapse accordion>
             <Collapse.Panel header="What's IC Naming?" itemKey="Panel1">
               <p>IC Naming is a decentralized name service on IC. </p>
@@ -79,7 +75,7 @@ export const Faq: React.FC = () => {
               <p>Currently open ≥ 7-digit name registration, anyone can register</p>
             </Collapse.Panel>
             <Collapse.Panel header="What is the registration fee and renewal fee for name?" itemKey="Panel4">
-              <Table columns={columns} dataSource={data} pagination={false} />
+              <Table columns={columns} dataSource={data} pagination={false} className={styles['faq-table']} />
             </Collapse.Panel>
             <Collapse.Panel header="Can I use it for a decentralized website deployed on IC?" itemKey="Panel5">
               <p>Yes, you can use our browser extension to access your decentralized website directly through chrome browser </p>
