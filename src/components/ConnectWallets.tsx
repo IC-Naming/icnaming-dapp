@@ -67,14 +67,14 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
           connecting ?
             <Row>
               <Col sm="12">
-                <p className="text-center modal-text-color p-5">
+                <div className="text-center modal-text-color p-5">
                   Connecting Wallets <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />
-                </p>
+                </div>
               </Col>
             </Row>
             :
             <React.Fragment>
-              <p className="mb-4 modal-text-color">Please select a wallet to connect to this dapp:</p>
+              <div className="mb-4 modal-text-color">Please select a wallet to connect to this dapp:</div>
               <Row>
                 <Col sm="6">
                   <button className={styles["btn-connect"]} onClick={connectIIWallet} disabled={connecting}>

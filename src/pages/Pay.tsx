@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { Modal, Timeline } from "@douyinfe/semi-ui";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from '../assets/styles/Name.module.scss'
+import payStyles from '../assets/styles/Pay.module.scss'
 import { ModalTipFull } from "../components/ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
 import ServiceApi from "../utils/ServiceApi";
@@ -14,12 +16,18 @@ export const Pay = (props) => {
   const { ...myInfo } = useMyInfo();
 
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
-  const [loadingCancel, setLoadingCancel] = useState<boolean>(false);
+  const [paymentQuota, setPaymentQuota] = useState<boolean>(false);
+  const [loadingCancelOrder, setLoadingCancelOrder] = useState<boolean>(false);
   const [hasRefund, setHasRefund] = useState<boolean>(false)
 
   const [quotaTypeCount, setQuotaTypeCount] = useState<any>(0);
-  const [icpPayAmountDesc, setIcpPayAmountDesc] = useState<string>('')
   const [quotaType, setQuotaType] = useState<number>(7)
+
+  const [icpPayAmountDesc, setIcpPayAmountDesc] = useState<string>('')
+
+  const [icpPayIng, setIcpPayIng] = useState<boolean>(true)
+  const [icpPayStatus, setIcpPayStatus] = useState<boolean>(false)
+  const [systemStatus, setSystemStatus] = useState<boolean>(false)
 
   const errorToast = (msg: string) => {
     toast.error(msg, {
@@ -46,8 +54,8 @@ export const Pay = (props) => {
   }, [myInfo.orderInfo])
 
   const payVidQuota = async () => {
-    if (loadingSubmit) return
-    setLoadingSubmit(true)
+    if (paymentQuota) return
+    setPaymentQuota(true)
     if (quotaType) {
       serviceApi.registerNameByQuota(myInfo.orderInfo.name, quotaType).then(res => {
         if (res === true) {
@@ -55,14 +63,14 @@ export const Pay = (props) => {
             position: 'top-center',
             theme: 'dark'
           })
-          setLoadingSubmit(false)
+          setPaymentQuota(false)
           myInfo.getMyQuotas();
           history.push('/myaccount')
         } else {
           errorToast('fail register');
         }
       }).catch(err => {
-        setLoadingSubmit(false)
+        setPaymentQuota(false)
         errorToast(err.message)
       })
     }
@@ -71,6 +79,7 @@ export const Pay = (props) => {
   const payVidIcp = async () => {
     if (loadingSubmit) return
     setLoadingSubmit(true)
+    setIcpPayIng(true)
     let orderResult = await serviceApi.getPendingOrder();
     console.log(orderResult)
     if (orderResult.length === 0) {
@@ -81,7 +90,6 @@ export const Pay = (props) => {
     const arrayToHex = (arr: Array<number>) => {
       return arr.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"), "")
     }
-  
     try {
       const accountId = arrayToHex(order.payment_account_id);
       console.log(`account id: ${accountId}`);
@@ -93,35 +101,44 @@ export const Pay = (props) => {
           memo: order.payment_memo.ICP.toString(),
         },
       });
-      console.log(result);
-      setLoadingSubmit(false)
+      console.log('pay result',result);
+      setIcpPayIng(false)
+      setIcpPayStatus(true)
+      // setLoadingSubmit(false)
       toast.success('Payment is successful, please wait for seconds, the system will confirm your payment, please do not repeat during this period', {
         position: 'top-center',
         theme: 'dark'
       })
     } catch (err) {
-      setLoadingSubmit(false);
+      // setLoadingSubmit(false);
+      setIcpPayIng(false)
+      setIcpPayStatus(false)
       errorToast(`fail transfer with error: ${err}`);
       return
     }
   }
 
-  const cancelRegisterOrder = () => {
+  // TODO: check system status
+  const checkSystemStatus = async () => {
+    
+  }
+
+  const cancelRegisterOrder = async () => {
     if (loadingSubmit) return
-    setLoadingCancel(true)
+    setLoadingCancelOrder(true)
     serviceApi.cancelRegisterOrder().then(res => {
       if (res) {
-        setLoadingCancel(false)
+        setLoadingCancelOrder(false)
         toast.success('Cancel the success', {
           position: 'top-center',
-          autoClose:1000,
+          autoClose: 1000,
           theme: 'dark'
         })
         myInfo.cleanPendingOrder()
         history.push(`/search/${myInfo.orderInfo.name.split('.')[0]}`)
       }
     }).catch(err => {
-      setLoadingCancel(false)
+      setLoadingCancelOrder(false)
       errorToast(err.message)
       console.log('cancelRegisterOrder', err)
     })
@@ -153,7 +170,7 @@ export const Pay = (props) => {
                   </Row>
                   <div className="d-grid gap-2">
                     <button className={styles.btn} onClick={() => { payVidQuota() }}>
-                      {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                      {paymentQuota && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                       Submit
                     </button>
                   </div>
@@ -184,7 +201,7 @@ export const Pay = (props) => {
                       <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <button className={styles.btn} onClick={() => { cancelRegisterOrder() }} style={{ marginRight: 10 }}
                         >
-                          {loadingCancel && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                          {loadingCancelOrder && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                           Cancel</button>
                         <button className={styles.btn} onClick={() => { payVidIcp() }}>
                           {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
@@ -197,8 +214,50 @@ export const Pay = (props) => {
           </div>
         </div>
       </div>
-      <ModalTipFull visible={loadingCancel} text={'Cancellation order'} />
+      <ModalTipFull visible={loadingCancelOrder || paymentQuota} text={loadingCancelOrder ? 'Cancellation order' : 'Payment in progress'} />
+
+      <Modal
+        header={null}
+        footer={null}
+        visible={true}
+        maskClosable={false}
+        className={payStyles['modal-wrap-icpPay']}
+      >
+        <Timeline className={payStyles['paymentIcpTimeline']}>
+          <Timeline.Item type="ongoing">Payment in progress</Timeline.Item>
+          {
+            icpPayIng ? null :
+              icpPayStatus ?
+                <React.Fragment>
+                  <Timeline.Item type="success">Payment success</Timeline.Item>
+                  <Timeline.Item color="pink">System confirmation in progress</Timeline.Item>
+                </React.Fragment>
+                :
+                <Timeline.Item type="error">Payment failure</Timeline.Item>
+          }
+        </Timeline>
+        {
+          !icpPayStatus &&
+          <div className={payStyles['btn-wrap']}>
+            <button className={payStyles['btn']} onClick={() => { setLoadingSubmit(false) }}>
+              Cancle
+            </button>
+            <button className={payStyles['btn']} style={{ marginLeft: 10 }}
+              onClick={() => { setLoadingSubmit(false) }}
+            >
+              Continue to pay
+            </button>
+          </div>
+        }
+
+        {
+          systemStatus && <div className={payStyles['success-icpreg']}>
+            Registered successfully<br />
+            Congratulations
+          </div>
+        }
+      </Modal>
     </div>
-    
+
   )
 }
