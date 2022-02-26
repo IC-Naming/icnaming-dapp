@@ -24,7 +24,7 @@
       color: rgba(217, 225, 242, 0.5);
       border: 1px solid #384B6E;
       font-size: 1rem;
-      font-family: 'PuHuiTi';
+      font-family: 'AlibabaPuHuiTiR';
       box-shadow: none;
       height: 40px;
       &:hover, &:focus{
@@ -269,6 +269,21 @@
   justify-content: center;
 }
 
+
+.quota-option-type{
+  width: 80px !important;
+  height: 32px !important;
+  border-radius: 6px !important;
+  color: #D9E1F2;
+  font-size: 16px!important;
+  font-family: "AlibabaPuHuiTiR";
+}
+.quota-count{
+  padding-left: 10px;
+  color: #D9E1F2!important;
+  font-size: 16px!important;
+  display: inline-block !important;
+}
 .selcet-quota{
   margin-left: 40px;
   min-width: 260px !important;
@@ -278,22 +293,31 @@
   transition: .3s all;
   &:hover{
     background: rgba(0, 255, 230, 0.3) !important;
-      border: 1px solid #00FFE6 !important;
+    border: 1px solid #00FFE6 !important;
+  }
+  .quota-option-type{
+    width: 80px !important;
+    height: 32px !important;
+    color: #00CFBB;
+    font-size: 16px!important;
+    font-family: "AlibabaPuHuiTiR";
+  }
+  .quota-count{
+    padding-left: 10px;
+    color: #00CFBB!important;
+    display: inline-block !important;
   }
   :global{
+    .semi-select-selection{
+      justify-content: center;
+    }
     .semi-select-selection-text{
-      overflow: visible !important;
-      color: #00CFBB;
-      font-size: 16px;
+      color: #00CFBB !important;
+        font-size: 16px;
     }
     .semi-select-arrow{
       color: #00CFBB;
     }
-    .semi-badge{display: none;}
-    .semi-badge+span{display: none;}
-  }
-  .quota-option-con{
-    :global{.semi-badge{display: inline-block;}}
   }
 }
 
@@ -304,33 +328,10 @@
   background: rgba(234, 74, 170, 1) !important;
   border-radius: 15px;
   font-size: 14px;
-  // width: 100px;
   height: 20px;
   line-height: 18px !important;
   padding: 0 5px;
   text-align: center;
-}
-.quota-option-avatar{
-  width: 88px !important;
-  height: 32px !important;
-  border-radius: 6px !important;
-  background: rgba(131, 154, 200, 0.11)!important;
-  color: rgba(217, 225, 242, 1)!important;
-  font-size: 16px!important;
-  font-family: "PuHuiTi";
-  // display: inline-block !important;
-  .superscript{
-    font-size: 14px;
-  }
-  :global{
-    .semi-avatar-label{
-      font-size: 12px !important;
-    }
-  }
-}
-.quota-num{
-  padding-left: 10px;
-  display: inline-block !important;
 }
 
 .superscript{

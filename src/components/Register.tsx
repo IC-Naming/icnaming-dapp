@@ -188,15 +188,14 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                         onChange={(e) => {
                           registerVidQuota(e)
                         }}>
-                        <Option>Please choose you quota</Option>
                         {
                           quotas.map((quota, index) => {
-                            return <Option className={styles['quota-option']} key={index} value={quota.quotaType}>
+                            return <Option showTick={false} className={styles['quota-option-item']} key={index} value={quota.quotaType}>
                               <div className={styles['quota-option-con']}>
-                                <Avatar shape='square' className={styles['quota-option-avatar']}>
-                                  Length-{quota.quotaType}
-                                </Avatar>
-                                <span className={styles['quota-num']}>{quota.quotaCount}</span>
+                                <span className={styles['quota-option-type']}>
+                                  [Length-{quota.quotaType}]
+                                </span>
+                                <span className={styles['quota-count']}>{quota.quotaCount}</span>
                               </div>
                               {
                                 recomQuota === quota.quotaType && <span className={styles['recommend']}>recom</span>
