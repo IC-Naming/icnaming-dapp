@@ -10,23 +10,26 @@ export interface MyInfoContextInterface {
     nameLen: number,
     payYears: number,
     payType: 'icp' | 'quota',
+    payStatus?: object,
     quotaType?: number,
   };
   icpToCycles: Array<{ icp: string, cycles: string }>;
   hasPendingOrder: boolean;
   quotas: Array<number>;
-  createOrder: (order: { name: string, nameLen: number, payYears: number, payType: 'icp' | 'quota', quotaType?: number }) => void;
+  createOrder: (order: { name: string, nameLen: number, payYears: number, payStatus: object, payType: 'icp' | 'quota', quotaType?: number }) => void;
   getMyQuotas: () => void;
   getIcpToCycles: () => void;
   checkPendingOrder: () => void;
+  cleanPendingOrder: () => void;
 }
 
 function useProvideMyInfo() {
   const serviceApi = new ServiceApi();
   const { ...auth } = useAuthWallet();
-  const [orderInfo, setOrderInfo] = useState<{ name: string, nameLen: number, payYears: number, payType: 'icp' | 'quota', quotaType?: number }>({
+  const [orderInfo, setOrderInfo] = useState<{ name: string, nameLen: number, payStatus?: object, payYears: number, payType: 'icp' | 'quota', quotaType?: number }>({
     name: '',
     nameLen: 0,
+    payStatus: {},
     payYears: 1,
     payType: 'icp',
   })
@@ -35,10 +38,11 @@ function useProvideMyInfo() {
   const [quotas, setQuotas] = useState<Array<number>>([])
   const [innerTimerTick, setInnerTimerTick] = useState(0);
 
-  const createOrder = (order: { name: string; nameLen: number; payYears: number; payType: 'icp' | 'quota'; quotaType?: number; }) => {
+  const createOrder = (order: { name: string; nameLen: number; payStatus?: object, payYears: number; payType: 'icp' | 'quota'; quotaType?: number; }) => {
     setOrderInfo({
       name: order.name,
       nameLen: order.nameLen,
+      payStatus: order.payStatus,
       payYears: order.payYears,
       payType: order.payType,
       quotaType: order.quotaType,
@@ -61,8 +65,6 @@ function useProvideMyInfo() {
       setQuotas(res)
     }
   }
-
-
   const checkPendingOrder = async () => {
     serviceApi.getPendingOrder().then(res => {
       if (res.length !== 0) {
@@ -70,23 +72,24 @@ function useProvideMyInfo() {
         console.log(res)
         setOrderInfo({
           name: res[0].name,
+          payStatus: res[0].status,
           nameLen: res[0].name.split('.').length,
           payYears: res[0].years,
           payType: 'icp',
         })
-      }else{
+      } else {
         setPendingOrder(false)
       }
     })
   }
 
   useEffect(() => {
-    if(auth.principal){
+    if (auth.principal) {
       getMyQuotas();
       checkPendingOrder();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[auth.principal])
+  }, [auth.principal])
 
   const getIcpToCycles = async () => {
     const get_IcpToCycles = () => {
@@ -139,6 +142,7 @@ function useProvideMyInfo() {
     getMyQuotas,
     getIcpToCycles,
     checkPendingOrder,
+    cleanPendingOrder:()=>{setPendingOrder(false)}
   }
 }
 

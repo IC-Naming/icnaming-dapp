@@ -65,6 +65,9 @@
   box-sizing: border-box;
 }
 
+.semi-popover-wrapper{
+  background: linear-gradient(rgba(37, 56, 99, 1),rgba(22, 34, 61, 1));
+}
 @media (min-width: 576px){
   .container {
     max-width: 700px;

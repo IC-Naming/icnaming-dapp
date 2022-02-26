@@ -30,6 +30,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const [icpToCycles, SetIcpToCycles] = useState<string>('');
   const [quotas, setQuotas] = useState<Array<number>>([]);
 
+  const [recomQuota, setRecomQuota] = useState<number>(0);
   const errorToast = (msg: string) => {
     toast.error(msg, {
       position: 'top-center',
@@ -38,34 +39,55 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     })
   }
 
+  const calculateRecomQuota = async (myQuotasArr) => {
+    for (let i = 0; i < myQuotasArr.length; i++) {
+      console.log(i + 4, myQuotasArr[i])
+      console.log('nameLen', nameLen ==i + 4)
+      if (myQuotasArr[i] > 0 && nameLen == i + 4) {
+        setRecomQuota(myQuotasArr[i])
+        break;
+      }
+    }
+  }
+
   const registerVidIcp = async () => {
     if (loadingSubmit) return
-    setLoadingSubmit(true)
-    serviceApi.submitRegisterOrder(regname, 1).then(res => {
-      console.log('registerVidIcp', res)
-      if (res) {
-        setLoadingSubmit(false)
-        myInfo.createOrder({ name: regname, nameLen: regname.split('.')[0].length, payYears: 1, payType: 'icp' });
-        history.push(`/pay`)
-      }
-    }).catch(err => {
-      console.log(err)
-      setLoadingSubmit(false)
-      if (err instanceof CanisterError) {
-        if (err.code === 22) {
-          setPendingOrderTipVisible(true)
-        } else {
-          errorToast(err.message)
+    if (regname.split('.')[0].length >= 7) {
+      setLoadingSubmit(true)
+      serviceApi.submitRegisterOrder(regname, 1).then(res => {
+        console.log('registerVidIcp', res)
+        if (res) {
+          setLoadingSubmit(false)
+          myInfo.createOrder({
+            name: res.order.name,
+            nameLen: res.order.name.split('.')[0].length,
+            payYears: res.order.years,
+            payStatus: res.order.status,
+            payType: 'icp'
+          });
+          history.push(`/pay`)
         }
-      }
-    })
+      }).catch(err => {
+        console.log(err)
+        setLoadingSubmit(false)
+        if (err instanceof CanisterError) {
+          if (err.code === 22) {
+            setPendingOrderTipVisible(true)
+          } else {
+            errorToast(err.message)
+          }
+        }
+      })
+    } else {
+      errorToast('Name length must less than 7')
+    }
   }
 
   const registerVidQuota = async (e) => {
     // if qouta length is 0, return
     if (quotas[e - 4] > 0) {
       if (nameLen >= e) {
-        myInfo.createOrder({ name: regname, nameLen: regname.split('.')[0].length, payYears: 1, payType: 'quota', quotaType: e });
+        myInfo.createOrder({ name: regname, nameLen: nameLen, payStatus: {}, payYears: 1, payType: 'quota', quotaType: e });
         history.push(`/pay`);
         return
       } else {
@@ -93,6 +115,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
       if (myQuotas && myQuotas.length > 0) {
         const myQuotasArr = JSON.parse(myQuotas)
         setQuotas(myQuotasArr)
+        calculateRecomQuota(myQuotasArr)
       } else if (myInfo.quotas.length > 0) {
         console.log(myInfo.quotas)
       }
@@ -164,21 +187,26 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                     </button>
 
                     <Select size='large' className={styles['selcet-quota']}
-                      placeholder="please choose you quota"
+                      placeholder="Please choose you quota"
                       onChange={(e) => {
                         registerVidQuota(e)
                       }}>
-                      <Option>Register via Quota</Option>
+                      <Option>Please choose you quota</Option>
                       {
                         quotas.length > 0 &&
                         quotas.map((quota, index) => {
                           return <Option className={styles['quota-option']} key={index} value={index + 4}>
                             <div className={styles['quota-option-con']}>
                               <Avatar shape='square' className={styles['quota-option-avatar']}>
+                                {/* Length<span className={styles['superscript']}>{index + 4}</span> */}
                                 Length-{index + 4}
                               </Avatar>
-                              <span className={styles['quota-num']}>{quota}</span>
+                              <span className={styles['quota-num']}>{quota} - {recomQuota}</span>
                             </div>
+                            
+                            {/* {
+                              recomQuota === index + 4 && <span className={styles['recommend']}>recom</span>
+                            } */}
                           </Option>
                         })
                       }

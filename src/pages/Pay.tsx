@@ -3,6 +3,7 @@ import { Row, Col, Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
 import styles from '../assets/styles/Name.module.scss'
+import { ModalTipFull } from "../components/ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
 import ServiceApi from "../utils/ServiceApi";
 declare var window: any;
@@ -38,8 +39,8 @@ export const Pay = (props) => {
       setQuotaType(myInfo.orderInfo.quotaType)
       const myQuotas = localStorage.getItem('myQuotas');
       if (myQuotas) {
-        const myQuotasObj = JSON.parse(myQuotas)        
-        setQuotaTypeCount(myQuotasObj[myInfo.orderInfo.quotaType-4])
+        const myQuotasObj = JSON.parse(myQuotas)
+        setQuotaTypeCount(myQuotasObj[myInfo.orderInfo.quotaType - 4])
       }
     }
   }, [myInfo.orderInfo])
@@ -70,6 +71,7 @@ export const Pay = (props) => {
     if (loadingSubmit) return
     setLoadingSubmit(true)
     let orderResult = await serviceApi.getPendingOrder();
+    console.log(orderResult)
     if (orderResult.length === 0) {
       errorToast('no pending order')
       return
@@ -78,7 +80,7 @@ export const Pay = (props) => {
     const arrayToHex = (arr: Array<number>) => {
       return arr.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"), "")
     }
-
+  
     try {
       const accountId = arrayToHex(order.payment_account_id);
       console.log(`account id: ${accountId}`);
@@ -111,12 +113,15 @@ export const Pay = (props) => {
         setLoadingCancel(false)
         toast.success('Cancel the success', {
           position: 'top-center',
+          autoClose:1000,
           theme: 'dark'
         })
-        history.push('/')
+        myInfo.cleanPendingOrder()
+        history.push(`/search/${myInfo.orderInfo.name.split('.')[0]}`)
       }
     }).catch(err => {
       setLoadingCancel(false)
+      errorToast(err.message)
       console.log('cancelRegisterOrder', err)
     })
   }
@@ -140,7 +145,7 @@ export const Pay = (props) => {
                     <Col md={4} sm={12} className="text-center" >
                       <div style={{ whiteSpace: 'nowrap' }}>
                         {myInfo.orderInfo.payYears} Quota<span className={styles['superscript']}>{quotaType}</span>
-                        <span style={{color:'#999',paddingLeft:10}}> ( you have {quotaTypeCount} Quota<span className={styles['superscript']}>{quotaType}</span> )</span>
+                        <span style={{ color: '#999', paddingLeft: 10 }}> ( you have {quotaTypeCount} Quota<span className={styles['superscript']}>{quotaType}</span> )</span>
                       </div>
                     </Col>
                     <Col md={4} sm={12}></Col>
@@ -191,6 +196,8 @@ export const Pay = (props) => {
           </div>
         </div>
       </div>
+      <ModalTipFull visible={loadingCancel} text={'Cancellation order'} />
     </div>
+    
   )
 }

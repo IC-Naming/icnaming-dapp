@@ -1,5 +1,5 @@
 import React from "react";
-import styles from '../assets/styles/Name.module.scss'
+import styles from '../assets/styles/ModalTipFull.module.scss'
 import { Modal, Spin } from '@douyinfe/semi-ui';
 interface RegProps {
   text: string;
