@@ -2,7 +2,7 @@ import React from "react";
 import logoipc from '../assets/images/icplogo.png';
 import plugimg from '../assets/images/pluglogo.png';
 import styles from "../assets/styles/ConnectWallets.module.scss";
-import { Row, Col, Modal } from "react-bootstrap";
+import { Row, Col, Modal, Spinner } from "react-bootstrap";
 import { useAuthWallet } from "../context/AuthWallet";
 import { ToastContainer, toast } from 'react-toastify';
 interface propsType {
@@ -10,11 +10,12 @@ interface propsType {
   hide: () => void;
 }
 export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
-
   const { ...authWallet } = useAuthWallet()
-
+  const [connecting, setConnecting] = React.useState<boolean>(false)
   const connPlugWallet = () => {
+    setConnecting(true)
     authWallet.connectPlugWallet().then(async (res: any) => {
+      setConnecting(false)
       if (res && res.connected) {
         hide()
       } else {
@@ -30,48 +31,66 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
     });
   }
 
-  const connectIIWallet = ()=>{
-    authWallet.connectII().then((res: any)=>{
-      console.log(res)
-      if(res && res.connected){
+  const connectIIWallet = () => {
+    setConnecting(true)
+    authWallet.connectII().then((res: any) => {
+      setConnecting(false)
+      if (res && res.connected) {
         hide()
-      }else{
+      } else {
         toast.error('fail connect', {
           position: "top-center"
         })
       }
     })
   }
-
   return (
     <Modal
       show={visible}
-      onHide={hide}
-      style={{zIndex:1111}}
+      onHide={() => {
+        hide()
+        setConnecting(false)
+      }}
     >
       <Modal.Header>
         <Modal.Title className="fz-18 connectwallettitle">Select a Wallet</Modal.Title>
-        <button className='close' onClick={hide}>
-        <i className="bi bi-x-circle"></i>
+        <button className='close' onClick={() => {
+          hide()
+          setConnecting(false)
+        }}>
+          <i className="bi bi-x-circle"></i>
         </button>
       </Modal.Header>
       <Modal.Body>
         <div className="line-light mb-3"></div>
-        <p className="mb-4 modal-text-color">Please select a wallet to connect to this dapp:</p>
-        <Row>
-          <Col sm="6">
-            <button className={styles["btn-connect"]} onClick={connectIIWallet}>
-              <img src={logoipc} alt="ipc" />
-              <span>Internet Identity</span>
-            </button>
-          </Col>
-          <Col sm="6">
-            <button className={styles["btn-connect"]} onClick={connPlugWallet}>
-              <img src={plugimg} alt="plug" />
-              <span>Plug</span>
-            </button>
-          </Col>
-        </Row>
+        {
+          connecting ?
+            <Row>
+              <Col sm="12">
+                <p className="text-center modal-text-color p-5">
+                  Connecting Wallets <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />
+                </p>
+              </Col>
+            </Row>
+            :
+            <React.Fragment>
+              <p className="mb-4 modal-text-color">Please select a wallet to connect to this dapp:</p>
+              <Row>
+                <Col sm="6">
+                  <button className={styles["btn-connect"]} onClick={connectIIWallet} disabled={connecting}>
+                    <img src={logoipc} alt="ipc" />
+                    <span>Internet Identity</span>
+                  </button>
+                </Col>
+                <Col sm="6">
+                  <button className={styles["btn-connect"]} onClick={connPlugWallet} disabled={connecting}>
+                    <img src={plugimg} alt="plug" />
+                    <span>Plug</span>
+                  </button>
+                </Col>
+              </Row>
+            </React.Fragment>
+        }
         <ToastContainer />
       </Modal.Body>
     </Modal>
