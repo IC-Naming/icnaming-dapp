@@ -28,8 +28,8 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const [loadingPending, setLoadingPending] = useState<boolean>(false);
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [icpToCycles, SetIcpToCycles] = useState<string>('');
-  const [quotas, setQuotas] = useState<Array<number>>([]);
-
+  const [quotas, setQuotas] = useState<Array<any>>([]);
+  const [quotaLoading,setQuotaLoading] = useState<boolean>(true);
   const [recomQuota, setRecomQuota] = useState<number>(0);
   const errorToast = (msg: string) => {
     toast.error(msg, {
@@ -39,16 +39,6 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     })
   }
 
-  const calculateRecomQuota = async (myQuotasArr) => {
-    for (let i = 0; i < myQuotasArr.length; i++) {
-      console.log(i + 4, myQuotasArr[i])
-      console.log('nameLen', nameLen ==i + 4)
-      if (myQuotasArr[i] > 0 && nameLen == i + 4) {
-        setRecomQuota(myQuotasArr[i])
-        break;
-      }
-    }
-  }
 
   const registerVidIcp = async () => {
     if (loadingSubmit) return
@@ -84,17 +74,13 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   }
 
   const registerVidQuota = async (e) => {
-    // if qouta length is 0, return
-    if (quotas[e - 4] > 0) {
-      if (nameLen >= e) {
-        myInfo.createOrder({ name: regname, nameLen: nameLen, payStatus: {}, payYears: 1, payType: 'quota', quotaType: e });
-        history.push(`/pay`);
-        return
-      } else {
-        errorToast(`Name must be at least ${nameLen} characters long`)
-      }
+    // console.log('registerVidQuota',e)
+    if (nameLen >= e) {
+      myInfo.createOrder({ name: regname, nameLen: nameLen, payStatus: {}, payYears: 1, payType: 'quota', quotaType: e });
+      history.push(`/pay`);
+      return
     } else {
-      errorToast(`Has no quota for len_gte ${e}`)
+      errorToast(`Name must be at least ${nameLen} characters long`)
     }
   }
 
@@ -114,14 +100,24 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
       const myQuotas = localStorage.getItem('myQuotas');
       if (myQuotas && myQuotas.length > 0) {
         const myQuotasArr = JSON.parse(myQuotas)
-        setQuotas(myQuotasArr)
-        calculateRecomQuota(myQuotasArr)
-      } else if (myInfo.quotas.length > 0) {
-        console.log(myInfo.quotas)
+        let newData: any = [];
+        for (let i = 0; i < myQuotasArr.length; i++) {
+          if (myQuotasArr[i] > 0) {
+            newData.push({ quotaType: i + 4, quotaCount: myQuotasArr[i] })
+          }
+        }
+        setQuotas(newData)
+        setQuotaLoading(false)
+        const canQuota = newData.filter(quota => quota.quotaType <= nameLen)
+        setRecomQuota(Math.max(...canQuota.map(quota => quota.quotaType)))
+      } else {
+        setQuotaLoading(true)
+        myInfo.getMyQuotas();
       }
     }
     return () => {
       setQuotas([])
+      setQuotaLoading(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.principal, myInfo.quotas])
@@ -175,7 +171,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                   <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect Wallet</button>
                 </div>
                 :
-                quotas.length === 0 ?
+                quotaLoading ?
                   <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
                   :
                   <div className={styles['btn-wrap']}>
@@ -185,32 +181,31 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                       {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                       Register via ICP
                     </button>
-
-                    <Select size='large' className={styles['selcet-quota']}
-                      placeholder="Please choose you quota"
-                      onChange={(e) => {
-                        registerVidQuota(e)
-                      }}>
-                      <Option>Please choose you quota</Option>
-                      {
-                        quotas.length > 0 &&
-                        quotas.map((quota, index) => {
-                          return <Option className={styles['quota-option']} key={index} value={index + 4}>
-                            <div className={styles['quota-option-con']}>
-                              <Avatar shape='square' className={styles['quota-option-avatar']}>
-                                {/* Length<span className={styles['superscript']}>{index + 4}</span> */}
-                                Length-{index + 4}
-                              </Avatar>
-                              <span className={styles['quota-num']}>{quota} - {recomQuota}</span>
-                            </div>
-                            
-                            {/* {
-                              recomQuota === index + 4 && <span className={styles['recommend']}>recom</span>
-                            } */}
-                          </Option>
-                        })
-                      }
-                    </Select>
+                    {
+                      quotas.length > 0 &&
+                      <Select size='large' className={styles['selcet-quota']}
+                        placeholder="Please choose you quota"
+                        onChange={(e) => {
+                          registerVidQuota(e)
+                        }}>
+                        <Option>Please choose you quota</Option>
+                        {
+                          quotas.map((quota, index) => {
+                            return <Option className={styles['quota-option']} key={index} value={quota.quotaType}>
+                              <div className={styles['quota-option-con']}>
+                                <Avatar shape='square' className={styles['quota-option-avatar']}>
+                                  Length-{quota.quotaType}
+                                </Avatar>
+                                <span className={styles['quota-num']}>{quota.quotaCount}</span>
+                              </div>
+                              {
+                                recomQuota === quota.quotaType && <span className={styles['recommend']}>recom</span>
+                              }
+                            </Option>
+                          })
+                        }
+                      </Select>
+                    }
                   </div>
             }
           </React.Fragment>

@@ -56,6 +56,7 @@ export const Pay = (props) => {
             theme: 'dark'
           })
           setLoadingSubmit(false)
+          myInfo.getMyQuotas();
           history.push('/myaccount')
         } else {
           errorToast('fail register');
