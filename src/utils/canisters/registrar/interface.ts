@@ -1,15 +1,15 @@
 import type { Principal } from '@dfinity/principal';
 export type BooleanActorResponse = { 'Ok' : boolean } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export interface ErrorInfo { 'code' : number, 'message' : string }
 export type GetAllDetailsActorResponse = { 'Ok' : Array<RegistrationDetails> } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export type GetAstroxMeNameStatsActorResponse = { 'Ok' : ImportedStats } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export type GetDetailsActorResponse = { 'Ok' : RegistrationDetails } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export type GetNameExpiresActorResponse = { 'Ok' : bigint } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export interface GetNameOrderResponse {
   'status' : NameOrderStatus,
   'payment_memo' : PaymentMemo,
@@ -22,32 +22,32 @@ export interface GetNameOrderResponse {
   'years' : number,
 }
 export type GetNamesActorResponse = { 'Ok' : GetPageOutput } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export type GetOwnerActorResponse = { 'Ok' : Principal } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export interface GetPageInput { 'offset' : bigint, 'limit' : bigint }
 export interface GetPageOutput { 'items' : Array<RegistrationDto> }
 export type GetPendingOrderActorResponse = {
-    'Ok' : [] | [GetNameOrderResponse]
-  } |
-  { 'Err' : ErrorInfo };
+  'Ok' : [] | [GetNameOrderResponse]
+} |
+    { 'Err' : ErrorInfo };
 export type GetPriceTableResponse = { 'Ok' : PriceTable } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export type GetQuotaActorResponse = { 'Ok' : number } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export type GetStatsActorResponse = { 'Ok' : Stats } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export type ImportAstroxMeNamesActorResponse = { 'Ok' : ImportedStats } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export interface ImportedStats {
   'total' : number,
   'imported' : number,
   'not_imported' : number,
 }
 export type NameOrderStatus = { 'New' : null } |
-  { 'WaitingToRefund' : null } |
-  { 'Done' : null } |
-  { 'Canceled' : null };
+    { 'WaitingToRefund' : null } |
+    { 'Done' : null } |
+    { 'Canceled' : null };
 export type PaymentMemo = { 'ICP' : bigint };
 export interface PriceTable {
   'icp_xdr_conversion_rate' : bigint,
@@ -59,7 +59,7 @@ export interface PriceTableItem {
   'price_in_xdr_permyriad' : bigint,
 }
 export type QuotaType = { 'LenEq' : number } |
-  { 'LenGte' : number };
+    { 'LenGte' : number };
 export interface RegistrationDetails {
   'owner' : Principal,
   'name' : string,
@@ -73,7 +73,7 @@ export interface RegistrationDto {
 }
 export interface StateExportData { 'state_data' : Array<number> }
 export type StateExportResponse = { 'Ok' : StateExportData } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export interface Stats {
   'new_registered_name_count' : bigint,
   'cycles_balance' : bigint,
@@ -89,46 +89,48 @@ export interface Stats {
   'registration_count' : bigint,
 }
 export type SubmitOrderActorResponse = { 'Ok' : SubmitOrderResponse } |
-  { 'Err' : ErrorInfo };
+    { 'Err' : ErrorInfo };
 export interface SubmitOrderRequest { 'name' : string, 'years' : number }
 export interface SubmitOrderResponse { 'order' : GetNameOrderResponse }
 export interface _SERVICE {
   'add_quota' : (arg_0: Principal, arg_1: QuotaType, arg_2: number) => Promise<
       BooleanActorResponse
-    >,
+      >,
   'available' : (arg_0: string) => Promise<BooleanActorResponse>,
   'cancel_order' : () => Promise<BooleanActorResponse>,
+  'confirm_pay_order' : (arg_0: bigint) => Promise<BooleanActorResponse>,
   'export_state' : () => Promise<StateExportResponse>,
   'get_all_details' : (arg_0: GetPageInput) => Promise<
       GetAllDetailsActorResponse
-    >,
+      >,
   'get_astrox_me_name_stats' : () => Promise<GetAstroxMeNameStatsActorResponse>,
   'get_details' : (arg_0: string) => Promise<GetDetailsActorResponse>,
   'get_name_expires' : (arg_0: string) => Promise<GetNameExpiresActorResponse>,
   'get_names' : (arg_0: Principal, arg_1: GetPageInput) => Promise<
       GetNamesActorResponse
-    >,
+      >,
   'get_owner' : (arg_0: string) => Promise<GetOwnerActorResponse>,
   'get_pending_order' : () => Promise<GetPendingOrderActorResponse>,
   'get_price_table' : () => Promise<GetPriceTableResponse>,
   'get_quota' : (arg_0: Principal, arg_1: QuotaType) => Promise<
       GetQuotaActorResponse
-    >,
+      >,
   'get_stats' : () => Promise<GetStatsActorResponse>,
   'import_astrox_me_names' : (arg_0: Array<string>) => Promise<
       ImportAstroxMeNamesActorResponse
-    >,
+      >,
+  'import_quota' : (arg_0: Array<number>) => Promise<BooleanActorResponse>,
   'refund_order' : () => Promise<BooleanActorResponse>,
   'register_for' : (arg_0: string, arg_1: Principal, arg_2: bigint) => Promise<
       BooleanActorResponse
-    >,
+      >,
   'register_with_quota' : (arg_0: string, arg_1: QuotaType) => Promise<
       BooleanActorResponse
-    >,
+      >,
   'sub_quota' : (arg_0: Principal, arg_1: QuotaType, arg_2: number) => Promise<
       BooleanActorResponse
-    >,
+      >,
   'submit_order' : (arg_0: SubmitOrderRequest) => Promise<
       SubmitOrderActorResponse
-    >,
+      >,
 }

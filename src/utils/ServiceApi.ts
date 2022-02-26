@@ -177,6 +177,18 @@ export default class ServiceApi {
     });
   };
 
+  // confirm order
+  public confirmOrder = (block_height): Promise<boolean> => {
+    return executeWithLogging(async () => {
+      const res = await this.registrarUpdateActor.confirm_pay_order(block_height);
+      if ("Ok" in res) {
+        return res.Ok;
+      } else {
+        throw new CanisterError(res.Err);
+      }
+    });
+  };
+
   // get credit
   public creditOfEthAddress = (ethAddress: string): Promise<number> => {
     return executeWithLogging(async () => {

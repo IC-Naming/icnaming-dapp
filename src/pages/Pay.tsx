@@ -85,7 +85,7 @@ export const Pay = (props) => {
     try {
       const accountId = arrayToHex(order.payment_account_id);
       console.log(`account id: ${accountId}`);
-      const result = await window.ic.plug.requestTransfer({
+      const payResult = await window.ic.plug.requestTransfer({
         to: arrayToHex(order.payment_account_id),
         amount: Number(order.price_icp_in_e8s),
         opts: {
@@ -93,12 +93,21 @@ export const Pay = (props) => {
           memo: order.payment_memo.ICP.toString(),
         },
       });
-      console.log(result);
-      setLoadingSubmit(false)
-      toast.success('Payment is successful, please wait for seconds, the system will confirm your payment, please do not repeat during this period', {
+      console.log(`Pay success: ${JSON.stringify(payResult)}`);
+      toast.success('Payment success! Please wait, the name is being picked up for you. ', {
         position: 'top-center',
         theme: 'dark'
       })
+      let result = await serviceApi.confirmOrder(payResult.height);
+      setLoadingSubmit(false)
+      if (result) {
+        toast.success('You got the name! please check it out from MyAccount', {
+          position: 'top-center',
+          theme: 'dark'
+        })
+      } else {
+        errorToast('fail confirm order')
+      }
     } catch (err) {
       setLoadingSubmit(false);
       errorToast(`fail transfer with error: ${err}`);
