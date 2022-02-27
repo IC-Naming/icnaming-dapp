@@ -33,6 +33,9 @@ export const Pay = (props) => {
   const [icpPayStatus, setIcpPayStatus] = useState<boolean>(false)
   const [systemStatus, setSystemStatus] = useState<boolean>(false)
 
+  const [visiableModalTipFull, setVisiableModalTipFull] = useState<boolean>(false)
+  const [textModalTipFull, setTextModalTipFull] = useState<string>('')
+
   const errorToast = (msg: string) => {
     toast.error(msg, {
       position: 'top-center',
@@ -40,12 +43,16 @@ export const Pay = (props) => {
     })
   }
   useEffect(() => {
+    console.log('pay myInfo', myInfo.orderInfo)
     let nameLen = myInfo.orderInfo.nameLen >= 7 ? 7 : myInfo.orderInfo.nameLen;
     if (myInfo.orderInfo.payType === 'icp') {
       const icpToCycles = localStorage.getItem('icpToCycles')
       if (icpToCycles) {
         const icpToCyclesObj = JSON.parse(icpToCycles)
         setIcpPayAmountDesc(`${icpToCyclesObj[nameLen - 1].icp} ICP ≈ ${icpToCyclesObj[nameLen - 1].cycles} T Cycles`)
+      }
+      if ("WaitingToRefund" in myInfo.orderInfo.payStatus) {
+        setHasRefund(true)
       }
     } else if (myInfo.orderInfo.quotaType) {
       setQuotaType(myInfo.orderInfo.quotaType)
@@ -60,6 +67,8 @@ export const Pay = (props) => {
   const payVidQuota = async () => {
     if (paymentQuota) return
     setPaymentQuota(true)
+    setVisiableModalTipFull(true)
+    setTextModalTipFull('Payment in progress')
     if (quotaType) {
       serviceApi.registerNameByQuota(myInfo.orderInfo.name, quotaType).then(res => {
         if (res === true) {
@@ -68,6 +77,7 @@ export const Pay = (props) => {
             theme: 'dark'
           })
           setPaymentQuota(false)
+          setVisiableModalTipFull(false)
           myInfo.getMyQuotas();
           history.push('/myaccount')
           deleteCache('getNamesOfRegistrant' + auth.walletAddress)
@@ -77,6 +87,7 @@ export const Pay = (props) => {
         }
       }).catch(err => {
         setPaymentQuota(false)
+        setVisiableModalTipFull(false)
         errorToast(err.message)
       })
     }
@@ -128,13 +139,13 @@ export const Pay = (props) => {
       setIcpPayStatus(true)
       console.log('Payment success! Please wait, the name is being picked up for you. ')
       let result = await serviceApi.confirmOrder(payResult.height);
-      console.log('confirmOrder',result);
+      console.log('confirmOrder', result);
       if (result) {
         setSystemStatus(true)
         setIcpPayIng(true)
         deleteCache('getNamesOfRegistrant' + auth.walletAddress)
         deleteCache('namesOfController' + auth.walletAddress)
-        setTimeout(() => { history.push('/myaccount')}, 3000);
+        setTimeout(() => { history.push('/myaccount') }, 3000);
         console.log('You got the name! please check it out from MyAccount')
       } else {
         setSystemStatus(false)
@@ -152,9 +163,12 @@ export const Pay = (props) => {
   const cancelRegisterOrder = async () => {
     if (loadingSubmit) return
     setLoadingCancelOrder(true)
+    setVisiableModalTipFull(true)
+    setTextModalTipFull('Order is cancelling')
     serviceApi.cancelRegisterOrder().then(res => {
       if (res) {
         setLoadingCancelOrder(false)
+        setVisiableModalTipFull(false)
         toast.success('Cancel the success', {
           position: 'top-center',
           autoClose: 1000,
@@ -166,6 +180,7 @@ export const Pay = (props) => {
     }).catch(err => {
       if (err instanceof CanisterError) {
         setLoadingCancelOrder(false)
+        setVisiableModalTipFull(false)
         errorToast(err.message)
       }
       console.log('cancelRegisterOrder', err)
@@ -173,7 +188,30 @@ export const Pay = (props) => {
   }
 
   const refund = async () => {
-    console.log('refund----------------')
+    if (loadingSubmit) return
+    setVisiableModalTipFull(true)
+    setTextModalTipFull('Refund in progress')
+    serviceApi.refundOrder().then(res => {
+      if (res) {
+        toast.success('Refund success', {
+          position: 'top-center',
+          autoClose: 2000,
+          theme: 'dark'
+        })
+        myInfo.cleanPendingOrder()
+        history.push('/')
+      }
+      setVisiableModalTipFull(false)
+    }).catch(err => {
+      setVisiableModalTipFull(false)
+      if (err instanceof CanisterError) {
+        toast.error(err.message, {
+          position: 'top-center',
+          autoClose: 2000,
+          theme: 'dark'
+        })
+      }
+    })
   }
 
   return (
@@ -212,7 +250,7 @@ export const Pay = (props) => {
                   <>
                     <Row>
                       <Col md={12} sm={12}>
-                        <p className="text-center">Unfortunately,name is registered by someone else</p>
+                        <p className="text-center">Unfortunately, the name is registered by someone else</p>
                       </Col>
                     </Row>
                     <div className="d-grid gap-2">
@@ -246,7 +284,7 @@ export const Pay = (props) => {
           </div>
         </div>
       </div>
-      <ModalTipFull visible={loadingCancelOrder || paymentQuota} text={loadingCancelOrder ? 'Order is cancelling' : 'Payment in progress'} />
+      <ModalTipFull visible={visiableModalTipFull} text={textModalTipFull} />
 
       <Modal
         header={null}

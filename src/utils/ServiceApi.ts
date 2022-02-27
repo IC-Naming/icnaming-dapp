@@ -163,11 +163,23 @@ export default class ServiceApi {
     });
   }
 
+  // cancel order icp
+  public refundOrder = (): Promise<boolean> => {
+    return executeWithLogging(async () => {
+      const res = await this.registrarUpdateActor.refund_order();
+      if ("Ok" in res) {
+        return res.Ok;
+      } else {
+        throw new CanisterError(res.Err);
+      }
+    });
+  }
+
   // get pending order
   public getPendingOrder = (): Promise<[] | [GetNameOrderResponse]> => {
     return executeWithLogging(async () => {
       const res = await this.registrarUpdateActor.get_pending_order();
-      // console.log('get_pending_order', res);
+      console.log('get_pending_order', res);
       if ("Ok" in res) {
         return res.Ok;
       } else {

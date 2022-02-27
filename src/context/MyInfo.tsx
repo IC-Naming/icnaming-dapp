@@ -10,7 +10,7 @@ export interface MyInfoContextInterface {
     nameLen: number,
     payYears: number,
     payType: 'icp' | 'quota',
-    payStatus?: object,
+    payStatus: object,
     quotaType?: number,
   };
   icpToCycles: Array<{ icp: string, cycles: string }>;
@@ -26,7 +26,7 @@ export interface MyInfoContextInterface {
 function useProvideMyInfo() {
   const serviceApi = new ServiceApi();
   const { ...auth } = useAuthWallet();
-  const [orderInfo, setOrderInfo] = useState<{ name: string, nameLen: number, payStatus?: object, payYears: number, payType: 'icp' | 'quota', quotaType?: number }>({
+  const [orderInfo, setOrderInfo] = useState<{ name: string, nameLen: number, payStatus: object, payYears: number, payType: 'icp' | 'quota', quotaType?: number }>({
     name: '',
     nameLen: 0,
     payStatus: {},
@@ -38,7 +38,7 @@ function useProvideMyInfo() {
   const [quotas, setQuotas] = useState<Array<number>>([])
   const [innerTimerTick, setInnerTimerTick] = useState(0);
 
-  const createOrder = (order: { name: string; nameLen: number; payStatus?: object, payYears: number; payType: 'icp' | 'quota'; quotaType?: number; }) => {
+  const createOrder = (order: { name: string; nameLen: number; payStatus: object, payYears: number; payType: 'icp' | 'quota'; quotaType?: number; }) => {
     setOrderInfo({
       name: order.name,
       nameLen: order.nameLen,
