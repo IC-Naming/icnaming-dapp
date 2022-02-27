@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Row, Col, Spinner } from "react-bootstrap";
 import styles from '../assets/styles/Name.module.scss'
 import { useAuthWallet } from "../context/AuthWallet";
@@ -125,7 +125,12 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
       setQuotaLoading(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.principal, myInfo.quotas])
+  }, [auth.principal, myInfo.quotas]);
+  
+  // filter quota when count is 0
+  const avaliableQuotas = useMemo(() => {
+    return quotas.filter(quota => quota.quotaCount !== 0);
+  }, [quotas]);
 
   /* useEffect(() => {
     console.log('available---------------------------',available)
@@ -188,14 +193,14 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                       Register via ICP
                     </button>
                     {
-                      quotas.length > 0 &&
+                      avaliableQuotas.length > 0 &&
                       <Select size='large' className={styles['selcet-quota']}
                         placeholder="Please choose you quota"
                         onChange={(e) => {
                           registerVidQuota(e)
                         }}>
                         {
-                          quotas.map((quota, index) => {
+                          avaliableQuotas.map((quota, index) => {
                             return <Option showTick={false} className={styles['quota-option-item']} key={index} value={quota.quotaType}>
                               <div className={styles['quota-option-con']}>
                                 <span className={styles['quota-option-type']}>

@@ -1,5 +1,5 @@
-import React from 'react'
-import { useHistory } from "react-router-dom";
+import React, { useCallback } from 'react'
+import { useHistory, useLocation } from "react-router-dom";
 import styles from '../assets/styles/Card.module.scss'
 import ServiceApi from '../utils/ServiceApi'
 import { useAuthWallet } from '../context/AuthWallet';
@@ -20,6 +20,7 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
   const { ...auth } = useAuthWallet();
   const { ...myInfo } = useMyInfo();
   const history = useHistory();
+  const location = useLocation();
   const serviceApi = new ServiceApi();
   const [checkOrderIng, setCheckOrderIng] = React.useState<boolean>(false)
   const [isFavorite, SetIsFavorite] = React.useState<boolean>(false)
@@ -95,11 +96,13 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
       history.push(`/name/${name}/reg`)
     }
   }
+  const handleCardClick = useCallback(() => {
+      const fromSearch = location.pathname === '/myaccount' ? '?from=myaccount' : '' ;
+      history.push(`/name/${name}/details${fromSearch}`)
+  }, [location.pathname, name, history]);
 
   return (
-    <div className={`${styles["card"]}`} onClick={() => {
-      history.push(`/name/${name}/details`)
-    }}>
+    <div className={`${styles["card"]}`} onClick={handleCardClick}>
       <div className={styles['card-left']}>
         <div className={styles['add-favorite']} onClick={(e) => { handleFavorite(e) }}>
           <i className={`bi ${isFavorite ? 'bi-heart-fill' : 'bi-heart'}`}></i>
