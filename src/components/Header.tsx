@@ -109,7 +109,7 @@ export const Header = () => {
               })
             }
             <li className={styles['nav-item']}>
-              <a className={styles['nav-link']} href='https://docs.icnaming.com/'>Docs</a>
+              <a className={styles['nav-link']} target="_blank" rel="noreferrer" href='https://docs.icnaming.com/'>Docs</a>
             </li>
           </ul>
           <HeaderWallet />

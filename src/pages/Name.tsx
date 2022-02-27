@@ -1,14 +1,21 @@
-import { SearchInput, CopyToClipboard, Record, Register, ConnectWallets } from "../components";
-import styles from "../assets/styles/Name.module.scss";
+
 import { Container, Tabs, Tab, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useEffect, useState } from "react";
+import { Link, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
+
+import { SearchInput, CopyToClipboard, Record, Register, ConnectWallets } from "../components";
+import styles from "../assets/styles/Name.module.scss";
+
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
 import { CanisterError } from "../utils/exception";
 
+
 export const Name = (props) => {
   const serviceApi = new ServiceApi();
+  const location = useLocation();
+  const showBackLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'myaccount';
   const [showWallets, setShowWallets] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
   const [loadingName, setLoadingName] = useState<boolean>(false);
@@ -42,6 +49,7 @@ export const Name = (props) => {
   const [canister, setCanister] = useState<any>();
   const [action, setAction] = useState('');
   const [activeKey, setActiveKey] = useState('details');
+
 
   useEffect(() => {
     const ac = new AbortController();
@@ -168,7 +176,15 @@ export const Name = (props) => {
         <div className={styles['name-content']}>
           <SearchInput word="" />
           <Container className="pt-5">
-            <h1 className={`${styles.title} text-right`}>{name}</h1>
+            <h1 className={`${styles.title} text-right`}>
+              {
+                showBackLink && 
+                <Link to='/myaccount' className={styles['name-back-link']}>
+                  <i className="bi bi-chevron-left"></i>
+                </Link>
+              }
+              {name}
+            </h1>
             {
               loadingName ?
                 <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
