@@ -217,7 +217,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
         hide={() => { setPendingOrderTipVisible(false) }}
       />
       <ModalTipFull visible={loadingPending || loadingSubmit} text={
-        loadingPending ? 'check your pendingOrder' : 'Creating order'} />
+        loadingPending ? 'check your pendingOrder' : 'Cancellation order'} />
 
     </div>
   )

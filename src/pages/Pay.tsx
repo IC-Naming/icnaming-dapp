@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Timeline } from "@douyinfe/semi-ui";
+import { Modal, Timeline, Spin } from "@douyinfe/semi-ui";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -7,14 +7,17 @@ import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { ModalTipFull } from "../components/ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
+import { useAuthWallet } from '../context/AuthWallet';
 import ServiceApi from "../utils/ServiceApi";
 import { CanisterError } from "../utils/exception";
+import { deleteCache } from "../utils/localCache";
 declare var window: any;
 
 export const Pay = (props) => {
   const history = useHistory();
   const serviceApi = new ServiceApi();
   const { ...myInfo } = useMyInfo();
+  const { ...auth } = useAuthWallet();
 
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [paymentQuota, setPaymentQuota] = useState<boolean>(false);
@@ -67,6 +70,8 @@ export const Pay = (props) => {
           setPaymentQuota(false)
           myInfo.getMyQuotas();
           history.push('/myaccount')
+          deleteCache('getNamesOfRegistrant' + auth.walletAddress)
+          deleteCache('namesOfController' + auth.walletAddress)
         } else {
           errorToast('fail register');
         }
@@ -83,7 +88,7 @@ export const Pay = (props) => {
     });
     if (available) {
       payVidIcp();
-    }else{
+    } else {
       errorToast('Name is not available')
     }
   }
@@ -91,8 +96,8 @@ export const Pay = (props) => {
     if (loadingSubmit) return
     setLoadingSubmit(true)
     setIcpPayIng(true)
-    
-    
+
+
     let orderResult = await serviceApi.getPendingOrder();
     console.log(orderResult)
     if (orderResult.length === 0) {
@@ -124,18 +129,21 @@ export const Pay = (props) => {
         theme: 'dark'
       })
       let result = await serviceApi.confirmOrder(payResult.height);
-
+      console.log(result);
       if (result) {
         setSystemStatus(true)
         setIcpPayIng(true)
+        deleteCache('getNamesOfRegistrant' + auth.walletAddress)
+        deleteCache('namesOfController' + auth.walletAddress)
         setTimeout(() => {
           history.push('/myaccount')
-        }, 2500);
+        }, 3000);
 
         toast.success('You got the name! please check it out from MyAccount', {
           position: 'top-center',
           theme: 'dark'
         })
+
       } else {
         setSystemStatus(false)
         errorToast('fail confirm order')
@@ -247,7 +255,7 @@ export const Pay = (props) => {
           </div>
         </div>
       </div>
-      <ModalTipFull visible={loadingCancelOrder || paymentQuota} text={loadingCancelOrder ? 'Cancellation order' : 'Payment in progress'} />
+      <ModalTipFull visible={loadingCancelOrder || paymentQuota} text={loadingCancelOrder ? 'Order is cancelling' : 'Payment in progress'} />
 
       <Modal
         header={null}
@@ -258,14 +266,20 @@ export const Pay = (props) => {
       >
         <Timeline className={payStyles['paymentIcpTimeline']}>
           {
-            !systemStatus && <Timeline.Item type="ongoing">Payment in progress</Timeline.Item>
+            !systemStatus && <Timeline.Item type="ongoing">
+              {
+                icpPayIng && <Spin size="small" />
+              }
+              Payment in progress</Timeline.Item>
           }
           {
             icpPayIng ? null :
               icpPayStatus ?
                 <React.Fragment>
                   <Timeline.Item type="success">Payment success</Timeline.Item>
-                  <Timeline.Item color="pink">System confirmation in progress</Timeline.Item>
+                  <Timeline.Item color="pink">
+                    <Spin size="small" />
+                    It's almost done, ICNaming is doing the final confirmation.</Timeline.Item>
                 </React.Fragment>
                 :
                 <Timeline.Item type="error">Payment failure</Timeline.Item>
@@ -287,8 +301,7 @@ export const Pay = (props) => {
         }
         {
           systemStatus && <div className={payStyles['success-icpreg']}>
-            Registered successfully<br />
-            Congratulations
+            Congratulations!<br /> Now you are the owner of "hello.icp"!
           </div>
         }
       </Modal>

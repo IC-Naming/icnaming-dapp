@@ -67,9 +67,9 @@ function useProvideMyInfo() {
   }
   const checkPendingOrder = async () => {
     serviceApi.getPendingOrder().then(res => {
+      console.log(res)
       if (res.length !== 0) {
         setPendingOrder(true)
-        console.log(res)
         setOrderInfo({
           name: res[0].name,
           payStatus: res[0].status,
