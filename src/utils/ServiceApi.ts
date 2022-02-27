@@ -142,7 +142,7 @@ export default class ServiceApi {
     return executeWithLogging(async () => {
       console.log("reg name", name);
       const res = await this.registrarUpdateActor.submit_order({ name, years });
-      console.log(res);
+      console.log('submit_order',res);
       if ("Ok" in res) {
         return res.Ok;
       } else {

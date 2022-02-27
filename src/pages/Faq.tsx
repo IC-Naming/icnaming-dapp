@@ -76,19 +76,23 @@ export const Faq: React.FC = () => {
             </Collapse.Panel>
             <Collapse.Panel header="What is the registration fee and renewal fee for name?" itemKey="Panel4">
               <Table columns={columns} dataSource={data} pagination={false} className={styles['faq-table']} />
-              <div className={styles['faq-table-dosc']}>
-                <p>* What is cycles? [link]</p>
-                <p>* How to pay cycles? What you will actually have to pay is ICP.</p>
-                <p>This will be converted at the time of order creation using the latest cycles/ICP rate from NNS.</p>
-              </div>
             </Collapse.Panel>
-            <Collapse.Panel header="Can I use it for a decentralized website deployed on IC?" itemKey="Panel5">
+            <Collapse.Panel header="What is cycles? " itemKey="Panel5">
+              <p>Simply remember that 1T cycles is about $1.40, which is relatively fixed.</p>
+              <p>And ICP uses the market price. Let's say $20.</p>
+              <p>Then 1T cycles is equal to 1.4 / 20 = 0.07 ICP.</p>
+              <p><a target="_blank" rel="noreferrer" href="https://smartcontracts.org/docs/developers-guide/concepts/tokens-cycles.html">(https://smartcontracts.org/docs/developers-guide/concepts/tokens-cycles.html)</a></p>
+            </Collapse.Panel>
+            <Collapse.Panel header="How to pay cycles?" itemKey="Panel6">
+              <p>What you will actually have to pay is ICP.This will be converted at the time of order creation using the latest cycles/ICP rate from NNS.</p>
+            </Collapse.Panel>
+            <Collapse.Panel header="Can I use it for a decentralized website deployed on IC?" itemKey="Panel7">
               <p>Yes, you can use our browser extension to access your decentralized website directly through chrome browser </p>
             </Collapse.Panel>
-            <Collapse.Panel header="Once I own a name, can I create my own subdomains?" itemKey="Panel6">
+            <Collapse.Panel header="Once I own a name, can I create my own subdomains?" itemKey="Panel8">
               <p>Yes. You can create whatever subdomains you wish and assign ownership of them to other people if you desire. You can even set up your own registrar for your domain. </p>
             </Collapse.Panel>
-            <Collapse.Panel header="Where is the source code of IC Naming?" itemKey="Panel7">
+            <Collapse.Panel header="Where is the source code of IC Naming?" itemKey="Panel9">
               <p>You can find out the source code of IC Naming from https://github.com/IC-Naming/icnaming, including smart contract in canister, browser extensions and etc.</p>
             </Collapse.Panel>
           </Collapse>

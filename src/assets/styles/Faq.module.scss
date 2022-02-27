@@ -45,15 +45,21 @@
     .semi-collapse-content {
       color         : #879BC5;
       font-size     : 16px;
+      line-height: 24px;
       font-family   : "AlibabaPuHuiTiR";
       padding-bottom: 30px;
+      a{
+        color: #00CFBB;
+        &:hover{
+          text-decoration: underline;
+        }
+      }
     }
   }
 }
 
 .faq-table {
   :global {
-
     .semi-table-thead>.semi-table-row>.semi-table-row-head,
     .semi-table-tbody>.semi-table-row>.semi-table-row-cell {
       color: #879BC5;
