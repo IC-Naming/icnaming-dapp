@@ -23,7 +23,7 @@ interface NameModel {
 
 export const Search = (props) => {
   const { ...authWallet } = useAuthWallet();
-  const serviceApi = useMemo(() => new ServiceApi(), [authWallet]);
+  const serviceApi = useMemo(() => new ServiceApi(), [authWallet.walletAddress]);
   const [word, setWord] = useState<string | Principal>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [isSearchAddress, setIsSearchAddress] = useState<boolean>(false)
@@ -74,6 +74,9 @@ export const Search = (props) => {
   }, [serviceApi, authWallet.walletAddress]);
 
   const getPendingOrder = useCallback(async () => {
+    if(!authWallet.walletAddress) {
+      return undefined;
+    }
     setPendingOrderLoading(true);
     try {
       const res = await serviceApi.getPendingOrder();
@@ -84,7 +87,7 @@ export const Search = (props) => {
       setPendingOrderLoading(false);
     }
     return undefined;
-  }, [serviceApi]);
+  }, [serviceApi, authWallet.walletAddress]);
 
   const handlWordChange = useCallback(async () => {
     if (word) {
