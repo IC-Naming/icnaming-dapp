@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { SearchInput, Card, CopyToClipboard } from "../components";
 import PendingOrderCard from 'components/PendingOrderCard';
 import styles from '../assets/styles/Search.module.scss'
@@ -22,8 +22,8 @@ interface NameModel {
 }
 
 export const Search = (props) => {
-  const serviceApi = new ServiceApi();
   const { ...authWallet } = useAuthWallet();
+  const serviceApi = useMemo(() => new ServiceApi(), [authWallet]);
   const [word, setWord] = useState<string | Principal>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [isSearchAddress, setIsSearchAddress] = useState<boolean>(false)
@@ -46,7 +46,7 @@ export const Search = (props) => {
     }
   }
 
-  const creatNameSearchResult = async (searchName, available) => {
+  const creatNameSearchResult = useCallback(async (searchName, available) => {
     console.log('creatNameSearchResult start..........')
     // let expireAt = available ? '' : 'Expires ' + dateFormat(new Date(await serviceApi.expireAtOf(searchName)), "isoDateTime")
     let expireAt = '';
@@ -71,9 +71,9 @@ export const Search = (props) => {
     console.log({ name: searchName, available: available, expireAt, favorite: fav })
     setNameSearchResult({ name: searchName, available: available, expireAt, favorite: fav })
     setLoading(false)
-  }
+  }, [serviceApi, authWallet.walletAddress]);
 
-  const getPendingOrder = async () => {
+  const getPendingOrder = useCallback(async () => {
     setPendingOrderLoading(true);
     try {
       const res = await serviceApi.getPendingOrder();
@@ -84,9 +84,9 @@ export const Search = (props) => {
       setPendingOrderLoading(false);
     }
     return undefined;
-  };
+  }, [serviceApi]);
 
-  const handlWordChange = async () => {
+  const handlWordChange = useCallback(async () => {
     if (word) {
       // if word is string
       if (typeof word === 'string') {
@@ -179,7 +179,7 @@ export const Search = (props) => {
         });
       }
     }
-  };
+  }, [word, authWallet.walletAddress, serviceApi, creatNameSearchResult, getPendingOrder]);
 
   useEffect(() => {
     handlWordChange();
