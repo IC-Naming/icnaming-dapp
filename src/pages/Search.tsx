@@ -83,6 +83,8 @@ export const Search = (props) => {
       if(res[0]) {
         return res[0];
       }
+    } catch(err) {
+      console.log('getPendingOrder', err);
     } finally {
       setPendingOrderLoading(false);
     }
