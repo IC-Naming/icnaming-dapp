@@ -161,8 +161,13 @@ export const Name = (props) => {
   }, [action])
 
   useEffect(() => {
+    console.log(props.match.params)
     setName(props.match.params.name || "")
-    setAction(props.match.params.action || "")
+    if(props.match.params.action){
+      setAction(props.match.params.action)
+    }else{
+      setAction("details")
+    }
     return () => {
       setName('')
       setAction('')

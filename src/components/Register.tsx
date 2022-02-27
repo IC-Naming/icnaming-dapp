@@ -33,7 +33,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const errorToast = (msg: string) => {
     toast.error(msg, {
       position: 'top-center',
-      autoClose: 1000,
+      autoClose: 2000,
       theme: 'dark',
     })
   }

@@ -23,7 +23,9 @@ interface NameModel {
 
 export const Search = (props) => {
   const { ...authWallet } = useAuthWallet();
-  const serviceApi = useMemo(() => new ServiceApi(), [authWallet.walletAddress]);
+  const serviceApi = useMemo(() => 
+  new ServiceApi(), 
+  [authWallet.walletAddress]);// eslint-disable-line
   const [word, setWord] = useState<string | Principal>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [isSearchAddress, setIsSearchAddress] = useState<boolean>(false)

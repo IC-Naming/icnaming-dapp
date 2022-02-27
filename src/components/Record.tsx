@@ -50,7 +50,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
     setRecordSaveLoading(true);
     serviceApi.setRecord(name, recordKey, recordVal).then(res => {
       if (res) {
-        toast.success('Set record Done', {
+        toast.success('Set record success', {
           position: "top-center",
           autoClose: 2000,
           theme: "dark",

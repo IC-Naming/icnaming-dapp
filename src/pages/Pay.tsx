@@ -72,7 +72,7 @@ export const Pay = (props) => {
     if (quotaType) {
       serviceApi.registerNameByQuota(myInfo.orderInfo.name, quotaType).then(res => {
         if (res === true) {
-          toast.success('success', {
+          toast.success(`Congratulations! Now you are the owner of ${myInfo.orderInfo.name}!`, {
             position: 'top-center',
             theme: 'dark'
           })
@@ -97,11 +97,10 @@ export const Pay = (props) => {
     if (loadingSubmit) return
     setLoadingSubmit(true)
     setIcpPayIng(true)
-    const available = await serviceApi.available(myInfo.orderInfo.name).catch(err => {
+
+    const [availableResult, orderResult] = await Promise.all([serviceApi.available(myInfo.orderInfo.name).catch(err => {
       errorToast(err.message)
-    });
-    const orderResultRes = await serviceApi.getPendingOrder();
-    const [availableResult, orderResult] = await Promise.all([available, orderResultRes]);
+    }), serviceApi.getPendingOrder()]);
 
     if (availableResult !== true) {
       toast.warning('name is not available', {
@@ -148,8 +147,12 @@ export const Pay = (props) => {
         setTimeout(() => { history.push('/myaccount') }, 3000);
         console.log('You got the name! please check it out from MyAccount')
       } else {
+        setIcpPayIng(false)
+        setLoadingSubmit(false)
+        setIcpPayIng(false)
         setSystemStatus(false)
-        console.log('fail confirm order')
+        setHasRefund(true)
+        errorToast('fail confirm order')
       }
     } catch (err) {
       // setLoadingSubmit(false);
