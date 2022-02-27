@@ -67,13 +67,13 @@ export default class ServiceApi {
   }
 
   // get icp && cycles
-  public async getIcpToCycles(nameLen: number): Promise<PriceTableItem> {
+  public async getIcpToCycles(): Promise<PriceTableItem[]> {
     // console.log('nameLen', nameLen)
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_price_table();
       if ('Ok' in res) {
-        const t:PriceTableItem = res.Ok.items.find(x => x.len === nameLen)!;
-        return t;
+        // const t:PriceTableItem = res.Ok.items.find(x => x.len === nameLen)!;
+        return res.Ok.items;
       } else {
         throw new CanisterError(res.Err);
       }
@@ -92,6 +92,7 @@ export default class ServiceApi {
         if ("Ok" in res) {
           return res.Ok;
         } else {
+          console.log(res.Err)
           throw new CanisterError(res.Err);
         }
       });
@@ -102,6 +103,7 @@ export default class ServiceApi {
   public expireAtOf = (name: string): Promise<number> => {
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_name_expires(name);
+      console.log('expireAtOf-------------------', res)
       if ("Ok" in res) {
         return Number(res.Ok);
       } else {

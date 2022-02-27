@@ -82,29 +82,31 @@ export const Pay = (props) => {
     }
   }
 
-  const checkAvailable = async () => {
-    const available = await serviceApi.available(myInfo.orderInfo.name).catch(err => {
-      errorToast(err.message)
-    });
-    if (available) {
-      payVidIcp();
-    } else {
-      errorToast('Name is not available')
-    }
-  }
   const payVidIcp = async () => {
     if (loadingSubmit) return
     setLoadingSubmit(true)
     setIcpPayIng(true)
+    const available = await serviceApi.available(myInfo.orderInfo.name).catch(err => {
+      errorToast(err.message)
+    });
+    const orderResultRes = await serviceApi.getPendingOrder();
+    const [availableResult, orderResult] = await Promise.all([available, orderResultRes]);
 
-
-    let orderResult = await serviceApi.getPendingOrder();
-    console.log(orderResult)
-    if (orderResult.length === 0) {
-      errorToast('no pending order')
+    if (availableResult !== true) {
+      toast.warning('name is not available', {
+        position: 'top-center',
+        autoClose: 2000,
+        theme: 'dark'
+      })
       return
-    } else if ("WaitingToRefund" in orderResult[0].status) {
-      setHasRefund(true)
+    } else {
+      if (orderResult.length === 0) {
+        errorToast('no pending order')
+        return
+      } else if ("WaitingToRefund" in orderResult[0].status) {
+        setHasRefund(true)
+        return
+      }
     }
     let order = orderResult[0];
     const arrayToHex = (arr: Array<number>) => {
@@ -124,39 +126,28 @@ export const Pay = (props) => {
       console.log(`Pay success: ${JSON.stringify(payResult)}`);
       setIcpPayIng(false)
       setIcpPayStatus(true)
-      toast.success('Payment success! Please wait, the name is being picked up for you. ', {
-        position: 'top-center',
-        theme: 'dark'
-      })
+      console.log('Payment success! Please wait, the name is being picked up for you. ')
       let result = await serviceApi.confirmOrder(payResult.height);
-      console.log(result);
+      console.log('confirmOrder',result);
       if (result) {
         setSystemStatus(true)
         setIcpPayIng(true)
         deleteCache('getNamesOfRegistrant' + auth.walletAddress)
         deleteCache('namesOfController' + auth.walletAddress)
-        setTimeout(() => {
-          history.push('/myaccount')
-        }, 3000);
-
-        toast.success('You got the name! please check it out from MyAccount', {
-          position: 'top-center',
-          theme: 'dark'
-        })
-
+        setTimeout(() => { history.push('/myaccount')}, 3000);
+        console.log('You got the name! please check it out from MyAccount')
       } else {
         setSystemStatus(false)
-        errorToast('fail confirm order')
+        console.log('fail confirm order')
       }
     } catch (err) {
       // setLoadingSubmit(false);
       setIcpPayIng(false)
       setIcpPayStatus(false)
-      errorToast(`fail transfer with error: ${err}`);
+      console.log(`fail transfer with error: ${err}`);
       return
     }
   }
-
 
   const cancelRegisterOrder = async () => {
     if (loadingSubmit) return
@@ -244,7 +235,7 @@ export const Pay = (props) => {
                         >
                           {loadingCancelOrder && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                           Cancel</button>
-                        <button className={styles.btn} onClick={() => { checkAvailable() }}>
+                        <button className={styles.btn} onClick={() => { payVidIcp() }}>
                           {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                           Pay
                         </button>
@@ -295,13 +286,16 @@ export const Pay = (props) => {
               <button className={payStyles['btn']} style={{ marginLeft: 10 }}
                 onClick={() => { setLoadingSubmit(false) }}
               >
+                {
+                  icpPayIng && <Spin size="small" />
+                }
                 Continue to pay
               </button>
             </div>
         }
         {
           systemStatus && <div className={payStyles['success-icpreg']}>
-            Congratulations!<br /> Now you are the owner of "hello.icp"!
+            Congratulations! Now you are the owner of <br />{myInfo.orderInfo.name}!
           </div>
         }
       </Modal>

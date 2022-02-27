@@ -11,6 +11,7 @@ export const ModalTipFull: React.FC<RegProps> = ({ text, visible }) => {
       header={null}
       footer={null}
       visible={visible}
+      maskClosable={false}
       className={styles['pendingOrder-modal']}
     >
       <div className={styles['pendingOrder-modal-text']}>

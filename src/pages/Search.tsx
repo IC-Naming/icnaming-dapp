@@ -38,13 +38,29 @@ export const Search = (props) => {
     }
   }
 
-  const creatNameSearchResult = async (searchName,available) => {
-    let expireAt = available ? '' : 'Expires ' + dateFormat(new Date(await serviceApi.expireAtOf(searchName)), "isoDateTime")
+  const creatNameSearchResult = async (searchName, available) => {
+    console.log('creatNameSearchResult start..........')
+    // let expireAt = available ? '' : 'Expires ' + dateFormat(new Date(await serviceApi.expireAtOf(searchName)), "isoDateTime")
+    let expireAt = '';
+    if (available) {
+      expireAt = '';
+    } else {
+      await serviceApi.expireAtOf(searchName).then(res => {
+        if (res) {
+          expireAt = 'Expires ' + dateFormat(new Date(res), "isoDateTime")
+        }
+      }).catch(err => {
+        if (err instanceof CanisterError) {
+          expireAt = '';
+        }
+      })
+    }
     let fav = false;
     if (authWallet.walletAddress) {
       const myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
       fav = myFavoriteNames.find(item => item === searchName) || false;
     }
+    console.log({ name: searchName, available: available, expireAt, favorite: fav })
     setNameSearchResult({ name: searchName, available: available, expireAt, favorite: fav })
     setLoading(false)
   }
@@ -74,6 +90,7 @@ export const Search = (props) => {
           creatNameSearchResult(searchName, available);
         }).catch(err => {
           if (err instanceof CanisterError) {
+            console.log('CanisterError', err);
             if (err.code === 9) {
               creatNameSearchResult(searchName, false);
             } else {
@@ -149,6 +166,13 @@ export const Search = (props) => {
       <div className="container pt-5">
         <div className={styles['serach-content']}>
           <SearchInput word={typeof word === 'string' ? word : word.toText()} />
+          {/* <div className={styles['pending-order']}>
+            <Banner
+              closeIcon={null}
+              type="info"
+              description={<>you have pending order <Link to="/pay">View</Link></>}
+            />
+          </div> */}
           <Container className={`pt-5`}>
             {
               loading ?

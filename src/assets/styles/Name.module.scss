@@ -263,14 +263,11 @@
   }
 }
 
-
-
 .btn-wrap{
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 
 .quota-option-type{
   width: 80px !important;
@@ -308,6 +305,9 @@
     padding-left: 10px;
     color: #00CFBB!important;
     display: inline-block !important;
+  }
+  .recommend{
+    display: none;
   }
   :global{
     .semi-select-selection{

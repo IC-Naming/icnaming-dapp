@@ -24,7 +24,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const serviceApi = new ServiceApi();
   const [showWallets, setShowWallets] = useState<boolean>(false);
   const [pendingOrderTipVisible, setPendingOrderTipVisible] = useState<boolean>(false);
-  const [loadingPending, setLoadingPending] = useState<boolean>(false);
+  // const [loadingPending, setLoadingPending] = useState<boolean>(false);
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [icpToCycles, SetIcpToCycles] = useState<string>('');
   const [quotas, setQuotas] = useState<Array<any>>([]);
@@ -42,7 +42,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     if (loadingSubmit) return
     if (myInfo.hasPendingOrder) {
       setPendingOrderTipVisible(true)
-    }else{
+    } else {
       if (regname.split('.')[0].length >= 7) {
         setLoadingSubmit(true)
         serviceApi.submitRegisterOrder(regname, 1).then(res => {
@@ -72,17 +72,20 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
         errorToast('Name length must less than 7')
       }
     }
-
   }
 
   const registerVidQuota = async (e) => {
     // console.log('registerVidQuota',e)
-    if (nameLen >= e) {
-      myInfo.createOrder({ name: regname, nameLen: nameLen, payStatus: {}, payYears: 1, payType: 'quota', quotaType: e });
-      history.push(`/pay`);
-      return
+    if (myInfo.hasPendingOrder) {
+      setPendingOrderTipVisible(true)
     } else {
-      errorToast(`Name must be at least ${nameLen} characters long`)
+      if (nameLen >= e) {
+        myInfo.createOrder({ name: regname, nameLen: nameLen, payStatus: {}, payYears: 1, payType: 'quota', quotaType: e });
+        history.push(`/pay`);
+        return
+      } else {
+        errorToast(`Name must be at least ${nameLen} characters long`)
+      }
     }
   }
 
@@ -124,7 +127,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.principal, myInfo.quotas])
 
-  useEffect(() => {
+  /* useEffect(() => {
     console.log('available---------------------------',available)
     // if available is true, then show the check pending order modal
     if (auth.walletAddress && available) {
@@ -143,7 +146,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
       setPendingOrderTipVisible(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.walletAddress, available, myInfo.hasPendingOrder])
+  }, [auth.walletAddress, available, myInfo.hasPendingOrder]) */
 
   return (
     <div className={styles.register}>
@@ -216,8 +219,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
       <PendingOrderTip visible={pendingOrderTipVisible}
         hide={() => { setPendingOrderTipVisible(false) }}
       />
-      <ModalTipFull visible={loadingPending || loadingSubmit} text={
-        loadingPending ? 'check your pendingOrder' : 'Cancellation order'} />
+      <ModalTipFull visible={loadingSubmit} text={'Creating Order'} />
 
     </div>
   )

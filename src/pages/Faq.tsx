@@ -20,50 +20,50 @@ export const Faq: React.FC = () => {
     {
       key: '1',
       name: '>=7',
-      price: 'ICP equivalent to 2.00 T Cycles',
-      year: 'Same as Register',
+      price: '2.00 T Cycles',
+      year: '2.00 T Cycles',
     },
     {
       key: '2',
       name: '6',
-      price: 'ICP equivalent to 2.20 T Cycles',
-      year: 'Same as Register',
+      price: '2.20 T Cycles',
+      year: '2.20 T Cycles',
     },
     {
       key: '3',
       name: '5',
-      price: 'ICP equivalent to 2.42 T Cycles',
-      year: 'Same as Register',
+      price: '2.42 T Cycles',
+      year: '2.42 T Cycles',
     },
     {
       key: '4',
       name: '4',
-      price: 'ICP equivalent to 2.66 T Cycles',
-      year: 'Same as Register',
+      price: '2.66 T Cycles',
+      year: '2.66 T Cycles',
     },
     {
       key: '5',
       name: '3',
-      price: 'ICP equivalent to 2.93 T Cycles',
-      year: 'Same as Register',
+      price: '2.92 T Cycles',
+      year: '2.92 T Cycles',
     },
     {
       key: '6',
       name: '2',
-      price: 'ICP equivalent to 3.22 T Cycles',
-      year: 'Same as Register',
+      price: '3.22 T Cycles',
+      year: '3.22 T Cycles',
     },
     {
       key: '7',
       name: '1',
-      price: 'ICP equivalent to 3.54 T Cycles',
-      year: 'Same as Register',
+      price: '3.54 T Cycles',
+      year: '3.54 T Cycles',
     }
   ]
   return (
     <div className="container pt-5">
       <div className={styles['faq-wrap']}>
-        <div style={{ paddingTop: "20px"}}>
+        <div style={{ paddingTop: "20px" }}>
           <Collapse accordion>
             <Collapse.Panel header="What's IC Naming?" itemKey="Panel1">
               <p>IC Naming is a decentralized name service on IC. </p>
@@ -76,6 +76,11 @@ export const Faq: React.FC = () => {
             </Collapse.Panel>
             <Collapse.Panel header="What is the registration fee and renewal fee for name?" itemKey="Panel4">
               <Table columns={columns} dataSource={data} pagination={false} className={styles['faq-table']} />
+              <div className={styles['faq-table-dosc']}>
+                <p>* What is cycles? [link]</p>
+                <p>* How to pay cycles? What you will actually have to pay is ICP.</p>
+                <p>This will be converted at the time of order creation using the latest cycles/ICP rate from NNS.</p>
+              </div>
             </Collapse.Panel>
             <Collapse.Panel header="Can I use it for a decentralized website deployed on IC?" itemKey="Panel5">
               <p>Yes, you can use our browser extension to access your decentralized website directly through chrome browser </p>

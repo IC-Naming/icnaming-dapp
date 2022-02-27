@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import styles from '../assets/styles/SearchInput.module.scss'
 import { toast } from 'react-toastify';
+import styles from '../assets/styles/SearchInput.module.scss'
 interface Props {
   word?: string
 }
 export const SearchInput = (props: Props) => {
   const history = useHistory();
   const [value, setValue] = useState<string>('')
-  
+
   const handleChange = (e) => {
     setValue(e.target.value.toLowerCase())
     e.preventDefault()

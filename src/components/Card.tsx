@@ -5,6 +5,9 @@ import ServiceApi from '../utils/ServiceApi'
 import { useAuthWallet } from '../context/AuthWallet';
 import { toast } from 'react-toastify';
 import { deleteCache } from '../utils/localCache';
+import { Spinner } from 'react-bootstrap';
+import { useMyInfo } from '../context/MyInfo';
+import { PendingOrderTip } from '.';
 
 export interface CardProps {
   name: string,
@@ -15,9 +18,13 @@ export interface CardProps {
 }
 export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccount, favorite }) => {
   const { ...auth } = useAuthWallet();
+  const { ...myInfo } = useMyInfo();
   const history = useHistory();
   const serviceApi = new ServiceApi();
+  const [checkOrderIng, setCheckOrderIng] = React.useState<boolean>(false)
   const [isFavorite, SetIsFavorite] = React.useState<boolean>(false)
+  const [visible, setVisible] = React.useState<boolean>(false)
+
   React.useEffect(() => {
     SetIsFavorite(favorite)
   }, [favorite])
@@ -75,6 +82,20 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
     }
   }
 
+  const checkOrder = () => {
+    if (auth.walletAddress) {
+      setCheckOrderIng(true)
+      myInfo.checkPendingOrder()
+      if (myInfo.hasPendingOrder) {
+        setVisible(true)
+      } else {
+        history.push(`/name/${name}/reg`)
+      }
+    } else {
+      history.push(`/name/${name}/reg`)
+    }
+  }
+
   return (
     <div className={`${styles["card"]}`} onClick={() => {
       history.push(`/name/${name}/details`)
@@ -92,7 +113,8 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
           available ?
             <>
               <div className={styles['card-right']}>
-                <button onClick={e => { e.stopPropagation(); history.push(`/name/${name}/reg`) }} className={styles['btn-reg']}>
+                <button onClick={e => { e.stopPropagation(); checkOrder(); }} className={styles['btn-reg']}>
+                  {checkOrderIng && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                   register
                 </button>
               </div>
@@ -101,6 +123,9 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
             :
             <div className={styles.unavailable}>Unavailable</div>
       }
+      <PendingOrderTip visible={visible}
+        hide={() => { setVisible(false);setCheckOrderIng(false) }}
+      />
     </div>
   )
 }

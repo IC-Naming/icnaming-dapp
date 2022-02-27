@@ -1,7 +1,7 @@
 import React from 'react'
 import { useHistory } from "react-router-dom";
-import styles from '../assets/styles/Card.module.scss'
-import { Modal } from "react-bootstrap";
+import { Modal } from '@douyinfe/semi-ui';
+import styles from '../assets/styles/PendingOrderTip.module.scss'
 export interface PendingOrderTipProps {
   visible: boolean,
   hide: () => void,
@@ -13,26 +13,25 @@ export const PendingOrderTip: React.FC<PendingOrderTipProps> = ({ visible, hide 
   }
   return (
     <Modal
-      show={visible}
-      style={{ zIndex: 222222 }}
-      backdrop={true}
+      visible={visible}
+      maskClosable={false}
+      title="Notice"
+      footer={null}
+      onCancel={(e)=>{
+        e.stopPropagation();
+        hide();
+      }}
+      className={styles['pendingOrder-modal']}
     >
-      <Modal.Header>
-        <Modal.Title className="fz-18 connectwallettitle">Notice</Modal.Title>
-        <button className='close' onClick={e => { e.stopPropagation(); hide() }}>
-          <i className="bi bi-x-circle"></i>
-        </button>
-      </Modal.Header>
-      <Modal.Body>
-        <div className="line-light mb-3"></div>
-        <div className={styles['notice-main']}>You have a pending order</div>
-      </Modal.Body>
-      <Modal.Footer className={styles['notice-modal-footer']}>
+      <div className="line-light mb-3"></div>
+      <div className={styles['notice-main']}>You have a pending order</div>
+      <div className={styles['notice-btn-wrap']}>
         <button className={styles['notice-btn']} onClick={(e) => {
           e.stopPropagation();
           viewOrder()
         }}>View</button>
-      </Modal.Footer>
+      </div>
+
     </Modal>
   )
 }

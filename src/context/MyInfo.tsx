@@ -52,11 +52,11 @@ function useProvideMyInfo() {
   const getMyQuotas = async () => {
     if (auth.principal) {
       console.log('getMyQuotas start')
-      const get_MyQuotas = (user: Principal) => {
-        const quota4 = serviceApi.getQuota(user, 4);
-        const quota5 = serviceApi.getQuota(user, 5);
-        const quota6 = serviceApi.getQuota(user, 6);
-        const quota7 = serviceApi.getQuota(user, 7);
+      const get_MyQuotas = async (user: Principal) => {
+        const quota4 = await serviceApi.getQuota(user, 4);
+        const quota5 = await serviceApi.getQuota(user, 5);
+        const quota6 = await serviceApi.getQuota(user, 6);
+        const quota7 = await serviceApi.getQuota(user, 7);
         return Promise.all([quota4, quota5, quota6, quota7])
       }
       const res = await get_MyQuotas(auth.principal);
@@ -67,7 +67,7 @@ function useProvideMyInfo() {
   }
   const checkPendingOrder = async () => {
     serviceApi.getPendingOrder().then(res => {
-      console.log(res)
+      console.log('checkPendingOrder',res)
       if (res.length !== 0) {
         setPendingOrder(true)
         setOrderInfo({
@@ -92,17 +92,7 @@ function useProvideMyInfo() {
   }, [auth.principal])
 
   const getIcpToCycles = async () => {
-    const get_IcpToCycles = () => {
-      const price1 = serviceApi.getIcpToCycles(1)
-      const price2 = serviceApi.getIcpToCycles(2)
-      const price3 = serviceApi.getIcpToCycles(3)
-      const price4 = serviceApi.getIcpToCycles(4)
-      const price5 = serviceApi.getIcpToCycles(5)
-      const price6 = serviceApi.getIcpToCycles(6)
-      const price7 = serviceApi.getIcpToCycles(7)
-      return Promise.all([price1, price2, price3, price4, price5, price6, price7])
-    }
-    const res_IcpToCycles = await get_IcpToCycles();
+    const res_IcpToCycles = await serviceApi.getIcpToCycles();
     const res_IcpToCycles_map = res_IcpToCycles.map((item, index) => {
       return {
         icp: new BigNumber(item.price_in_icp_e8s.toString()).div(100000000).toString(),

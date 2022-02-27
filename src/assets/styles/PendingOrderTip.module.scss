@@ -1,0 +1,38 @@
+.pendingOrder-modal{
+  :global{
+    .semi-modal-content{
+      background: linear-gradient(180deg, #202a40 0%, #1a2233 100%);
+    }
+    .semi-modal-header{
+      margin: 12px 0;
+    }
+    .semi-button-tertiary.semi-button-light, .semi-button-tertiary.semi-button-borderless,
+    .semi-modal-title{
+      color: #00CFBB;
+    }
+    .semi-modal-body{
+      padding-bottom: 2rem;
+    }
+  }
+}
+.notice-main{text-align: center;color: #00CFBB;padding: 1.4rem 0 2rem;font-size: 16px;}
+.notice-btn-wrap{
+  width: 100%;
+  text-align: center;
+}
+.notice-btn{
+  width: 100px;
+  height: 32px;
+  background: rgba(0, 207, 187, 0.1);
+  border-radius: 8px;
+  color: #00CFBB;
+  border: 1px solid #00CFBB;
+  font-size: 14px;
+  text-transform: uppercase;
+  transition: all .3s;
+  &:hover{
+    background: rgba(0, 255, 230, 0.3);
+      border: 1px solid #00FFE6;
+      color:#00CFBB;
+  }
+}
