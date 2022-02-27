@@ -27,7 +27,9 @@ const validICPAddress = (address: string): boolean => {
 
 // is valid address
 const isValidAddress = (address: string, coin: string) => {
-  if (validator.findCurrency(coin)) {
+  if(address === ''){
+    return true;
+  }else if (validator.findCurrency(coin)) {
     return validator.validate(address, coin);
   }
   switch (coin.toUpperCase()) {
