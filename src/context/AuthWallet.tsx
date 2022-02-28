@@ -72,6 +72,7 @@ function useProvideAuthWallet() {
           actorFactory.authenticateWithIdentity(identity);
           setAuthWalletConnected(true)
           setWalletAddress(identity.getPrincipal().toText())
+          setPrincipal(identity.getPrincipal())
           resolve({ connected: true, account: identity.getPrincipal().toText() })
         }
       })
@@ -86,6 +87,7 @@ function useProvideAuthWallet() {
         actorFactory.authenticateWithIdentity(identity);
         setAuthWalletConnected(true)
         setWalletAddress(identity.getPrincipal().toText())
+        setPrincipal(identity.getPrincipal())
       }
     }
     getCurrentAccountOfII()

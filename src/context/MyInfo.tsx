@@ -51,7 +51,6 @@ function useProvideMyInfo() {
 
   const getMyQuotas = async () => {
     if (auth.principal) {
-      console.log('getMyQuotas start')
       const get_MyQuotas = async (user: Principal) => {
         const quota4 = await serviceApi.getQuota(user, 4);
         const quota5 = await serviceApi.getQuota(user, 5);
@@ -67,7 +66,7 @@ function useProvideMyInfo() {
   }
   const checkPendingOrder = async () => {
     serviceApi.getPendingOrder().then(res => {
-      console.log('checkPendingOrder',res)
+      console.log('checkPendingOrdersssss',res)
       if (res.length !== 0) {
         setPendingOrder(true)
         setOrderInfo({
@@ -84,6 +83,7 @@ function useProvideMyInfo() {
   }
 
   useEffect(() => {
+    console.log('getMyQuotas principal -----------------',auth.principal)
     if (auth.principal) {
       getMyQuotas();
       checkPendingOrder();

@@ -69,7 +69,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
           }
         })
       } else {
-        errorToast('Name length must less than 7')
+        errorToast(' Name length must more than or equal 7')
       }
     }
   }
