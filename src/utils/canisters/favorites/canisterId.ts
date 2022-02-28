@@ -5,10 +5,13 @@ const getFavoriteId = (): Principal => {
     return Principal.fromText("qjdve-lqaaa-aaaaa-aaaeq-cai");
   }
   if (isMainNetEnv()) {
-    return Principal.fromText("gfftf-pqaaa-aaaaj-aadza-cai");
+    return Principal.fromText("crp26-tyaaa-aaaam-aacbq-cai");
   }
   if (isTestNetEnv()) {
-    return Principal.fromText("oyjuw-oqaaa-aaaal-qac5q-cai");
+    // test
+    // return Principal.fromText("oyjuw-oqaaa-aaaal-qac5q-cai");
+    // main
+    return Principal.fromText("crp26-tyaaa-aaaam-aacbq-cai");
   }
   throw new Error("Unknown environment");
 };
