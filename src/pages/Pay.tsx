@@ -141,18 +141,24 @@ export const Pay = (props) => {
         setIcpPayIng(false)
         setIcpPayStatus(true)
         console.log('Payment success! Please wait, the name is being picked up for you. ')
-        let result = await serviceApi.confirmOrder(payResult.height);
-        console.log('confirmOrder', result);
-        setSystemStatus(true)
-        setIcpPayIng(true)
-        deleteCache('getNamesOfRegistrant' + auth.walletAddress)
-        deleteCache('namesOfController' + auth.walletAddress)
-        if (result) {
-          setTimeout(() => { history.push('/myaccount') }, 3000);
-          console.log('You got the name! please check it out from MyAccount')
-        } else {
-          console.log('fail confirm order,but payment success')
-          setTimeout(() => { history.push('/myaccount') }, 6000);
+
+        try {
+          let result = await serviceApi.confirmOrder(payResult.height);
+          console.log('confirmOrder', result);
+          setSystemStatus(true)
+          setIcpPayIng(true)
+          deleteCache('getNamesOfRegistrant' + auth.walletAddress)
+          deleteCache('namesOfController' + auth.walletAddress)
+          if (result) {
+            setTimeout(() => { history.push('/myaccount') }, 3000);
+            console.log('You got the name! please check it out from MyAccount')
+          } else {
+            console.log('fail confirm order,but payment success')
+            setTimeout(() => { history.push('/myaccount') }, 6000);
+          }
+        }
+        catch (err) {
+          console.log(`fail confirm order, ${JSON.stringify(err)}`)
         }
       }
       else {
@@ -162,6 +168,7 @@ export const Pay = (props) => {
         setHasRefund(true)
         errorToast('fail confirm order')
       }
+
 
     } catch (err) {
       // setLoadingSubmit(false);
