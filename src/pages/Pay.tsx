@@ -134,26 +134,33 @@ export const Pay = (props) => {
         },
       });
       console.log(`Pay success: ${JSON.stringify(payResult)}`);
-      setIcpPayIng(false)
-      setIcpPayStatus(true)
-      console.log('Payment success! Please wait, the name is being picked up for you. ')
-      let result = await serviceApi.confirmOrder(payResult.height);
-      console.log('confirmOrder', result);
-      if (result) {
+
+      if (payResult.height) {
+        setIcpPayIng(false)
+        setIcpPayStatus(true)
+        console.log('Payment success! Please wait, the name is being picked up for you. ')
+        let result = await serviceApi.confirmOrder(payResult.height);
+        console.log('confirmOrder', result);
         setSystemStatus(true)
         setIcpPayIng(true)
         deleteCache('getNamesOfRegistrant' + auth.walletAddress)
         deleteCache('namesOfController' + auth.walletAddress)
-        setTimeout(() => { history.push('/myaccount') }, 3000);
-        console.log('You got the name! please check it out from MyAccount')
-      } else {
+        if (result) {
+          setTimeout(() => { history.push('/myaccount') }, 3000);
+          console.log('You got the name! please check it out from MyAccount')
+        } else {
+          console.log('fail confirm order,but payment success')
+          setTimeout(() => { history.push('/myaccount') }, 6000);
+        }
+      }
+      else {
         setIcpPayIng(false)
         setLoadingSubmit(false)
-        setIcpPayIng(false)
         setSystemStatus(false)
         setHasRefund(true)
         errorToast('fail confirm order')
       }
+
     } catch (err) {
       // setLoadingSubmit(false);
       setIcpPayIng(false)
@@ -270,17 +277,17 @@ export const Pay = (props) => {
                       <Col md={4} sm={12} className="text-center">{icpPayAmountDesc}</Col>
                       <Col md={4} sm={12}></Col>
                     </Row>
-                    
-                      <div className={payStyles['btn-pay-wrap']}>
-                        <button className={`${styles.btn} ${payStyles['btn-pay-quota']}`} onClick={() => { cancelRegisterOrder() }} style={{ marginRight: 10 }}
-                        >
-                          {loadingCancelOrder && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
-                          Cancel</button>
-                        <button className={`${styles.btn} ${payStyles['btn-pay-quota']}`} onClick={() => { payVidIcp() }}>
-                          {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
-                          Pay
-                        </button>
-                      
+
+                    <div className={payStyles['btn-pay-wrap']}>
+                      <button className={`${styles.btn} ${payStyles['btn-pay-quota']}`} onClick={() => { cancelRegisterOrder() }} style={{ marginRight: 10 }}
+                      >
+                        {loadingCancelOrder && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                        Cancel</button>
+                      <button className={`${styles.btn} ${payStyles['btn-pay-quota']}`} onClick={() => { payVidIcp() }}>
+                        {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                        Pay
+                      </button>
+
                     </div>
                   </>
             }
