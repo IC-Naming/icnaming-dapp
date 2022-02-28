@@ -149,7 +149,7 @@ export const Pay = (props) => {
           console.log('You got the name! please check it out from MyAccount')
         } else {
           console.log('fail confirm order, but payment success')
-          throw "failed to confirm from api";
+          throw new Error("failed to confirm from api");
         }
       }
       catch (err) {
