@@ -145,10 +145,6 @@ export const Pay = (props) => {
         try {
           let result = await serviceApi.confirmOrder(payResult.height);
           console.log('confirmOrder', result);
-          setSystemStatus(true)
-          setIcpPayIng(true)
-          deleteCache('getNamesOfRegistrant' + auth.walletAddress)
-          deleteCache('namesOfController' + auth.walletAddress)
           if (result) {
             setTimeout(() => { history.push('/myaccount') }, 3000);
             console.log('You got the name! please check it out from MyAccount')
@@ -159,6 +155,12 @@ export const Pay = (props) => {
         }
         catch (err) {
           console.log(`fail confirm order, ${JSON.stringify(err)}`)
+        }
+        finally {
+          setSystemStatus(true)
+          setIcpPayIng(true)
+          deleteCache('getNamesOfRegistrant' + auth.walletAddress)
+          deleteCache('namesOfController' + auth.walletAddress)
         }
       }
       else {
