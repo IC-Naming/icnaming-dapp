@@ -8,7 +8,7 @@ const getRegistryId = (): Principal => {
     return Principal.fromText("chqy6-eiaaa-aaaak-qabja-cai");
   }
   if (isTestNetEnv()) {
-    return Principal.fromText("uilf4-iqaaa-aaaam-qaava-cai");
+    return Principal.fromText("cxnwn-diaaa-aaaag-aabaq-cai");
   }
   throw new Error("Unknown environment");
 };

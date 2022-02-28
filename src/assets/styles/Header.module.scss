@@ -5,7 +5,7 @@
   right: 0;
   top: 0;
   height: 54px;
-  z-index: 1100;
+  z-index: 1;
   background: linear-gradient(180deg, #031D49 0%, #062860 100%);
 }
 .navbar{
@@ -61,12 +61,12 @@
   display: none;
 }
 .nav-item{
-  span{color: #fff;
+  .nav-link{color: #fff;
     transition: color .3s;
     cursor: pointer;
    &:hover{color: #00CFBB;}
   }
-   &.current{ span{color: #00CFBB;}}
+   &.current{ .nav-link{color: #00CFBB;}}
   }
 .navbar>.container, .navbar>.container-xxl {
   display: flex;

@@ -5,8 +5,7 @@ import { toast } from 'react-toastify';
 import ServiceApi from "../utils/ServiceApi";
 import { Spinner } from "react-bootstrap";
 import { CopyToClipboard } from ".";
-import { isBTCAddress, isETHAddress, isLTCAddress, isEmail } from "../utils/helper";
-import { Principal } from "@dfinity/principal";
+import { isValidAddress, isEmail } from "../utils/helper";
 import { deleteCache } from '../utils/localCache';
 
 interface Props {
@@ -31,20 +30,6 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
     setRecordVal(e.target.value);
   };
 
-  // isCanisterAddress
-  const isCanisterAddress = (address: string) => {
-    if (address !== '') {
-      try {
-        Principal.fromText(address);
-        return true;
-      }
-      catch (e) {
-        return false;
-      }
-    }
-    return true;
-  }
-
   const notToast = (msg) => {
     toast.error(msg, {
       position: "top-center",
@@ -65,7 +50,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
     setRecordSaveLoading(true);
     serviceApi.setRecord(name, recordKey, recordVal).then(res => {
       if (res) {
-        toast.success('Set record Done', {
+        toast.success('Set record success', {
           position: "top-center",
           autoClose: 2000,
           theme: "dark",
@@ -93,15 +78,17 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
 
   const handleSetRecord = () => {
     if (recordKey === 'token.btc') {
-      isBTCAddress(recordVal) ? recordSet() : notToast('Invalid BTC address');
+      isValidAddress(recordVal, "btc") ? recordSet() : notToast('Invalid BTC address');
     } else if (recordKey === 'token.eth') {
-      isETHAddress(recordVal) ? recordSet() : notToast('Invalid ETH address');
+      isValidAddress(recordVal, "eth") ? recordSet() : notToast('Invalid ETH address');
     } else if (recordKey === 'token.ltc') {
-      isLTCAddress(recordVal) ? recordSet() : notToast('Invalid LTC address');
+      isValidAddress(recordVal, "ltc") ? recordSet() : notToast('Invalid LTC address');
+    } else if (recordKey === 'token.icp') {
+      isValidAddress(recordVal, "icp") ? recordSet() : notToast('Invalid ICP address');
     } else if (recordKey === 'email') {
       isEmail(recordVal) ? recordSet() : notToast('Invalid email address');
     } else if (recordKey === 'canister.icp') {
-      isCanisterAddress(recordVal) ? recordSet() : notToast('Invalid Canister address');
+      isValidAddress(recordVal, "icp") ? recordSet() : notToast('Invalid canister id');
     } else {
       recordSet();
     }

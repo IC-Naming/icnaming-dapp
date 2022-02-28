@@ -47,7 +47,6 @@ export const idlFactory = ({ IDL }) => {
         [Result_1],
         [],
       ),
-    'set_top_name' : IDL.Func([], [Result_5], []),
   });
 };
 export const init = ({ IDL }) => { return []; };

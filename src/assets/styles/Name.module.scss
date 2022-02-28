@@ -24,7 +24,7 @@
       color: rgba(217, 225, 242, 0.5);
       border: 1px solid #384B6E;
       font-size: 1rem;
-      font-family: 'PuHuiTi';
+      font-family: 'AlibabaPuHuiTiR';
       box-shadow: none;
       height: 40px;
       &:hover, &:focus{
@@ -41,6 +41,9 @@
       font-size: 18px;
       margin-left: .8rem;
     }
+  }
+  .name-back-link {
+    margin-right: 4px;
   }
 }
 
@@ -84,6 +87,7 @@
   }
   
   .btn{
+    min-width: 260px;
     height: 40px;
     background: rgba(0, 207, 187, 0.1);
     border-radius: 12px;
@@ -262,6 +266,83 @@
   }
 }
 
+.btn-wrap{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.quota-option-type{
+  width: 80px !important;
+  height: 32px !important;
+  border-radius: 6px !important;
+  color: #D9E1F2;
+  font-size: 16px!important;
+  font-family: "AlibabaPuHuiTiR";
+}
+.quota-count{
+  padding-left: 10px;
+  color: #D9E1F2!important;
+  font-size: 16px!important;
+  display: inline-block !important;
+}
+.selcet-quota{
+  margin-left: 40px;
+  min-width: 260px !important;
+  border: 1px solid #00CFBB !important;
+  background: rgba(0, 207, 187, 0.1) !important;
+  border-radius: 12px !important;
+  transition: .3s all;
+  &:hover{
+    background: rgba(0, 255, 230, 0.3) !important;
+    border: 1px solid #00FFE6 !important;
+  }
+  .quota-option-type{
+    width: 80px !important;
+    height: 32px !important;
+    color: #00CFBB;
+    font-size: 16px!important;
+    font-family: "AlibabaPuHuiTiR";
+  }
+  .quota-count{
+    padding-left: 10px;
+    color: #00CFBB!important;
+    display: inline-block !important;
+  }
+  .recommend{
+    display: none;
+  }
+  :global{
+    .semi-select-selection{
+      justify-content: center;
+    }
+    .semi-select-selection-text{
+      color: #00CFBB !important;
+        font-size: 16px;
+    }
+    .semi-select-arrow{
+      color: #00CFBB;
+    }
+  }
+}
+
+.quota-option-con{
+  min-width: 160px;
+}
+.recommend{
+  background: rgba(234, 74, 170, 1) !important;
+  border-radius: 15px;
+  font-size: 14px;
+  height: 20px;
+  line-height: 18px !important;
+  padding: 0 5px;
+  text-align: center;
+}
+
+.superscript{
+  vertical-align:super
+}
+
 @media screen and (min-width: 576px){
   
 .records{
@@ -301,7 +382,6 @@
         }
         .d-grid {
           padding-top: 1rem;
-          width : 260px;
           margin: auto;
         }
       }
@@ -348,7 +428,3 @@
     }
   }
 }
-
-
-
-

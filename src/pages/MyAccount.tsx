@@ -40,7 +40,6 @@ export const MyAccount = () => {
           serviceApi.getNamesOfRegistrant(wordParam).then(data => {
             resolve(data)
           }).catch(errs => {
-            console.log(errs)
             reject(errs)
           });
         })
@@ -69,7 +68,6 @@ export const MyAccount = () => {
           serviceApi.getNamesOfController(wordParam).then(data => {
             resolve(data)
           }).catch(errs => {
-            console.log(errs)
             reject(errs)
           });
         })

@@ -7,7 +7,6 @@ import { useAuthWallet } from "../context/AuthWallet";
 import { formatAddress } from '../utils/helper';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { isMainNetEnv } from "../utils/config";
 export const Header = () => {
   const history = useHistory();
   const { ...authWallet } = useAuthWallet();
@@ -45,6 +44,7 @@ export const Header = () => {
     setCurrentPcIndex(0)
     setCurrentIndex(0)
     localStorage.removeItem('myFavoriteNames');
+    localStorage.removeItem('myQuotas');
   }
 
   const HeaderWallet = () => {
@@ -68,7 +68,6 @@ export const Header = () => {
   const [navitems, setNavitems] = useState<any>([
     { title: 'Home', path: '/' },
     { title: 'FAQ', path: '/faq' },
-    { title: 'About', path: '/about' }
   ])
   useEffect(() => {
     if (authWallet.isAuthWalletConnected) {
@@ -77,13 +76,11 @@ export const Header = () => {
         { title: 'My Account', path: '/myaccount' },
         { title: 'Favourites', path: '/favourites' },
         { title: 'FAQ', path: '/faq' },
-        { title: 'About', path: '/about' }
       ])
     }else{
       setNavitems([
         { title: 'Home', path: '/' },
         { title: 'FAQ', path: '/faq' },
-        { title: 'About', path: '/about' }
       ])
     }
   }, [authWallet.isAuthWalletConnected])
@@ -96,10 +93,6 @@ export const Header = () => {
           () => {history.push('/')
           houdlePcNav('logo')}
         } className={`${styles['header-logo']} headerLogo`}>logo
-        {
-          !!!isMainNetEnv() && <span className={styles.testnetlogo}>testnet</span>
-        }
-          
         </span>
 
         <button className="navbar-toggler" type="button" onClick={() => { houdleNav(null) }}>
@@ -111,10 +104,13 @@ export const Header = () => {
             {
               navitems.map((item, index) => {
                 return <li key={index} className={`${styles['nav-item']} ${index === currentPcIndex ? styles.current : null}`}>
-                  <span  onClick={() => {history.push(item.path);houdlePcNav(index) }}>{item.title}</span>
+                  <span className={styles['nav-link']} onClick={() => {history.push(item.path);houdlePcNav(index) }}>{item.title}</span>
                 </li>
               })
             }
+            <li className={styles['nav-item']}>
+              <a className={styles['nav-link']} target="_blank" rel="noreferrer" href='https://docs.icnaming.com/'>Docs</a>
+            </li>
           </ul>
           <HeaderWallet />
           <div className={styles['language']}>

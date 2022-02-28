@@ -1,19 +1,24 @@
-import React from 'react'
-import { SearchInput, CopyToClipboard, NameRegister, NameRegisterTestnet, Record } from "../components";
-import styles from "../assets/styles/Name.module.scss";
-import { ConnectWallets } from "../components/ConnectWallets";
+
 import { Container, Tabs, Tab, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useEffect, useState } from "react";
+import { Link, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
+
+import { SearchInput, CopyToClipboard, Record, Register, ConnectWallets } from "../components";
+import styles from "../assets/styles/Name.module.scss";
+
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
-import { isMainNetEnv } from "../utils/config";
+import { CanisterError } from "../utils/exception";
+
 
 export const Name = (props) => {
   const serviceApi = new ServiceApi();
-  const [showWallets, setShowWallets] = useState(false);
+  const location = useLocation();
+  const showBackLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'myaccount';
+  const [showWallets, setShowWallets] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
-  const [loadingName, setLoadingName] = useState(true);
+  const [loadingName, setLoadingName] = useState<boolean>(false);
   const [nameDetails, setNameDetails] = useState<NameDetails>({
     name: 'ICP',
     available: true,
@@ -45,12 +50,14 @@ export const Name = (props) => {
   const [action, setAction] = useState('');
   const [activeKey, setActiveKey] = useState('details');
 
+
   useEffect(() => {
     const ac = new AbortController();
     if (name !== '') {
       let getNameDetailsLoaded = false;
       let getRecordsOfNameLoaded = false;
-      queryWithCache(() => {
+
+      /* queryWithCache(() => {
         return new Promise((resolve, reject) => {
           serviceApi.getNameDetails(name).then(data => {
             resolve(data)
@@ -59,19 +66,41 @@ export const Name = (props) => {
           });
         })
       }, name + 'details').then(res => {
+        console.log('details', res)
         setNameDetails(res);
         getNameDetailsLoaded = true;
         if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
           setLoadingName(false);
         }
       }).catch(err => {
+        console.log(err)
         setLoadingName(false);
-        toast('Get name details failed', {
+        toast.error('Get name details failed', {
           position: "top-center",
           autoClose: 2000,
           theme: "dark",
         });
-      })
+      }) */
+
+      serviceApi.getNameDetails(name).then(res => {
+        console.log(name)
+        console.log('details', res)
+        setNameDetails(res);
+        getNameDetailsLoaded = true;
+        if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
+          setLoadingName(false);
+        }
+      }).catch(err => {
+        if(err in CanisterError){
+          console.log(err.message)
+        }
+        setLoadingName(false);
+        toast.error('Get name details failed', {
+          position: "top-center",
+          autoClose: 2000,
+          theme: "dark",
+        });
+      });
 
       queryWithCache(() => {
         return new Promise((resolve, reject) => {
@@ -83,7 +112,11 @@ export const Name = (props) => {
         })
       }, name + 'Records').then(res => {
         const records = recordsAddress.map(item => {
-          const record = res.find(record => record[0] === item.key);
+          const record = res.find(record => {
+            console.log(record)
+            return record[0] === item.key
+          }
+          );
           return record ? { title: item.title, key: item.key, value: record[1] } : { title: item.title, key: item.key, value: "" };
         })
         setRecordsAddress(records);
@@ -96,7 +129,6 @@ export const Name = (props) => {
 
         const canister = res.find(record => record[0] === 'canister.icp');
         canister ? setCanister(canister[1]) : setCanister("");
-
         getRecordsOfNameLoaded = true;
         if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
           setLoadingName(false);
@@ -104,7 +136,7 @@ export const Name = (props) => {
       }).catch(err => {
         console.log(err)
         setLoadingName(false);
-        toast('Get records of name failed', {
+        toast.error('Get records of name failed', {
           position: "top-center",
           autoClose: 2000,
           theme: "dark",
@@ -122,13 +154,24 @@ export const Name = (props) => {
     } else if (action === 'details') {
       setActiveKey('details')
     }
+    return () => {
+      setActiveKey('details')
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [action])
 
   useEffect(() => {
-    
+    console.log(props.match.params)
     setName(props.match.params.name || "")
-    setAction(props.match.params.action || "")
+    if(props.match.params.action){
+      setAction(props.match.params.action)
+    }else{
+      setAction("details")
+    }
+    return () => {
+      setName('')
+      setAction('')
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.match.params])
 
@@ -138,19 +181,22 @@ export const Name = (props) => {
         <div className={styles['name-content']}>
           <SearchInput word="" />
           <Container className="pt-5">
-            <h1 className={`${styles.title} text-right`}>{name}</h1>
+            <h1 className={`${styles.title} text-right`}>
+              {
+                showBackLink && 
+                <Link to='/myaccount' className={styles['name-back-link']}>
+                  <i className="bi bi-chevron-left"></i>
+                </Link>
+              }
+              {name}
+            </h1>
             {
               loadingName ?
                 <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
                 :
                 <Tabs activeKey={activeKey} onSelect={(k) => setActiveKey(k || "register")} className="mb-3">
                   <Tab eventKey="register" title="Register">
-                    {
-                      isMainNetEnv() ? <NameRegister name={name} available={nameDetails?.available} />
-                        :
-                        <NameRegisterTestnet name={name} available={nameDetails?.available} />
-                    }
-
+                    <Register regname={props.match.params.name} available={nameDetails?.available} />
                   </Tab>
                   <Tab eventKey="details" title="Details">
                     <div className={styles.details}>

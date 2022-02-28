@@ -69,23 +69,25 @@
 }
 .name{color:#00CFBB;font-size: 0.8rem;margin-right: .8rem;}
 .time{color:#66728C;font-size: 0.6rem; @include no-wrap;}
-.btn-reg{
+.btn-reg,.notice-btn{
   height: 26px;
-background: rgba(0, 207, 187, 0.1);
-border-radius: 8px;
-color: #00CFBB;
-border: 1px solid #00CFBB;
-font-size: 12px;
-text-transform: uppercase;
-padding: .4rem .5rem;
-display: block;
-transition: all .3s;
-&:hover{
-  background: rgba(0, 255, 230, 0.3);
-    border: 1px solid #00FFE6;
-    color:#00CFBB;
+  background: rgba(0, 207, 187, 0.1);
+  border-radius: 8px;
+  color: #00CFBB;
+  border: 1px solid #00CFBB;
+  font-size: 12px;
+  text-transform: uppercase;
+  padding: .4rem .5rem;
+  display: block;
+  transition: all .3s;
+  &:hover{
+    background: rgba(0, 255, 230, 0.3);
+      border: 1px solid #00FFE6;
+      color:#00CFBB;
+  }
 }
-}
+
+
 @media screen and (min-width: 576px){
   .card{
     height: 84px;
@@ -97,9 +99,9 @@ transition: all .3s;
     font-size: 1.6rem;
   }
   .name{font-size: 1rem;}
-.time{font-size: 1rem;}
+  .time{font-size: 1rem;}
   .btn-reg{height: 40px;line-height: 40px;padding: 0 .7rem;font-size: 1rem;}
-  
+  .notice-btn{height: 30px;line-height: 30px;padding: 0 .7rem;font-size: 1rem;}
 }
   
 

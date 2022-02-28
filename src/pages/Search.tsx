@@ -1,11 +1,18 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { SearchInput, Card, CopyToClipboard } from "../components";
+import PendingOrderCard from 'components/PendingOrderCard';
 import styles from '../assets/styles/Search.module.scss'
 import { Container, Tab, Tabs } from 'react-bootstrap';
 import { Principal } from '@dfinity/principal';
 import { useAuthWallet } from '../context/AuthWallet';
 import ServiceApi from '../utils/ServiceApi';
 import dateFormat from "dateformat";
+import { IC_EXTENSION } from '../utils/config';
+import { CanisterError } from '../utils/exception';
+import { isLocalEnv } from 'config/env';
+import { toast } from 'react-toastify';
+
+import { GetNameOrderResponse } from 'utils/canisters/registrar/interface';
 
 interface NameModel {
   name: string;
@@ -13,9 +20,12 @@ interface NameModel {
   expireAt: string;
   favorite: boolean;
 }
+
 export const Search = (props) => {
   const { ...authWallet } = useAuthWallet();
-  const serviceApi = new ServiceApi();
+  const serviceApi = useMemo(() => 
+  new ServiceApi(), 
+  [authWallet.walletAddress]);// eslint-disable-line
   const [word, setWord] = useState<string | Principal>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [isSearchAddress, setIsSearchAddress] = useState<boolean>(false)
@@ -24,6 +34,9 @@ export const Search = (props) => {
   const [nameSearchResult, setNameSearchResult] = useState<NameModel>();
   const [namesOfRegistrant, setNamesOfRegistrant] = useState<any>();
   const [namesOfController, setNamesOfController] = useState<any>();
+  const [pendingOrderLoading, setPendingOrderLoading] = useState(false);
+  const [existPendingOrderInfo, setExistPendingOrderInfo] = useState<GetNameOrderResponse>();
+
 
   const isInvalidPrincipal = (word: string) => {
     try {
@@ -35,46 +48,99 @@ export const Search = (props) => {
     }
   }
 
-  useEffect(() => {
-    if (word && serviceApi) {
+  const creatNameSearchResult = useCallback(async (searchName, available) => {
+    console.log('creatNameSearchResult start..........')
+    // let expireAt = available ? '' : 'Expires ' + dateFormat(new Date(await serviceApi.expireAtOf(searchName)), "isoDateTime")
+    let expireAt = '';
+    if (available) {
+      expireAt = '';
+    } else {
+      await serviceApi.expireAtOf(searchName).then(res => {
+        if (res) {
+          expireAt = 'Expires ' + dateFormat(new Date(res), "isoDateTime")
+        }
+      }).catch(err => {
+        if (err instanceof CanisterError) {
+          expireAt = '';
+        }
+      })
+    }
+    let fav = false;
+    if (authWallet.walletAddress) {
+      const myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
+      fav = myFavoriteNames.some(item => item === searchName);
+    }
+    console.log({ name: searchName, available: available, expireAt, favorite: fav })
+    setNameSearchResult({ name: searchName, available: available, expireAt, favorite: fav })
+    setLoading(false)
+  }, [serviceApi, authWallet.walletAddress]);
+
+  const getPendingOrder = useCallback(async () => {
+    if(!authWallet.walletAddress) {
+      return undefined;
+    }
+    setPendingOrderLoading(true);
+    try {
+      const res = await serviceApi.getPendingOrder();
+      if(res[0]) {
+        return res[0];
+      }
+    } catch(err) {
+      console.log('getPendingOrder', err);
+    } finally {
+      setPendingOrderLoading(false);
+    }
+    return undefined;
+  }, [serviceApi, authWallet.walletAddress]);
+
+  const handlWordChange = useCallback(async () => {
+    if (word) {
       // if word is string
       if (typeof word === 'string') {
         let searchName = '';
         if (!word.endsWith('.')) {
-          if (word.split('.').length > 1 && word.split('.')[word.split('.').length - 1] !== 'icp') {
-            setLoading(false)
-            setIsNotIcp(true)
-            setNotIcpword(word.split('.')[word.split('.').length - 1]);
+          const wordDotSplitArray = word.split('.');
+          const wordDotSplitCount = wordDotSplitArray.length;
+          const nTLDs = wordDotSplitArray[wordDotSplitCount - 1];
+          const envICP = isLocalEnv ? 'ticp' : 'icp';
+          const isNotICP = nTLDs !== envICP;
+          setIsNotIcp(isNotICP);
+          if (wordDotSplitCount > 1 && isNotICP) {
+            setLoading(false);
+            setNotIcpword(nTLDs);
             return;
-          } else if (word.split('.').length > 1 && word.split('.')[word.split('.').length - 1] === 'icp') {
-            setIsNotIcp(false);
+          } else if (wordDotSplitCount > 1 && !isNotICP) {
             searchName = word
           } else {
             setIsNotIcp(false);
-            searchName = `${word}.icp`
+            searchName = `${word}.${IC_EXTENSION}`
           }
-        }else{
+        } else {
           setIsNotIcp(false);
-          searchName = `${word}icp`
+          searchName = `${word}${IC_EXTENSION}`
         }
-        
-        serviceApi.available(searchName).then(async res => {
-          let expireAt = ''
-          if (!res) {
-            const expireAtOfName = await serviceApi.expireAtOf(searchName);
-            expireAt = 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime")
+        try {
+          const [userPendingOrder, available] = await Promise.all([getPendingOrder(), serviceApi.available(searchName)]);
+          if(userPendingOrder?.name === searchName) {
+            setExistPendingOrderInfo(userPendingOrder);
+            setLoading(false);
+          } else {
+            await creatNameSearchResult(searchName, available);
           }
-          let fav = false;
-          if (authWallet.walletAddress) {
-            const myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
-            fav = myFavoriteNames.find(item => item === searchName)
+        } catch(err) {
+          if (err instanceof CanisterError) {
+            console.log('CanisterError', err);
+            if (err.code === 9) {
+              creatNameSearchResult(searchName, false);
+            } else {
+              toast.error(err.message, {
+                position: "top-center",
+                autoClose: 2000,
+                theme: "dark"
+              })
+            }
           }
-          setNameSearchResult({ name: searchName, available: res, expireAt, favorite: fav })
-          setLoading(false)
-        }).catch(err => {
-          console.log(err)
-          setLoading(false)
-        });
+        }
       }
       // if word is principal
       else {
@@ -120,6 +186,10 @@ export const Search = (props) => {
         });
       }
     }
+  }, [word, authWallet.walletAddress, serviceApi, creatNameSearchResult, getPendingOrder]);
+
+  useEffect(() => {
+    handlWordChange();
   }, [word, authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -133,15 +203,21 @@ export const Search = (props) => {
       setIsSearchAddress(false)
     }
   }, [props.match.params.word])// eslint-disable-line react-hooks/exhaustive-deps
-
   return (
     <div className={styles.serach}>
       <div className="container pt-5">
         <div className={styles['serach-content']}>
           <SearchInput word={typeof word === 'string' ? word : word.toText()} />
+          {/* <div className={styles['pending-order']}>
+            <Banner
+              closeIcon={null}
+              type="info"
+              description={<>you have pending order <Link to="/pay">View</Link></>}
+            />
+          </div> */}
           <Container className={`pt-5`}>
             {
-              loading ?
+              (loading || pendingOrderLoading) ?
                 <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
                 :
                 <>
@@ -160,17 +236,22 @@ export const Search = (props) => {
 
                       !isSearchAddress ?
                         isNotIcp ?
-                        <div className={styles.noicp}>
+                          <div className={styles.noicp}>
                             .{notIcpword} DNSSEC support coming soon!
                           </div>
                           :
                           <div className={styles.list}>
+                          {
+                            existPendingOrderInfo ?
+                            <PendingOrderCard order={existPendingOrderInfo}></PendingOrderCard>
+                            :
                             <Card name={nameSearchResult?.name || ''}
                               regTime={nameSearchResult?.expireAt || ''}
                               available={nameSearchResult?.available || false}
                               favorite={nameSearchResult?.favorite || false} />
+                          }
+                            
                           </div>
-                          
                         :
                         <Tabs defaultActiveKey="registrant" className="mb-3">
                           <Tab eventKey="registrant" title="Registrant">

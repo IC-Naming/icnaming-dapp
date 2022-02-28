@@ -8,4 +8,5 @@ export const ICP_TOKEN_ID = "__icp";
 export const ICP_TOKEN_SYMBOL = "ICP";
 export const ICP_TOKEN_DECIMALS = 8;
 
-
+export const IC_MAINNET_HOST = "https://ic0.app";
+export const IC_LOCAL_HOST = "http://127.0.0.1:8000";

@@ -11,6 +11,12 @@ declare module "*.module.scss" {
   export default scss;
 }
 
+declare interface Window {
+  ic: {
+    plug: any;
+  }
+}
+
 declare module '*.svg'
 declare module '*.png'
 declare module '*.jpg'
