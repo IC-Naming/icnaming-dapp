@@ -19,7 +19,6 @@
     .semi-spin{margin-right: 10px;}
     .semi-spin-wrapper{
       color: #fff;
-      
     }
   }
 }
@@ -62,5 +61,34 @@
     background: #0B142A !important;
     border: 1px solid #525F7A;
     color: #66728C;
+  }
+}
+
+.btn-pay-wrap{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  .btn-pay-quota{
+    width: 100%;
+    margin-right: 0 !important;
+  }
+  .btn-pay-quota:last-child{
+    margin-top: .75rem;
+    order:1;
+  }
+}
+@media screen and (min-width: 576px){
+  .btn-pay-wrap{
+    flex-direction: row;
+    .btn-pay-quota{
+      width: 260px;
+      margin-right: 0 !important;
+    }
+    .btn-pay-quota:last-child{
+      margin-top: 0;
+      order:1;
+      margin-left: 20px;
+    }
   }
 }

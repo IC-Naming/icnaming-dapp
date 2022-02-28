@@ -99,7 +99,7 @@ export const Favourites = () => {
                           }
                         </div>
                         :
-                        <div className="nodata"><span>No search results</span></div>
+                        <div className="nodata" style={{background:'none'}}><span>No data</span></div>
                     }
                   </div>
                 </>

@@ -80,15 +80,23 @@
   }
 }
 
-
+.semi-modal-small{
+  width: 100% !important;
+}
 @media (min-width: 576px){
   .container {
     max-width: 700px;
+  }
+  .semi-modal-small{
+    width: 480px !important;
   }
 }
 
 @media (min-width: 768px){
   .container-md, .container {
     max-width: 920px;
+  }
+  .semi-modal-small{
+    width: 480px !important;
   }
 }

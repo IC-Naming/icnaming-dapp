@@ -172,7 +172,7 @@ export const Pay = (props) => {
       if (res) {
         setLoadingCancelOrder(false)
         setVisiableModalTipFull(false)
-        toast.success('Cancel the success', {
+        toast.success('Order cancelled success', {
           position: 'top-center',
           autoClose: 1000,
           theme: 'dark'
@@ -270,17 +270,17 @@ export const Pay = (props) => {
                       <Col md={4} sm={12} className="text-center">{icpPayAmountDesc}</Col>
                       <Col md={4} sm={12}></Col>
                     </Row>
-                    <div className="d-grid gap-2">
-                      <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <button className={styles.btn} onClick={() => { cancelRegisterOrder() }} style={{ marginRight: 10 }}
+                    
+                      <div className={payStyles['btn-pay-wrap']}>
+                        <button className={`${styles.btn} ${payStyles['btn-pay-quota']}`} onClick={() => { cancelRegisterOrder() }} style={{ marginRight: 10 }}
                         >
                           {loadingCancelOrder && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                           Cancel</button>
-                        <button className={styles.btn} onClick={() => { payVidIcp() }}>
+                        <button className={`${styles.btn} ${payStyles['btn-pay-quota']}`} onClick={() => { payVidIcp() }}>
                           {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                           Pay
                         </button>
-                      </div>
+                      
                     </div>
                   </>
             }

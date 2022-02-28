@@ -132,27 +132,6 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     return quotas.filter(quota => quota.quotaCount !== 0);
   }, [quotas]);
 
-  /* useEffect(() => {
-    console.log('available---------------------------',available)
-    // if available is true, then show the check pending order modal
-    if (auth.walletAddress && available) {
-      setLoadingPending(true)
-      console.log('check pending order', myInfo.hasPendingOrder)
-      myInfo.checkPendingOrder()
-      if (myInfo.hasPendingOrder) {
-        setLoadingPending(false)
-        setPendingOrderTipVisible(true)
-      } else {
-        setLoadingPending(false)
-      }
-    }
-    return () => {
-      setLoadingPending(false)
-      setPendingOrderTipVisible(false)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.walletAddress, available, myInfo.hasPendingOrder]) */
-
   return (
     <div className={styles.register}>
       {
@@ -185,7 +164,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                 quotaLoading ?
                   <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
                   :
-                  <div className={styles['btn-wrap']}>
+                  <div className={`${styles['btn-wrap']} ${styles['btn-reg-wrap']}`}>
                     <button
                       className={`${styles.btn} ${styles['btn-via-icp']}`}
                       onClick={registerVidIcp}>
