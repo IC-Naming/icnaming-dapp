@@ -43,7 +43,7 @@ export const MyAccount = () => {
             reject(errs)
           });
         })
-      }, 'getNamesOfRegistrant' + authWallet.walletAddress).then(async (res) => {
+      }, 'getNamesOfRegistrant' + authWallet.walletAddress,60).then(async (res) => {
         console.log("my address result of registation", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()

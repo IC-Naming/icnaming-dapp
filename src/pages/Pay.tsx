@@ -137,46 +137,35 @@ export const Pay = (props) => {
       });
       console.log(`Pay success: ${JSON.stringify(payResult)}`);
 
-      if (payResult.height) {
-        setIcpPayIng(false)
-        setIcpPayStatus(true)
-        console.log('Payment success! Please wait, the name is being picked up for you. ')
-
-        try {
-          let result = await serviceApi.confirmOrder(payResult.height);
-          console.log('confirmOrder', result);
-          if (result) {
-            setTimeout(() => { history.push('/myaccount') }, 3000);
-            console.log('You got the name! please check it out from MyAccount')
-          } else {
-            console.log('fail confirm order,but payment success')
-            setTimeout(() => { history.push('/myaccount') }, 6000);
-          }
-        }
-        catch (err) {
-          console.log(`fail confirm order, ${JSON.stringify(err)}`)
-        }
-        finally {
+      try {
+        let result = await serviceApi.confirmOrder(payResult.height);
+        console.log('confirmOrder', result);
+        if (result) {
           setSystemStatus(true)
-          setIcpPayIng(true)
-          deleteCache('getNamesOfRegistrant' + auth.walletAddress)
-          deleteCache('namesOfController' + auth.walletAddress)
+
+          setIcpPayIng(false)
+          setIcpPayStatus(true)
+          setTimeout(() => { history.push('/myaccount') }, 3000);
+          console.log('You got the name! please check it out from MyAccount')
+        } else {
+          console.log('fail confirm order, but payment success')
+          throw "failed to confirm from api";
         }
       }
-      else {
-        setIcpPayIng(false)
-        setLoadingSubmit(false)
-        setSystemStatus(false)
-        setHasRefund(true)
-        errorToast('fail confirm order')
+      catch (err) {
+        console.log(`fail confirm order, ${JSON.stringify(err)}`);
+        throw err;
       }
-
+      finally {
+        deleteCache('getNamesOfRegistrant' + auth.walletAddress)
+        deleteCache('namesOfController' + auth.walletAddress)
+      }
 
     } catch (err) {
       // setLoadingSubmit(false);
       setIcpPayIng(false)
       setIcpPayStatus(false)
-      console.log(`fail transfer with error: ${err}`);
+      console.log(`Payment failed: ${JSON.stringify(err)}`);
       return
     }
   }
@@ -332,7 +321,7 @@ export const Pay = (props) => {
                     It's almost done, ICNaming is doing the final confirmation.</Timeline.Item>
                 </React.Fragment>
                 :
-                <Timeline.Item type="error">Payment failure</Timeline.Item>
+                <Timeline.Item type="error">Failed to transfer or confirm, please DO NOT retry to pay before checking your balance. If you find out your balance is taken, please wait and check in "My Account" page by refreshing, your order will be confirmed automatically by system within 5 minutes.</Timeline.Item>
           }
         </Timeline>
         {
