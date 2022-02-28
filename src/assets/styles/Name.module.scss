@@ -287,7 +287,7 @@
   display: inline-block !important;
 }
 .selcet-quota{
-  margin-left: 40px;
+  
   min-width: 260px !important;
   border: 1px solid #00CFBB !important;
   background: rgba(0, 207, 187, 0.1) !important;
@@ -343,8 +343,29 @@
   vertical-align:super
 }
 
+.btn-reg-wrap{
+  flex-direction: column;
+  .btn-via-icp,
+  .selcet-quota{
+    margin-bottom: .75rem;
+    width: 100% !important;
+  }
+  .selcet-quota{
+    margin-left: 0;
+  }
+}
 @media screen and (min-width: 576px){
-  
+  .btn-reg-wrap{
+    flex-direction: row;
+    .btn-via-icp,
+    .selcet-quota{
+      margin-bottom: 0;
+      min-width: 260 !important;
+    }
+    .selcet-quota{
+      margin-left: 40px;
+    }
+  }
 .records{
   .flexrow{
     .flexcol:nth-child(2){
