@@ -174,7 +174,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                     {
                       avaliableQuotas.length > 0 &&
                       <Select size='large' className={styles['selcet-quota']}
-                        placeholder="Please choose you quota"
+                        placeholder="Please choose your quota"
                         onChange={(e) => {
                           registerVidQuota(e)
                         }}>
