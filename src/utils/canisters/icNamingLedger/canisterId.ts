@@ -8,7 +8,10 @@ const getICNamingLedgerId = (): Principal => {
     return Principal.fromText("ceilt-sqaaa-aaaam-aacca-cai");
   }
   if (isTestNetEnv()) {
-    return Principal.fromText("ra2t7-3aaaa-aaaaj-aahzq-cai");
+    // test
+    // return Principal.fromText("ra2t7-3aaaa-aaaaj-aahzq-cai");
+    // main
+    return Principal.fromText("ceilt-sqaaa-aaaam-aacca-cai");
   }
   throw new Error("Unknown environment");
 };

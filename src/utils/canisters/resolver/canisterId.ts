@@ -5,10 +5,13 @@ const getResolverId = (): Principal => {
     return Principal.fromText("r7inp-6aaaa-aaaaa-aaabq-cai");
   }
   if (isMainNetEnv()) {
-    return Principal.fromText("uzy66-pqaaa-aaaal-qaalq-cai");
+    return Principal.fromText("cwo4k-6aaaa-aaaam-aacba-cai");
   }
   if (isTestNetEnv()) {
-    return Principal.fromText("okpdp-caaaa-aaaal-qac6q-cai");
+    // test
+    // return Principal.fromText("okpdp-caaaa-aaaal-qac6q-cai");
+    // main
+    return Principal.fromText("cwo4k-6aaaa-aaaam-aacba-cai");
   }
   throw new Error("Unknown environment");
 };
