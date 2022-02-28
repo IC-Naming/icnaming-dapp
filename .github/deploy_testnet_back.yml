@@ -30,4 +30,4 @@ jobs:
             invalidation: /*
             delete-removed: true
             no-cache: false
-            private: true
+            private: true 

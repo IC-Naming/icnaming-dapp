@@ -1,4 +1,4 @@
-name: Deploy MainNet Asset to TestNet
+name: TestNet CI
 on:
   push:
     branches:
@@ -24,9 +24,9 @@ jobs:
           uses: reggionick/s3-deploy@v3
           with:
             folder: build
-            bucket: ${{ secrets.S3_BUCKET }}
+            bucket: ${{ secrets.TESTNET_S3_BUCKET }}
             bucket-region: ${{ secrets.S3_BUCKET_REGION }}
-            dist-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+            dist-id: ${{ secrets.TESTNET_CLOUDFRONT_DISTRIBUTION_ID }}
             invalidation: /*
             delete-removed: true
             no-cache: false
