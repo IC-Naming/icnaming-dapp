@@ -322,7 +322,7 @@ export const Pay = (props) => {
             !icpPayStatus &&
             <div className={payStyles['btn-wrap']}>
               <button className={payStyles['btn']} onClick={() => { setLoadingSubmit(false) }}>
-                cancel
+                Cancel
               </button>
               <button className={payStyles['btn']} style={{ marginLeft: 10 }}
                 onClick={() => { setLoadingSubmit(false) }}
