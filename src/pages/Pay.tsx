@@ -44,11 +44,13 @@ export const Pay = (props) => {
   }
   useEffect(() => {
     console.log('pay myInfo', myInfo.orderInfo)
-    let nameLen = myInfo.orderInfo.nameLen >= 7 ? 7 : myInfo.orderInfo.nameLen;
+    let nameLen = myInfo.orderInfo.name.replace('.icp', "").length;
+    nameLen = nameLen >= 7 ? 7 : nameLen;
     if (myInfo.orderInfo.payType === 'icp') {
       const icpToCycles = localStorage.getItem('icpToCycles')
       if (icpToCycles) {
         const icpToCyclesObj = JSON.parse(icpToCycles)
+        console.log(`${icpToCyclesObj[nameLen - 1].icp} ICP ≈ ${icpToCyclesObj[nameLen - 1].cycles} T Cycles`)
         setIcpPayAmountDesc(`${icpToCyclesObj[nameLen - 1].icp} ICP ≈ ${icpToCyclesObj[nameLen - 1].cycles} T Cycles`)
       }
       if ("WaitingToRefund" in myInfo.orderInfo.payStatus) {
