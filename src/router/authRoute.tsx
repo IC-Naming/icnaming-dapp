@@ -1,8 +1,7 @@
 import React from 'react';
 import { Route, Redirect } from "react-router-dom";
-import { useAuthWallet } from '../context/AuthWallet';
 export function AuthRoute(props:any) {
-  const { ...useAuth } = useAuthWallet()
+  const connectStatus = sessionStorage.getItem("connectStatus");
   const targetRouteObj =  props;
 
   if (targetRouteObj && targetRouteObj.comingsoon) {
@@ -16,7 +15,7 @@ export function AuthRoute(props:any) {
     )
   }
 
-  if (useAuth.isAuthWalletConnected) {
+  if (connectStatus === 'connected') {
     if (targetRouteObj) {
       let { component, path } = targetRouteObj
       return <Route exact path={path} component={component}></Route>

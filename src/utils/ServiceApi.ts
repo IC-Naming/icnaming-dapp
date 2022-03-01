@@ -146,6 +146,7 @@ export default class ServiceApi {
       if ("Ok" in res) {
         return res.Ok;
       } else {
+        console.log(res.Err)
         throw new CanisterError(res.Err);
       }
     });
@@ -240,7 +241,7 @@ export default class ServiceApi {
       offset: BigInt(0),
       limit: BigInt(100),
     };
-    console.log('getNamesOfRegistrant----------', address)
+    // console.log('getNamesOfRegistrant----------', address)
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_names(address, pagingArgs);
       console.log('get_names----------', res)

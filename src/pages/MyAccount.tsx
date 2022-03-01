@@ -7,6 +7,7 @@ import ServiceApi from '../utils/ServiceApi';
 import { useAuthWallet } from '../context/AuthWallet';
 import dateFormat from "dateformat";
 import { queryWithCache } from '../utils/localCache';
+import { Skeleton } from '@douyinfe/semi-ui';
 
 export const MyAccount = () => {
   const { ...authWallet } = useAuthWallet();
@@ -27,7 +28,7 @@ export const MyAccount = () => {
       }, 'myNamesOfFavorite' + authWallet.walletAddress);
     }
   }
-  
+
   useEffect(() => {
     const ac = new AbortController();
     if (authWallet.walletAddress) {
@@ -43,7 +44,7 @@ export const MyAccount = () => {
             reject(errs)
           });
         })
-      }, 'getNamesOfRegistrant' + authWallet.walletAddress,60).then(async (res) => {
+      }, 'getNamesOfRegistrant' + authWallet.walletAddress, 60).then(async (res) => {
         console.log("my address result of registation", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
@@ -92,55 +93,70 @@ export const MyAccount = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authWallet.walletAddress])
 
+
+  const myAccountId = (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', width: '80%', marginBottom: '2rem' }}>
+        <Skeleton.Avatar style={{ width: 70, height: 60, marginRight: '1rem' }} />
+        <Skeleton.Title style={{ width: '100%', height: 32 }} />
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
+        <Skeleton.Button style={{ marginRight: 5 }} />
+        <Skeleton.Button />
+      </div>
+      <div className={styles['skeleton-pargraph']}>
+        <Skeleton.Paragraph rows={3} />
+      </div>
+    </>
+  );
   return (
     <div className={styles.serach}>
       <div className="container pt-5">
         <div className={styles['serach-content']}>
           <SearchInput />
           <Container className={`pt-5`}>
+            <div className={styles['search-address']}>
+              <Skeleton placeholder={myAccountId} loading={loading} style={{ width: '100%' }} active>
+                <span className={styles.icon}><i className="bi bi-person"></i></span>
+                <span className={styles.address}>{authWallet.walletAddress}</span>
+                <CopyToClipboard text={authWallet.walletAddress} />
+              </Skeleton>
+            </div>
             {
-              loading ?
-                <div className="text-center">
-                  <div className="spinner-border text-primary" role="status"></div>
-                </div> :
-                <>
-                  <div className={styles['search-address']}>
-                    <span className={styles.icon}><i className="bi bi-person"></i></span>
-                    <span className={styles.address}>{authWallet.walletAddress}</span>
-                    <CopyToClipboard text={authWallet.walletAddress} />
-                  </div>
-                  <div className={styles['search-result']}>
-                    <Tabs defaultActiveKey="registrant" className="mb-3">
-                      <Tab eventKey="registrant" title="Registrant">
-                        {
-                          namesOfRegistrant.length > 0 ?
-                            <div className={styles.list}>
-                              {
-                                namesOfRegistrant.map((item, index) => {
-                                  return <Card key={index} name={item.name} regTime={item.expireAt} available={false} isMyAccount={true} favorite={item.favorite} />
-                                })
-                              }
-                            </div> :
-                            <div className="nodata"><span>No data</span></div>
-                        }
-                      </Tab>
-                      <Tab eventKey="controller" title="Controller">
-                        {
-                          namesOfController.length > 0 ?
-                            <div className={styles.list}>
-                              {
-                                namesOfController.map((item, index) => {
-                                  return <Card key={index} name={item.name} regTime="" available={false} isMyAccount={true} favorite={item.favorite} />
-                                })
-                              }
-                            </div> :
-                            <div className="nodata"><span>No data</span></div>
-                        }
-                      </Tab>
-                    </Tabs>
-                  </div>
-                </>
+              loading ? null :
+                <div className={styles['search-result']}>
+
+                  <Tabs defaultActiveKey="registrant" className="mb-3">
+                    <Tab eventKey="registrant" title="Registrant">
+                      {
+                        namesOfRegistrant.length > 0 ?
+                          <div className={styles.list}>
+                            {
+                              namesOfRegistrant.map((item, index) => {
+                                return <Card key={index} name={item.name} regTime={item.expireAt} available={false} isMyAccount={true} favorite={item.favorite} />
+                              })
+                            }
+                          </div> :
+                          <div className="nodata" style={{ background: 'none' }}><span>No data</span></div>
+                      }
+                    </Tab>
+                    <Tab eventKey="controller" title="Controller">
+                      {
+                        namesOfController.length > 0 ?
+                          <div className={styles.list}>
+                            {
+                              namesOfController.map((item, index) => {
+                                return <Card key={index} name={item.name} regTime="" available={false} isMyAccount={true} favorite={item.favorite} />
+                              })
+                            }
+                          </div> :
+                          <div className="nodata" style={{ background: 'none' }}><span>No data</span></div>
+                      }
+                    </Tab>
+                  </Tabs>
+                </div>
             }
+
           </Container>
         </div>
       </div>

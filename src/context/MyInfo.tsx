@@ -47,26 +47,27 @@ function useProvideMyInfo() {
       payType: order.payType,
       quotaType: order.quotaType,
     })
+    localStorage.setItem('orderInfo', JSON.stringify(order))
   }
 
   const getMyQuotas = async () => {
+    const get_MyQuotas = async (user: Principal) => {
+      const quota4 = await serviceApi.getQuota(user, 4);
+      const quota5 = await serviceApi.getQuota(user, 5);
+      const quota6 = await serviceApi.getQuota(user, 6);
+      const quota7 = await serviceApi.getQuota(user, 7);
+      return Promise.all([quota4, quota5, quota6, quota7])
+    }
     if (auth.principal) {
-      const get_MyQuotas = async (user: Principal) => {
-        const quota4 = await serviceApi.getQuota(user, 4);
-        const quota5 = await serviceApi.getQuota(user, 5);
-        const quota6 = await serviceApi.getQuota(user, 6);
-        const quota7 = await serviceApi.getQuota(user, 7);
-        return Promise.all([quota4, quota5, quota6, quota7])
-      }
       const res = await get_MyQuotas(auth.principal);
-      console.log(res)
+      console.log('myQuotas', res)
       localStorage.setItem('myQuotas', JSON.stringify(res))
       setQuotas(res)
     }
   }
+
   const checkPendingOrder = async () => {
     serviceApi.getPendingOrder().then(res => {
-      console.log('checkPendingOrdersssss',res)
       if (res.length !== 0) {
         setPendingOrder(true)
         setOrderInfo({
@@ -83,13 +84,14 @@ function useProvideMyInfo() {
   }
 
   useEffect(() => {
-    console.log('getMyQuotas principal -----------------',auth.principal)
-    if (auth.principal) {
-      getMyQuotas();
-      checkPendingOrder();
+    if (sessionStorage.getItem('connectStatus') === 'connected') {
+      if (auth.walletAddress) {
+        getMyQuotas();
+        checkPendingOrder();
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.principal])
+  }, [auth.walletAddress])
 
   const getIcpToCycles = async () => {
     const res_IcpToCycles = await serviceApi.getIcpToCycles();
@@ -132,7 +134,7 @@ function useProvideMyInfo() {
     getMyQuotas,
     getIcpToCycles,
     checkPendingOrder,
-    cleanPendingOrder:()=>{setPendingOrder(false)}
+    cleanPendingOrder: () => { setPendingOrder(false) }
   }
 }
 

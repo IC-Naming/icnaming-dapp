@@ -7,9 +7,10 @@ import dateFormat from "dateformat";
 import { queryWithCache } from '../utils/localCache';
 import { Container } from 'react-bootstrap';
 import { CanisterError } from '../utils/exception';
+import { Skeleton } from '@douyinfe/semi-ui';
 
 export const Favourites = () => {
-  const { ...auth } = useAuthWallet();
+  const { ...authWallet } = useAuthWallet();
   const serviceApi = new ServiceApi();
   const [loading, setLoading] = useState<boolean>(true)
   const [nameResult, setNameResult] = useState<any>();
@@ -24,14 +25,14 @@ export const Favourites = () => {
         const favoriteNamesSevice = await serviceApi.getFavoriteNames()
         localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
         return serviceApi.getFavoriteNames();
-      }, 'myNamesOfFavorite' + auth.walletAddress);
+      }, 'myNamesOfFavorite' + authWallet.walletAddress);
     }
   }
 
   useEffect(() => {
     setLoading(true)
     const getMyFavoriteNames = async () => {
-      if (auth.walletAddress) {
+      if (authWallet.walletAddress) {
         let myNamesOfFavorite = await getMyFavourites()
         const myFavoriteNamesWithExpireAt = myNamesOfFavorite.map(async (item: string) => {
           const isMyAccount = await serviceApi.getRegistrantOfName(item) || false;
@@ -42,7 +43,7 @@ export const Favourites = () => {
           return {
             name: item,
             available: available,
-            isMyAccount: isMyAccount.toText() === auth.principal?.toText() ? true : false,
+            isMyAccount: isMyAccount.toText() === authWallet.principal?.toText() ? true : false,
             expireAt: expireAtOfName > 0 ? 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime") : ''
           }
         })
@@ -51,7 +52,7 @@ export const Favourites = () => {
         setLoading(false) */
         queryWithCache(async () => {
           return await Promise.all(myFavoriteNamesWithExpireAt);
-        }, 'favoriteall' + auth.walletAddress).then(res => {
+        }, 'favoriteall' + authWallet.walletAddress).then(res => {
           setNameResult(res)
           setLoading(false)
         }).catch(err => {
@@ -66,43 +67,53 @@ export const Favourites = () => {
       setNameResult(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.walletAddress])
+  }, [authWallet.walletAddress])
 
+  const favList = (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', width: '80%', marginBottom: '2rem' }}>
+        <Skeleton.Avatar style={{ width: 70, height: 60, marginRight: '1rem' }} />
+        <Skeleton.Title style={{ width: '100%', height: 32 }} />
+      </div>
+      <div className={styles['skeleton-pargraph']}>
+        <Skeleton.Paragraph rows={3} />
+      </div>
+    </>
+  );
   return (
     <div className={styles.serach}>
       <div className="container pt-5">
         <div className={styles['serach-content']}>
           <Container className={`pt-5`}>
+            <div className={styles['search-address']}>
+              <Skeleton placeholder={favList} loading={loading} style={{ width: '100%' }} active>
+                <span className={styles.icon}><i className="bi bi-person"></i></span>
+                <span className={styles.address}>{authWallet.walletAddress}</span>
+                <CopyToClipboard text={authWallet.walletAddress} />
+              </Skeleton>
+            </div>
             {
-              loading ?
-                <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
-                :
-                <>
-                  <div className={styles['search-address']}>
-                    <span className={styles.icon}><i className="bi bi-person"></i></span>
-                    <span className={styles.address}>{auth.walletAddress}</span>
-                    <CopyToClipboard text={auth.walletAddress} />
-                  </div>
-                  <div className={styles['search-result']}>
-                    {
-                      nameResult && nameResult.length > 0 ?
-                        <div className={styles.list}>
-                          {
-                            nameResult?.map((item, index) => {
-                              return <Card key={index}
-                                name={item?.name}
-                                regTime={item?.expireAt}
-                                available={item?.available}
-                                isMyAccount={item?.isMyAccount}
-                                favorite={true} />
-                            })
-                          }
-                        </div>
-                        :
-                        <div className="nodata" style={{background:'none'}}><span>No data</span></div>
-                    }
-                  </div>
-                </>
+              !loading &&
+              <div className={styles['search-result']}>
+                {
+                  nameResult && nameResult.length > 0 ?
+                    <div className={styles.list}>
+                      {
+                        nameResult?.map((item, index) => {
+                          return <Card key={index}
+                            name={item?.name}
+                            regTime={item?.expireAt}
+                            available={item?.available}
+                            isMyAccount={item?.isMyAccount}
+                            favorite={true} />
+                        })
+                      }
+                    </div>
+                    :
+                    <div className="nodata" style={{ background: 'none' }}><span>No data</span></div>
+                }
+              </div>
+
             }
           </Container>
         </div>

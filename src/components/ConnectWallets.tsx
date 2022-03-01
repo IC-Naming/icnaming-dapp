@@ -23,11 +23,14 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
           position: "top-center"
         })
       }
-    }).catch(error => {
-      console.log(error)
-      toast.error('fail connect', {
+    }).catch(err => {
+      hide();
+      console.log(err)
+      toast.error(`${err}`, {
         position: "top-center"
       })
+    }).finally(() => {
+      setConnecting(false)
     });
   }
 
