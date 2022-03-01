@@ -29,7 +29,6 @@ export const Refund = (props) => {
           theme: 'dark'
         })
         myInfo.cleanPendingOrder()
-        history.push('/')
       }
       setVisiableModalTipFull(false)
     }).catch(err => {
@@ -41,6 +40,9 @@ export const Refund = (props) => {
           theme: 'dark'
         })
       }
+    }).finally(() => {
+      setLoading(false);
+      history.push('/');
     })
   }
 
@@ -53,7 +55,7 @@ export const Refund = (props) => {
       </Row>
       <div className="d-grid gap-2">
         <button className={styles.btn} onClick={() => { refund() }}>
-          {loading && <Spinner animation="border" size="sm" />}
+          {loading && <Spinner animation="border" size="sm" style={{marginRight:10}} />}
           Refund
         </button>
       </div>

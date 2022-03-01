@@ -69,7 +69,7 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  .btn-pay-quota{
+  .btn-pay-quota,.btn-pay-icp{
     width: 100%;
     margin-right: 0 !important;
   }
@@ -81,7 +81,7 @@
 @media screen and (min-width: 576px){
   .btn-pay-wrap{
     flex-direction: row;
-    .btn-pay-quota{
+    .btn-pay-quota,.btn-pay-icp{
       width: 260px;
       margin-right: 0 !important;
     }

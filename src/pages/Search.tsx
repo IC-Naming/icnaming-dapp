@@ -208,13 +208,6 @@ export const Search = (props) => {
       <div className="container pt-5">
         <div className={styles['serach-content']}>
           <SearchInput word={typeof word === 'string' ? word : word.toText()} />
-          {/* <div className={styles['pending-order']}>
-            <Banner
-              closeIcon={null}
-              type="info"
-              description={<>you have pending order <Link to="/pay">View</Link></>}
-            />
-          </div> */}
           <Container className={`pt-5`}>
             {
               (loading || pendingOrderLoading) ?
