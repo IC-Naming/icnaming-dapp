@@ -7,7 +7,7 @@ import ServiceApi from '../utils/ServiceApi';
 import { useAuthWallet } from '../context/AuthWallet';
 import dateFormat from "dateformat";
 import { queryWithCache } from '../utils/localCache';
-import { Skeleton } from '@douyinfe/semi-ui';
+import { Skeleton, Pagination, List } from '@douyinfe/semi-ui';
 
 export const MyAccount = () => {
   const { ...authWallet } = useAuthWallet();
@@ -15,6 +15,9 @@ export const MyAccount = () => {
   const [loading, setLoading] = useState<boolean>(true)
   const [namesOfRegistrant, setNamesOfRegistrant] = useState<any>();
   const [namesOfController, setNamesOfController] = useState<any>();
+  const [pageReg, onPageRegChange] = useState<number>(1);
+  const [pageCtrl, onPageCtrlChange] = useState<number>(1);
+  let pageSize = 5;
 
   const getMyFavourites = async () => {
     let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
@@ -30,7 +33,7 @@ export const MyAccount = () => {
   }
 
   useEffect(() => {
-    const ac = new AbortController();
+
     if (authWallet.walletAddress) {
       const wordParam: Principal = Principal.fromText(authWallet.walletAddress);
       let getNamesOfRegistrantLoaded = false;
@@ -45,10 +48,9 @@ export const MyAccount = () => {
           });
         })
       }, 'getNamesOfRegistrant' + authWallet.walletAddress, 60).then(async (res) => {
-        console.log("my address result of registation", res)
+        // console.log("my address result of registation", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
-
         const names = res.map(n => {
           const expireAt = 'Expires ' + dateFormat(new Date(Number(n.expired_at)), "isoDateTime")
           let fav = myNamesOfFavorite.find(item => item === n.name);
@@ -73,7 +75,7 @@ export const MyAccount = () => {
           });
         })
       }, 'namesOfController' + authWallet.walletAddress).then(async (res) => {
-        console.log("my address result of controller", res)
+        // console.log("my address result of controller", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
         const names = res.map(n => {
@@ -88,11 +90,19 @@ export const MyAccount = () => {
         console.log(err)
         setLoading(false)
       })
-      return () => ac.abort();
+      return () => {
+        setLoading(true)
+      };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authWallet.walletAddress])
 
+
+  const getData = (page: number) => {
+    let start = (page - 1) * pageSize;
+    let end = page * pageSize;
+    return namesOfRegistrant.slice(start, end);
+  }
 
   const myAccountId = (
     <>
@@ -128,29 +138,29 @@ export const MyAccount = () => {
 
                   <Tabs defaultActiveKey="registrant" className="mb-3">
                     <Tab eventKey="registrant" title="Registrant">
+                      <List
+                        dataSource={getData(pageReg)}
+                        split={false}
+                        className={styles.list}
+                        renderItem={item =>
+                          <Card key={item.name} name={item.name} expireAt={item.expireAt} available={false} isMyAccount={true} favorite={item.favorite} />
+                        }
+                      />
                       {
-                        namesOfRegistrant.length > 0 ?
-                          <div className={styles.list}>
-                            {
-                              namesOfRegistrant.map((item, index) => {
-                                return <Card key={index} name={item.name} regTime={item.expireAt} available={false} isMyAccount={true} favorite={item.favorite} />
-                              })
-                            }
-                          </div> :
-                          <div className="nodata" style={{ background: 'none' }}><span>No data</span></div>
+                        namesOfRegistrant.length > 0 && <Pagination className='ic-pagination' pageSize={pageSize} currentPage={pageReg} total={namesOfRegistrant.length} onChange={cPage => onPageRegChange(cPage)}></Pagination>
                       }
                     </Tab>
                     <Tab eventKey="controller" title="Controller">
+                      <List
+                        dataSource={getData(pageCtrl)}
+                        split={false}
+                        className={styles.list}
+                        renderItem={item =>
+                          <Card name={item.name} expireAt="" available={false} isMyAccount={true} favorite={item.favorite} />
+                        }
+                      />
                       {
-                        namesOfController.length > 0 ?
-                          <div className={styles.list}>
-                            {
-                              namesOfController.map((item, index) => {
-                                return <Card key={index} name={item.name} regTime="" available={false} isMyAccount={true} favorite={item.favorite} />
-                              })
-                            }
-                          </div> :
-                          <div className="nodata" style={{ background: 'none' }}><span>No data</span></div>
+                        namesOfController.length > 0 && <Pagination className='ic-pagination' pageSize={pageSize} currentPage={pageCtrl} total={namesOfRegistrant.length} onChange={cPage => onPageCtrlChange(cPage)}></Pagination>
                       }
                     </Tab>
                   </Tabs>

@@ -87,12 +87,11 @@ export default class ServiceApi {
     if (word.length > 0) {
       return executeWithLogging(async () => {
         const res = await this.registrarQueryActor.available(`${word}`);
-        console.log('registrarQueryActor-available', res);
+        // console.log('registrarQueryActor-available', res);
         // if res is ErrorInfo
         if ("Ok" in res) {
           return res.Ok;
         } else {
-          console.log(res.Err)
           throw new CanisterError(res.Err);
         }
       });
@@ -103,7 +102,6 @@ export default class ServiceApi {
   public expireAtOf = (name: string): Promise<number> => {
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_name_expires(name);
-      console.log('expireAtOf-------------------', res)
       if ("Ok" in res) {
         return Number(res.Ok);
       } else {
@@ -118,14 +116,13 @@ export default class ServiceApi {
     quota: number
   ): Promise<boolean> => {
     return executeWithLogging(async () => {
-      console.log("reg name", name);
+      // console.log("reg name", name);
       // convert quota to QuotaType
       const quotaParsed: QuotaType = { LenGte: quota };
       const res = await this.registrarUpdateActor.register_with_quota(
         name,
         quotaParsed
       );
-      console.log(res);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -140,13 +137,12 @@ export default class ServiceApi {
     years: number
   ): Promise<SubmitOrderResponse> => {
     return executeWithLogging(async () => {
-      console.log("reg name", name);
+      // console.log("reg name", name);
       const res = await this.registrarUpdateActor.submit_order({ name, years });
       console.log('submit_order',res);
       if ("Ok" in res) {
         return res.Ok;
       } else {
-        console.log(res.Err)
         throw new CanisterError(res.Err);
       }
     });
@@ -180,7 +176,7 @@ export default class ServiceApi {
   public getPendingOrder = (): Promise<[] | [GetNameOrderResponse]> => {
     return executeWithLogging(async () => {
       const res = await this.registrarUpdateActor.get_pending_order();
-      console.log('get_pending_order', res);
+      // console.log('get_pending_order', res);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -225,7 +221,7 @@ export default class ServiceApi {
       const res = await this.resolverUpdateActor.set_record_value(name, [
         [key, value],
       ]);
-      console.log("setRecord", res);
+      // console.log("setRecord", res);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -244,7 +240,7 @@ export default class ServiceApi {
     // console.log('getNamesOfRegistrant----------', address)
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_names(address, pagingArgs);
-      console.log('get_names----------', res)
+      // console.log('get_names----------', res)
       if ("Ok" in res) {
         return res.Ok.items;
       } else {
@@ -383,7 +379,7 @@ export default class ServiceApi {
   public getNameDetails = (name: string): Promise<any> => {
     return executeWithLogging(async () => {
       const isAvailable = await this.available(name).catch(() => false);
-      console.log('getNameDetails =========== isAvailable',isAvailable)
+      // console.log('getNameDetails =========== isAvailable',isAvailable)
       if (isAvailable) {
         return {
           name: "ICP",
@@ -414,6 +410,7 @@ export default class ServiceApi {
   public getFavoriteNames = (): Promise<Array<string>> => {
     return executeWithLogging(async () => {
       const res = await this.favoritesActor.get_favorites();
+      console.log('favoritesActor.get_favorites',res)
       if ("Ok" in res) {
         return res.Ok;
       } else {

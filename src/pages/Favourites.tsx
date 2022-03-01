@@ -7,13 +7,15 @@ import dateFormat from "dateformat";
 import { queryWithCache } from '../utils/localCache';
 import { Container } from 'react-bootstrap';
 import { CanisterError } from '../utils/exception';
-import { Skeleton } from '@douyinfe/semi-ui';
+import { List, Pagination, Skeleton } from '@douyinfe/semi-ui';
 
 export const Favourites = () => {
   const { ...authWallet } = useAuthWallet();
   const serviceApi = new ServiceApi();
   const [loading, setLoading] = useState<boolean>(true)
-  const [nameResult, setNameResult] = useState<any>();
+  const [nameResult, setNameResult] = useState<Array<any>>([]);
+  const [page, onPageChange] = useState<number>(1);
+  let pageSize = 5;
 
   const getMyFavourites = async () => {
     let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
@@ -47,9 +49,6 @@ export const Favourites = () => {
             expireAt: expireAtOfName > 0 ? 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime") : ''
           }
         })
-        /* const res = await Promise.all(myFavoriteNamesWithExpireAt)
-        setNameResult(res)
-        setLoading(false) */
         queryWithCache(async () => {
           return await Promise.all(myFavoriteNamesWithExpireAt);
         }, 'favoriteall' + authWallet.walletAddress).then(res => {
@@ -64,11 +63,17 @@ export const Favourites = () => {
     getMyFavoriteNames()
     return () => {
       setLoading(false);
-      setNameResult(null);
+      setNameResult([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authWallet.walletAddress])
 
+  const getData = (page: number) => {
+    let start = (page - 1) * pageSize;
+    let end = page * pageSize;
+    if (nameResult.length > 0)
+      return nameResult.slice(start, end);
+  }
   const favList = (
     <>
       <div style={{ display: 'flex', alignItems: 'center', width: '80%', marginBottom: '2rem' }}>
@@ -93,27 +98,25 @@ export const Favourites = () => {
               </Skeleton>
             </div>
             {
-              !loading &&
-              <div className={styles['search-result']}>
-                {
-                  nameResult && nameResult.length > 0 ?
-                    <div className={styles.list}>
-                      {
-                        nameResult?.map((item, index) => {
-                          return <Card key={index}
-                            name={item?.name}
-                            regTime={item?.expireAt}
-                            available={item?.available}
-                            isMyAccount={item?.isMyAccount}
-                            favorite={true} />
-                        })
-                      }
-                    </div>
-                    :
-                    <div className="nodata" style={{ background: 'none' }}><span>No data</span></div>
-                }
-              </div>
-
+              loading ? null :
+                <div className={styles['search-result']}>
+                  <List
+                    dataSource={getData(page)}
+                    split={false}
+                    className={styles.list}
+                    renderItem={item =>
+                      <Card
+                        name={item?.name}
+                        expireAt={item?.expireAt}
+                        available={item?.available}
+                        isMyAccount={item?.isMyAccount}
+                        favorite={true} />
+                    }
+                  />
+                  {
+                    nameResult.length > 0 && <Pagination className='ic-pagination' pageSize={pageSize} currentPage={page} total={nameResult.length} onChange={cPage => onPageChange(cPage)}></Pagination>
+                  }
+                </div>
             }
           </Container>
         </div>

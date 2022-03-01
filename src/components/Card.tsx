@@ -11,12 +11,12 @@ import { PendingOrderTip } from '.';
 
 export interface CardProps {
   name: string,
-  regTime: string,
+  expireAt: string,
   available: boolean,
   isMyAccount?: boolean,
   favorite: boolean,
 }
-export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccount, favorite }) => {
+export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccount, favorite }) => {
   const { ...auth } = useAuthWallet();
   const { ...myInfo } = useMyInfo();
   const history = useHistory();
@@ -108,7 +108,7 @@ export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccoun
           <i className={`bi ${isFavorite ? 'bi-heart-fill' : 'bi-heart'}`}></i>
         </div>
         <div className={styles.name}>{name}</div>
-        <div className={styles.time}>{regTime}</div>
+        <div className={styles.time}>{expireAt}</div>
       </div>
       {
         isMyAccount ? null

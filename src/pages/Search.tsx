@@ -239,7 +239,7 @@ export const Search = (props) => {
                             <PendingOrderCard order={existPendingOrderInfo}></PendingOrderCard>
                             :
                             <Card name={nameSearchResult?.name || ''}
-                              regTime={nameSearchResult?.expireAt || ''}
+                              expireAt={nameSearchResult?.expireAt || ''}
                               available={nameSearchResult?.available || false}
                               favorite={nameSearchResult?.favorite || false} />
                           }
@@ -254,7 +254,7 @@ export const Search = (props) => {
                                   {
                                     namesOfRegistrant?.map((item, index) => {
                                       return <Card key={index} name={`${item.name}`}
-                                        regTime={`Expires ${item?.expireAt}`}
+                                        expireAt={`Expires ${item?.expireAt}`}
                                         available={item.available}
                                         favorite={item.favorite} />
                                     })
@@ -270,7 +270,7 @@ export const Search = (props) => {
                                 <div className={styles.list}>
                                   {
                                     namesOfController?.map((item, index) => {
-                                      return <Card key={index} name={`${item.name}`} regTime="" available={item.available} favorite={item.favorite} />
+                                      return <Card key={index} name={`${item.name}`} expireAt="" available={item.available} favorite={item.favorite} />
                                     })
                                   }
                                 </div>

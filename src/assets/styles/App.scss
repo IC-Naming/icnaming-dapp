@@ -83,6 +83,14 @@
 .semi-modal-small{
   width: 100% !important;
 }
+.ic-pagination{
+  .semi-page-item-active{
+    color: #00FFE6;
+  }
+  .semi-page-item-active:hover{
+    color:#00CFBB;
+  }
+}
 @media (min-width: 576px){
   .container {
     max-width: 700px;

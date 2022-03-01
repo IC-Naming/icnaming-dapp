@@ -6,26 +6,29 @@ import { ProvideMyInfoContext } from './context/MyInfo';
 import routeMaps from "./router/routeMap"
 import { AuthRoute } from "./router/authRoute"
 import { Header, Footer } from "./components";
-
+import { LocaleProvider } from '@douyinfe/semi-ui';
+import en_US from '@douyinfe/semi-ui/lib/es/locale/source/en_US';
 const App = () => {
   return (
     <div className="App">
       <Router basename="/">
-        <ProvideConnectContext>
-          <Header />
-          <ProvideMyInfoContext>
-            <Switch>
-              {
-                routeMaps.map((routeData, index) => {
-                  return (
-                    <AuthRoute key={index} {...routeData} />
-                  )
-                })
-              }
-            </Switch>
-          </ProvideMyInfoContext>
-        </ProvideConnectContext>
-        <Footer />
+        <LocaleProvider locale={en_US}>
+          <ProvideConnectContext>
+            <Header />
+            <ProvideMyInfoContext>
+              <Switch>
+                {
+                  routeMaps.map((routeData, index) => {
+                    return (
+                      <AuthRoute key={index} {...routeData} />
+                    )
+                  })
+                }
+              </Switch>
+            </ProvideMyInfoContext>
+          </ProvideConnectContext>
+          <Footer />
+        </LocaleProvider>
       </Router>
     </div>
   );

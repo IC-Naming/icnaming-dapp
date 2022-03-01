@@ -7,11 +7,11 @@ import { useAuthWallet } from "../context/AuthWallet";
 import { formatAddress } from '../utils/helper';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
 export const Header = () => {
   const history = useHistory();
   const { ...authWallet } = useAuthWallet();
   const [showWallets, setShowWallets] = useState(false);
-
   const [menuVisible, setMenuVisible] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [currentPcIndex, setCurrentPcIndex] = useState(0)
@@ -38,7 +38,7 @@ export const Header = () => {
     }
   }
 
-  const logout = async () =>{
+  const logout = async () => {
     authWallet.quitWallet();
     history.push('/');
     setCurrentPcIndex(0)
@@ -77,7 +77,7 @@ export const Header = () => {
         { title: 'Favourites', path: '/favourites' },
         { title: 'FAQ', path: '/faq' },
       ])
-    }else{
+    } else {
       setNavitems([
         { title: 'Home', path: '/' },
         { title: 'FAQ', path: '/faq' },
@@ -85,13 +85,15 @@ export const Header = () => {
     }
   }, [authWallet.isAuthWalletConnected])
 
-
+ 
   return (
     <header className={`${styles.header} app-header`}>
       <div className={`${styles.navbar} container-xxl flex-wrap flex-md-nowrap`}>
         <span onClick={
-          () => {history.push('/')
-          houdlePcNav('logo')}
+          () => {
+            history.push('/')
+            houdlePcNav('logo')
+          }
         } className={`${styles['header-logo']} headerLogo`}>logo
         </span>
 
@@ -103,9 +105,11 @@ export const Header = () => {
           <ul className={`${styles['navbar-nav']} ms-md-auto ms-sm-auto`}>
             {
               navitems.map((item, index) => {
-                return <li key={index} className={`${styles['nav-item']} ${index === currentPcIndex ? styles.current : null}`}>
-                  <span className={styles['nav-link']} onClick={() => {history.push(item.path);houdlePcNav(index) }}>{item.title}</span>
-                </li>
+                
+                  return <li key={index} className={`${styles['nav-item']} ${index === currentPcIndex ? styles.current : null}`}>
+                    <span className={styles['nav-link']} onClick={() => { history.push(item.path); houdlePcNav(index) }}>{item.title}</span>
+                  </li>
+                
               })
             }
             <li className={styles['nav-item']}>

@@ -1,16 +1,12 @@
-
 import { Container, Tabs, Tab, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
-
 import { SearchInput, CopyToClipboard, Record, Register, ConnectWallets } from "../components";
 import styles from "../assets/styles/Name.module.scss";
-
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
 import { CanisterError } from "../utils/exception";
-
 
 export const Name = (props) => {
   const serviceApi = new ServiceApi();
@@ -37,7 +33,6 @@ export const Name = (props) => {
 
   const [recordsText, setRecordsText] = useState([
     { title: 'Email', key: 'email', value: "Not set" },
-    { title: 'Url', key: 'url', value: "Not set" },
     { title: 'Avatar', key: 'avatar', value: "Not set" },
     { title: 'Description', key: 'description', value: "Not set" },
     { title: 'Notice', key: 'notice', value: "Not set" },
@@ -57,33 +52,7 @@ export const Name = (props) => {
       let getNameDetailsLoaded = false;
       let getRecordsOfNameLoaded = false;
 
-      /* queryWithCache(() => {
-        return new Promise((resolve, reject) => {
-          serviceApi.getNameDetails(name).then(data => {
-            resolve(data)
-          }).catch(errs => {
-            reject(errs)
-          });
-        })
-      }, name + 'details').then(res => {
-        console.log('details', res)
-        setNameDetails(res);
-        getNameDetailsLoaded = true;
-        if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
-          setLoadingName(false);
-        }
-      }).catch(err => {
-        console.log(err)
-        setLoadingName(false);
-        toast.error('Get name details failed', {
-          position: "top-center",
-          autoClose: 2000,
-          theme: "dark",
-        });
-      }) */
-
       serviceApi.getNameDetails(name).then(res => {
-        console.log(name)
         console.log('details', res)
         setNameDetails(res);
         getNameDetailsLoaded = true;
@@ -92,12 +61,14 @@ export const Name = (props) => {
         }
       }).catch(err => {
         if(err in CanisterError){
-          console.log(err.message)
+          toast.error(err.message, {
+            position: "top-center",
+            theme: "dark",
+          });
         }
         setLoadingName(false);
         toast.error('Get name details failed', {
           position: "top-center",
-          autoClose: 2000,
           theme: "dark",
         });
       });
@@ -110,7 +81,7 @@ export const Name = (props) => {
             reject(errs)
           });
         })
-      }, name + 'Records').then(res => {
+      }, name + 'Records',30).then(res => {
         const records = recordsAddress.map(item => {
           const record = res.find(record => {
             console.log(record)
