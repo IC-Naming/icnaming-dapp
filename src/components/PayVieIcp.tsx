@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { Modal, Timeline, Spin } from "@douyinfe/semi-ui";
 import { useHistory } from "react-router-dom";
@@ -30,12 +30,57 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ icpPayAmountDesc, orderInfo, 
   const [icpPayStatus, setIcpPayStatus] = useState<boolean>(false)
   const [systemDetermine, setSystemDetermine] = useState<boolean>(false)
   const [systemStatus, setSystemStatus] = useState<boolean>(false)
+  const [systemStatusText, setSystemStatusText] = useState<any>('')
+  const [payHeight, setPayHeight] = useState<number>(0)
+
+  const confirmSystem = async () => {
+    console.log('payHeight-----------', payHeight)
+    try {
+      let result = await serviceApi.confirmOrder(BigInt(payHeight));
+      console.log('confirmOrder', result);
+      setSystemDetermine(true)
+      if (result === true) {
+        setSystemStatus(true)
+        console.log('You got the name! please check it out from MyAccount')
+        localStorage.removeItem('orderInfo')
+      } else {
+        setSystemStatus(false)
+        console.log('fail confirm order, but payment success')
+        setSystemStatusText(`fail confirm order${<br />} but payment success`)
+        throw new Error("failed to confirm from api");
+      }
+    }
+    catch (err) {
+      setSystemDetermine(true)
+      setSystemStatus(false)
+      localStorage.removeItem('orderInfo')
+      setSystemStatusText(`fail confirm order,${JSON.parse(JSON.stringify(err)).name}`);
+      console.log(`fail confirm order, ${JSON.stringify(err)}`);
+      throw err;
+    }
+    finally {
+      deleteCache('getNamesOfRegistrant' + auth.walletAddress)
+      deleteCache('namesOfController' + auth.walletAddress)
+    }
+  }
+
+  useEffect(() => {
+    if (payHeight !== 0) {
+      confirmSystem();
+    }
+    return () => {
+      setPayHeight(0)
+    }
+  }, [payHeight])
 
   const payVidIcp = async () => {
     if (loading) return
     setLoading(true)
     setIcpPayIng(true)
+
     const [availableResult, orderResult] = await Promise.all([serviceApi.available(orderInfo.name).catch(err => {
+      setLoading(false)
+      setIcpPayIng(false)
       toast.error(err.message, {
         position: 'top-center',
         autoClose: 2000,
@@ -53,6 +98,8 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ icpPayAmountDesc, orderInfo, 
       return
     } else {
       if (orderResult.length === 0) {
+        setLoading(false)
+        setIcpPayIng(false)
         toast.error('no pending order', {
           position: 'top-center',
           theme: 'dark'
@@ -70,40 +117,23 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ icpPayAmountDesc, orderInfo, 
       return arr.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"), "")
     }
     try {
-      const payResult = await window.ic.plug.requestTransfer({
-        to: arrayToHex(order.payment_account_id),
-        amount: Number(order.price_icp_in_e8s),
-        opts: {
-          fee: 10000,
-          memo: order.payment_memo.ICP.toString(),
-        },
-      });
-      console.log(`Pay success: ${JSON.stringify(payResult)}`);
-      setIcpPayIng(false);
-      setIcpPayStatus(true)
-      try {
-        let result = await serviceApi.confirmOrder(payResult.height);
-        console.log('confirmOrder', result);
-        setSystemDetermine(true)
-        if (result) {
-          setSystemStatus(true)
-          setTimeout(() => { history.push('/myaccount') }, 3000);
-          console.log('You got the name! please check it out from MyAccount')
-        } else {
-          setSystemStatus(false)
-          console.log('fail confirm order, but payment success')
-          throw new Error("failed to confirm from api");
-        }
-      }
-      catch (err) {
-        setSystemDetermine(true)
-        setSystemStatus(false)
-        console.log(`fail confirm order, ${JSON.stringify(err)}`);
-        throw err;
-      }
-      finally {
-        deleteCache('getNamesOfRegistrant' + auth.walletAddress)
-        deleteCache('namesOfController' + auth.walletAddress)
+      console.log(payHeight)
+      if (payHeight === 0) {
+        const payResult = await window.ic.plug.requestTransfer({
+          to: arrayToHex(order.payment_account_id),
+          amount: Number(order.price_icp_in_e8s),
+          opts: {
+            fee: 10000,
+            memo: order.payment_memo.ICP.toString(),
+          },
+        });
+        console.log(`Pay success: ${JSON.stringify(payResult)}`);
+        setPayHeight(payResult.height)
+        setIcpPayIng(false);
+        setIcpPayStatus(true);
+      }else{
+        setIcpPayIng(false);
+        setIcpPayStatus(true);
       }
     } catch (err) {
       setIcpPayIng(false)
@@ -122,9 +152,12 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ icpPayAmountDesc, orderInfo, 
       </Row>
       <div className={payStyles['btn-pay-wrap']}>
         <CancelOrderIcp name={orderInfo.name} />
-        <button className={`${styles.btn} ${payStyles['btn-pay-quota']}`} onClick={() => { payVidIcp() }}>
-          {loading && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}Pay
-        </button>
+        {
+          payHeight === 0 &&
+          <button className={`${styles.btn} ${payStyles['btn-pay-quota']}`} onClick={() => { payVidIcp() }}>
+            {loading && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}Pay
+          </button>
+        }
       </div>
 
       <Modal
@@ -144,9 +177,12 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ icpPayAmountDesc, orderInfo, 
                     Congratulations! <br />Now you are the owner of <br />[ {orderInfo.name} ]
                   </div> :
                   <div className={payStyles['success-icpreg']}>
-                    fail confirm order<br /> but payment success
+                    {systemStatusText}
                   </div>
               }
+              <div className="d-grid gap-2">
+                <button className={payStyles['btn']} onClick={() => { history.push('/myaccount') }}>Go to MyAccount</button>
+              </div>
             </div>
             :
             <>
@@ -171,13 +207,10 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ icpPayAmountDesc, orderInfo, 
               </Timeline>
               {
                 icpPayIng ? null :
-                !icpPayStatus &&
-                <div className={payStyles['btn-wrap']}>
-                  <button className={payStyles['btn']} onClick={() => { setLoading(false) }}>Cancel</button>
-                  <button className={payStyles['btn']} style={{ marginLeft: 10 }} onClick={() => { setLoading(false) }}>
-                    Continue to pay
-                  </button>
-                </div>
+                  !icpPayStatus &&
+                  <div className={payStyles['btn-wrap']}>
+                    <button className={payStyles['btn']} onClick={() => { setLoading(false) }}>Cancel</button>
+                  </div>
               }
             </>
         }

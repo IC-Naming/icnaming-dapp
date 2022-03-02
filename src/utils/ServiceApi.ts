@@ -186,7 +186,7 @@ export default class ServiceApi {
   };
 
   // confirm order
-  public confirmOrder = (block_height): Promise<boolean> => {
+  public confirmOrder = (block_height:bigint): Promise<boolean> => {
     return executeWithLogging(async () => {
       const res = await this.registrarUpdateActor.confirm_pay_order(block_height);
       if ("Ok" in res) {
