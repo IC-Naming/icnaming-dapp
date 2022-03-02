@@ -8,8 +8,9 @@ import { useAuthWallet } from '../context/AuthWallet';
 import dateFormat from "dateformat";
 import { queryWithCache } from '../utils/localCache';
 import { Skeleton, Pagination, List } from '@douyinfe/semi-ui';
-
+import { useAnalytics } from '../utils/GoogleGA';
 export const MyAccount = () => {
+  useAnalytics('MyAccount');
   const { ...authWallet } = useAuthWallet();
   const serviceApi = new ServiceApi();
   const [loading, setLoading] = useState<boolean>(true)

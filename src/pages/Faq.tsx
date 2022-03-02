@@ -1,7 +1,9 @@
 import React from "react";
 import { Collapse, Table } from "@douyinfe/semi-ui";
 import styles from '../assets/styles/Faq.module.scss';
+import { useAnalytics } from '../utils/GoogleGA';
 export const Faq: React.FC = () => {
+  useAnalytics('FAQ');
   const columns = [
     {
       title: 'Name Length',

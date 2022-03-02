@@ -84,21 +84,27 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
   }
 
   const checkOrder = () => {
+    const fromSearch = location.pathname === '/favourites' ? '?from=favourites' : ''
     if (auth.walletAddress) {
       setCheckOrderIng(true)
       myInfo.checkPendingOrder()
       if (myInfo.hasPendingOrder) {
         setVisible(true)
       } else {
-        history.push(`/name/${name}/reg`)
+        history.push(`/name/${name}/reg${fromSearch}`)
       }
     } else {
-      history.push(`/name/${name}/reg`)
+      history.push(`/name/${name}/reg${fromSearch}`)
     }
   }
   const handleCardClick = useCallback(() => {
-      const fromSearch = location.pathname === '/myaccount' ? '?from=myaccount' : '' ;
-      history.push(`/name/${name}/details${fromSearch}`)
+    let fromSearch = '';
+    if (location.pathname === '/myaccount') {
+      fromSearch = '?from=myaccount'
+    } else if (location.pathname === '/favourites') {
+      fromSearch = '?from=favourites'
+    }
+    history.push(`/name/${name}/details${fromSearch}`)
   }, [location.pathname, name, history]);
 
   return (
@@ -127,7 +133,7 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
             <div className={styles.unavailable}>Unavailable</div>
       }
       <PendingOrderTip visible={visible}
-        hide={() => { setVisible(false);setCheckOrderIng(false) }}
+        hide={() => { setVisible(false); setCheckOrderIng(false) }}
       />
     </div>
   )

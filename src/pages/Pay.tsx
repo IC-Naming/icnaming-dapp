@@ -4,8 +4,9 @@ import styles from '../assets/styles/Name.module.scss'
 import { PayVieQuota } from "components/PayVieQuota";
 import { PayVieIcp } from "components/PayVieIcp";
 import { Refund } from "components/Refund";
-
+import { useAnalytics } from '../utils/GoogleGA';
 export const Pay = (props) => {
+  useAnalytics('Pay')
   const [icpPayAmountDesc, setIcpPayAmountDesc] = useState<string>('')
   const [hasRefund, setHasRefund] = useState<boolean>(false)
   const [quotaTypeCount, setQuotaTypeCount] = useState<any>(0);
@@ -17,9 +18,9 @@ export const Pay = (props) => {
     payYears: 1,
     payType: 'icp',
   })
-
+  const orderInfo = localStorage.getItem('orderInfo');
   useEffect(() => {
-    const orderInfo = localStorage.getItem('orderInfo');
+    
     if (orderInfo) {
       const orderInfoObj = JSON.parse(orderInfo)
       setOrderInfoObj(orderInfoObj)
@@ -44,7 +45,7 @@ export const Pay = (props) => {
         }
       }
     }
-  }, [])
+  }, [orderInfo])
 
   return (
     <div className={styles['name-wrap']}>

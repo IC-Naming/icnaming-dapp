@@ -71,7 +71,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ icpPayAmountDesc, orderInfo, 
     return () => {
       setPayHeight(0)
     }
-  }, [payHeight])
+  }, [payHeight])// eslint-disable-line react-hooks/exhaustive-deps
 
   const payVidIcp = async () => {
     if (loading) return

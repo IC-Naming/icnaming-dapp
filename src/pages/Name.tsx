@@ -7,11 +7,13 @@ import styles from "../assets/styles/Name.module.scss";
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
 import { CanisterError } from "../utils/exception";
-
+import { useAnalytics } from '../utils/GoogleGA';
 export const Name = (props) => {
+  useAnalytics('Name');
   const serviceApi = new ServiceApi();
   const location = useLocation();
-  const showBackLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'myaccount';
+  const showBackMyAccountLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'myaccount';
+  const showBackFavLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'favourites';
   const [showWallets, setShowWallets] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
   const [loadingName, setLoadingName] = useState<boolean>(false);
@@ -42,9 +44,7 @@ export const Name = (props) => {
   ]);
 
   const [canister, setCanister] = useState<any>();
-  const [action, setAction] = useState('');
-  const [activeKey, setActiveKey] = useState('details');
-
+  const [action, setAction] = useState('details');
 
   useEffect(() => {
     const ac = new AbortController();
@@ -119,19 +119,6 @@ export const Name = (props) => {
   }, [name])
 
   useEffect(() => {
-    // if action is reg 
-    if (action === 'reg') {
-      setActiveKey('register')
-    } else if (action === 'details') {
-      setActiveKey('details')
-    }
-    return () => {
-      setActiveKey('details')
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [action])
-
-  useEffect(() => {
     console.log(props.match.params)
     setName(props.match.params.name || "")
     if(props.match.params.action){
@@ -154,8 +141,14 @@ export const Name = (props) => {
           <Container className="pt-5">
             <h1 className={`${styles.title} text-right`}>
               {
-                showBackLink && 
+                showBackMyAccountLink && 
                 <Link to='/myaccount' className={styles['name-back-link']}>
+                  <i className="bi bi-chevron-left"></i>
+                </Link>
+              }
+              {
+                showBackFavLink &&
+                <Link to='/favourites' className={styles['name-back-link']}>
                   <i className="bi bi-chevron-left"></i>
                 </Link>
               }
@@ -165,8 +158,8 @@ export const Name = (props) => {
               loadingName ?
                 <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
                 :
-                <Tabs activeKey={activeKey} onSelect={(k) => setActiveKey(k || "register")} className="mb-3">
-                  <Tab eventKey="register" title="Register">
+                <Tabs activeKey={action} onSelect={(k) => setAction(k || "register")} className="mb-3">
+                  <Tab eventKey="reg" title="Register">
                     <Register regname={props.match.params.name} available={nameDetails?.available} />
                   </Tab>
                   <Tab eventKey="details" title="Details">

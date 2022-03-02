@@ -24,7 +24,6 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const serviceApi = new ServiceApi();
   const [showWallets, setShowWallets] = useState<boolean>(false);
   const [pendingOrderTipVisible, setPendingOrderTipVisible] = useState<boolean>(false);
-  // const [loadingPending, setLoadingPending] = useState<boolean>(false);
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [icpToCycles, SetIcpToCycles] = useState<string>('');
   const [quotas, setQuotas] = useState<Array<any>>([]);
@@ -45,7 +44,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     } else {
       if (regname.split('.')[0].length >= 7) {
         setLoadingSubmit(true)
-        serviceApi.submitRegisterOrder(regname, 1).then(res => {
+        serviceApi.submitRegisterOrder(regname, 1).then(res => {         
           if (res) {
             setLoadingSubmit(false)
             myInfo.createOrder({

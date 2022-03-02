@@ -11,7 +11,7 @@ import { IC_EXTENSION } from '../utils/config';
 import { CanisterError } from '../utils/exception';
 import { isLocalEnv } from 'config/env';
 import { toast } from 'react-toastify';
-
+import { useAnalytics } from '../utils/GoogleGA';
 import { GetNameOrderResponse } from 'utils/canisters/registrar/interface';
 
 interface NameModel {
@@ -22,6 +22,7 @@ interface NameModel {
 }
 
 export const Search = (props) => {
+  useAnalytics('Search');
   const { ...authWallet } = useAuthWallet();
   const serviceApi = useMemo(() => 
   new ServiceApi(), 
@@ -129,7 +130,6 @@ export const Search = (props) => {
           }
         } catch(err) {
           if (err instanceof CanisterError) {
-            console.log('CanisterError', err);
             if (err.code === 9) {
               creatNameSearchResult(searchName, false);
             } else {
