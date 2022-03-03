@@ -175,6 +175,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ icpPayAmountDesc, orderInfo, 
 					break;
 				case OrderStatus.NotOrder:
 					setModalVisible(false);
+					history.push('/myaccount');
 					toast.error('no pending order', {
 						position: 'top-center',
 						theme: 'dark'
