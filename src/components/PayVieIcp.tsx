@@ -110,7 +110,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ icpPayAmountDesc, orderInfo, 
     if (loading) return
     setLoading(true)
     setIcpPayIng(true)
-
     const [availableResult, orderResult] = await Promise.all([serviceApi.available(orderInfo.name).catch(err => {
       setLoading(false)
       setIcpPayIng(false)

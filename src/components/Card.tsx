@@ -106,7 +106,6 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
     }
     history.push(`/name/${name}/details${fromSearch}`)
   }, [location.pathname, name, history]);
-
   return (
     <div className={`${styles["card"]}`} onClick={handleCardClick}>
       <div className={styles['card-left']}>
