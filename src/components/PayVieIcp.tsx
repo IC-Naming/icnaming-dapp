@@ -33,35 +33,68 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ icpPayAmountDesc, orderInfo, 
   const [systemStatusText, setSystemStatusText] = useState<any>('')
   const [payHeight, setPayHeight] = useState<number>(0)
 
+  /**
+   * try to confirm order payment for several times
+   * go to my account when it confirms success
+   * reload current order if it fails
+   */
   const confirmSystem = async () => {
-    console.log('payHeight-----------', payHeight)
-    try {
-      let result = await serviceApi.confirmOrder(BigInt(payHeight));
-      console.log('confirmOrder', result);
-      setSystemDetermine(true)
-      if (result === true) {
-        setSystemStatus(true)
-        console.log('You got the name! please check it out from MyAccount')
-        localStorage.removeItem('orderInfo')
-      } else {
-        setSystemStatus(false)
-        console.log('fail confirm order, but payment success')
-        setSystemStatusText(`fail confirm order${<br />} but payment success`)
-        throw new Error("failed to confirm from api");
+    enum ConfirmStatus {
+      Success,
+      Fail,
+      Exception
+    }
+
+    console.log('payHeight-----------', payHeight);
+    console.assert(payHeight > 0, 'payHeight must be greater than 0');
+    // get confirm status
+    let confirmStatus = await (async () => {
+      const max_retry = 3;
+      let result_status = ConfirmStatus.Success;
+      for (let i = 0; i < max_retry; i++) {
+        try {
+          let result = await serviceApi.confirmOrder(BigInt(payHeight));
+          if (result) {
+            result_status = ConfirmStatus.Success;
+            break;
+          } else {
+            result_status = ConfirmStatus.Fail;
+          }
+        } catch (error) {
+          console.error(`exception when confirm order: ${error}`);
+          return ConfirmStatus.Exception;
+        }
       }
+      return result_status;
+    })();
+
+    console.log(`confirm status: ${confirmStatus}`);
+
+    // remove cache
+    deleteCache('getNamesOfRegistrant' + auth.walletAddress);
+    deleteCache('namesOfController' + auth.walletAddress);
+
+    // handle status
+    switch (confirmStatus) {
+      case ConfirmStatus.Success:
+        setSystemStatus(true);
+        console.log('You got the name! please check it out from MyAccount');
+        localStorage.removeItem('orderInfo');
+        break;
+      case ConfirmStatus.Exception:
+        setSystemDetermine(true)
+        setSystemStatus(false)
+        localStorage.removeItem('orderInfo');
+        // TODO make user to click confirm button again
+        break;
+      case ConfirmStatus.Fail:
+        // name is not available or invalid request from client
+        setSystemStatus(false);
+        console.log('fail confirm order, but payment success');
+        // TODO try to reload current order, it should be status "refund" in normal case
+        break;
     }
-    catch (err) {
-      setSystemDetermine(true)
-      setSystemStatus(false)
-      localStorage.removeItem('orderInfo')
-      setSystemStatusText(`fail confirm order,${JSON.parse(JSON.stringify(err)).name}`);
-      console.log(`fail confirm order, ${JSON.stringify(err)}`);
-      throw err;
-    }
-    finally {
-      deleteCache('getNamesOfRegistrant' + auth.walletAddress)
-      deleteCache('namesOfController' + auth.walletAddress)
-    }
+
   }
 
   useEffect(() => {
@@ -201,7 +234,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ icpPayAmountDesc, orderInfo, 
                       </React.Fragment>
                       :
                       <Timeline.Item type="error">
-                        Failed to transfer or confirm, please DO NOT retry to pay before checking your balance. If you find out your balance is taken, please wait and check in "My Account" page by refreshing, your order will be confirmed automatically by system within 5 minutes.
+                        Failed to transfer, please DO NOT retry to pay before checking your balance. If you find out your balance is taken, please wait and check in "My Account" page by refreshing, your order will be confirmed automatically by system within 5 minutes.
                       </Timeline.Item>
                 }
               </Timeline>
