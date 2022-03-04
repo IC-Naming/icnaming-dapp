@@ -10,7 +10,7 @@ export const SearchInput = (props: Props) => {
   const [value, setValue] = useState<string>('')
 
   const handleChange = (e) => {
-    setValue(e.target.value.toLowerCase())
+    setValue(e.target.value.replace(/\s+/g, '').toLowerCase())
     e.preventDefault()
   }
   const handleKeyUp = (e: any) => {

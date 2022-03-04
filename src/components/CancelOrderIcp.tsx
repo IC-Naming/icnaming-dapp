@@ -8,6 +8,7 @@ import { ModalTipFull } from "./ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
 import ServiceApi from "../utils/ServiceApi";
 import { CanisterError } from "utils/exception";
+import { Modal } from "@douyinfe/semi-ui";
 interface CancelOrderIcpProps {
   name: string;
 }
@@ -48,10 +49,23 @@ export const CancelOrderIcp: React.FC<CancelOrderIcpProps> = ({ name }) => {
     })
   }
 
+  const cancelConfirm = async () => {
+    Modal.warning({
+      'title': 'Warning: cancellation of order',
+      'content': 'If this order has already been paid, please do not cancel',
+      'onOk': cancelRegisterOrder,
+      'maskClosable': false,
+      'okText': 'Confirm',
+      'cancelText': 'Cancel',
+      'className': `${payStyles['modal-warning-cancel']}`
+    });
+  }
+
   return (
     <>
-      <button className={`${styles.btn} ${payStyles['btn-pay-icp']}`} onClick={() => { cancelRegisterOrder() }} style={{ marginRight: 10 }}
-      >
+      <button className={`${styles.btn} ${payStyles['btn-pay-cancel']}`} onClick={() => {
+        cancelConfirm()
+      }} style={{ marginRight: 10 }}>
         {loading && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
         Cancel
       </button>
