@@ -300,13 +300,13 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 								confirmStatus === 'exception' &&
 								<React.Fragment>
 									<div className={payStyles['confirm-msg']}>
-										System Exception,<br /> please try confirm
+										Sorry, something error, please retry to confirm payment.
 									</div>
 									<div className="d-grid gap-2">
 										<button className={`${payStyles['btn']}  ${payStyles['btn-order']}`} disabled={confirmAgain} onClick={() => {
 											setConfirmAgain(true)
 											confirmOrderFunction()
-										}}>{confirmAgain && <Spin size="middle" />}Confirm Order</button>
+										}}>{confirmAgain && <Spin size="middle" />}Retry to confirm</button>
 									</div>
 								</React.Fragment>
 							}
@@ -314,10 +314,10 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 								confirmStatus === 'fail' &&
 								<React.Fragment>
 									<div className={payStyles['confirm-msg']}>
-										Fail confirm order, but payment success
+										Sorry, order status has been changed, please refresh current page.
 									</div>
 									<div className="d-grid gap-2">
-										<button className={payStyles['btn']} onClick={() => { window.location.reload() }}>Reload current order</button>
+										<button className={payStyles['btn']} onClick={() => { window.location.reload() }}>Refresh</button>
 									</div>
 								</React.Fragment>
 							}
