@@ -44,7 +44,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     } else {
       if (regname.split('.')[0].length >= 7) {
         setLoadingSubmit(true)
-        serviceApi.submitRegisterOrder(regname, 1).then(res => {         
+        serviceApi.submitRegisterOrder(regname, 1).then(res => {
           if (res) {
             setLoadingSubmit(false)
             myInfo.createOrder({
@@ -62,7 +62,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
           if (err instanceof CanisterError) {
             if (err.code === 22) {
               setPendingOrderTipVisible(true)
-            } else if(err.code === 26){
+            } else if (err.code === 26) {
               errorToast(err.message)
             } else {
               errorToast(err.message)
@@ -127,7 +127,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.isAuthWalletConnected, myInfo.quotas]);
-  
+
   // filter quota when count is 0
   const avaliableQuotas = useMemo(() => {
     return quotas.filter(quota => quota.quotaCount !== 0);
@@ -167,8 +167,10 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                   :
                   <div className={`${styles['btn-wrap']} ${styles['btn-reg-wrap']}`}>
                     <button
-                      className={`${styles.btn} ${styles['btn-via-icp']}`}
-                      onClick={registerVidIcp}>
+                      className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={registerVidIcp} 
+                      disabled={auth.walletType === 'nns'}
+                      title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
+                      >
                       {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                       Register via ICP
                     </button>
