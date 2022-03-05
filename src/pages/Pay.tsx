@@ -15,7 +15,7 @@ export const Pay = (props) => {
     nameLen: 0,
     payStatus: {},
     payYears: 1,
-    payType: 'icp',
+    payType: 'quota',
   })
   const orderInfo = localStorage.getItem('orderInfo');
   useEffect(() => {
