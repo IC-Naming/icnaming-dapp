@@ -1,31 +1,28 @@
-import React from 'react';
 import { Route, Redirect } from "react-router-dom";
-import { useAuthWallet } from '../context/AuthWallet';
-export function AuthRoute(props:any) {
-  const { ...useAuth } = useAuthWallet()
-  const targetRouteObj =  props;
 
-  if (targetRouteObj && targetRouteObj.comingsoon) {
-    return <Redirect to="/comingsoon"></Redirect>
-  }
+export function AuthRoute(props: any) {
+	const { routerConfig, location } = props;
+	const { pathname } = location;
+	const isConnected = sessionStorage.getItem("connectStatus");
+	const targetRouterConfig = routerConfig.find(item =>
+		item.path.replace(/\s*/g, "").split('/')[1] === pathname.split('/')[1]
+	);
 
-  if (targetRouteObj && !targetRouteObj.auth) {
-    let { component, path } = targetRouteObj
-    return (
-      <Route exact path={path} component={component} />
-    )
-  }
-
-  if (useAuth.isAuthWalletConnected) {
-    if (targetRouteObj) {
-      let { component, path } = targetRouteObj
-      return <Route exact path={path} component={component}></Route>
-    } else {
-      return <Redirect to="/404"></Redirect>
-    }
-  } else if (targetRouteObj && targetRouteObj.auth) {
-    return <Redirect to="/" />
-  } else {
-    return <Redirect to="/404" />
-  }
+	if (targetRouterConfig && !targetRouterConfig.auth && !isConnected) {
+		const { component } = targetRouterConfig;
+		return <Route exact path={targetRouterConfig.path} component={component} />
+	}
+	if (isConnected) {
+		if (targetRouterConfig) {
+			return (<Route path={targetRouterConfig.path} component={targetRouterConfig.component} />);
+		} else {
+			return <Redirect to="/404" />;
+		}
+	} else {
+		if (targetRouterConfig && targetRouterConfig.auth) {
+			return <Redirect to="/" />;
+		} else {
+			return <Redirect to="/404" />;
+		}
+	}
 }

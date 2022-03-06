@@ -24,7 +24,6 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const serviceApi = new ServiceApi();
   const [showWallets, setShowWallets] = useState<boolean>(false);
   const [pendingOrderTipVisible, setPendingOrderTipVisible] = useState<boolean>(false);
-  // const [loadingPending, setLoadingPending] = useState<boolean>(false);
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [icpToCycles, SetIcpToCycles] = useState<string>('');
   const [quotas, setQuotas] = useState<Array<any>>([]);
@@ -63,6 +62,8 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
           if (err instanceof CanisterError) {
             if (err.code === 22) {
               setPendingOrderTipVisible(true)
+            } else if (err.code === 26) {
+              errorToast(err.message)
             } else {
               errorToast(err.message)
             }
@@ -101,7 +102,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   }, [regname, myInfo.icpToCycles])
 
   useEffect(() => {
-    if (auth.principal) {
+    if (auth.isAuthWalletConnected) {
       const myQuotas = localStorage.getItem('myQuotas');
       if (myQuotas && myQuotas.length > 0) {
         const myQuotasArr = JSON.parse(myQuotas)
@@ -125,8 +126,8 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
       setQuotaLoading(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.principal, myInfo.quotas]);
-  
+  }, [auth.isAuthWalletConnected, myInfo.quotas]);
+
   // filter quota when count is 0
   const avaliableQuotas = useMemo(() => {
     return quotas.filter(quota => quota.quotaCount !== 0);
@@ -155,7 +156,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
               <Col md={4} sm={12}></Col>
             </Row>
             {
-              !auth.walletAddress
+              !auth.isAuthWalletConnected
                 ?
                 <div className="d-grid gap-2">
                   <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect Wallet</button>
@@ -166,8 +167,10 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                   :
                   <div className={`${styles['btn-wrap']} ${styles['btn-reg-wrap']}`}>
                     <button
-                      className={`${styles.btn} ${styles['btn-via-icp']}`}
-                      onClick={registerVidIcp}>
+                      className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={registerVidIcp} 
+                      disabled={auth.walletType === 'nns'}
+                      title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
+                      >
                       {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                       Register via ICP
                     </button>

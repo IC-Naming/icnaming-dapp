@@ -1,3 +1,4 @@
+@import "./mixin.scss";
 .modal-wrap-icpPay{
   :global{
     .semi-modal-content{
@@ -22,7 +23,7 @@
     }
   }
 }
-.success-icpreg{
+.success-icpreg,.confirm-msg{
   color: #00CFBB;
   font-size: 1.6rem;
   line-height: 160%;
@@ -34,6 +35,12 @@
   width: 100%;
   padding: 1.5rem 0;
   min-height: 200px;
+}
+.confirm-msg{
+  :global{
+    .semi-spin{margin-right: 10px;}
+    .semi-spin-wrapper{color: #00CFBB;}
+  }
 }
 .btn-wrap{
   display: flex;
@@ -56,9 +63,23 @@
     background: rgba(0, 255, 230, 0.3);
     border: 1px solid #00FFE6
   }
+  :global{
+    .semi-spin{margin-right: 10px;}
+    .semi-spin-wrapper{color: #00CFBB;}
+  }
   &[disabled],&[disabled=true]{
     cursor: not-allowed;
     background: #0B142A !important;
+    border: 1px solid #525F7A;
+    color: #66728C;
+    :global{
+      .semi-spin-wrapper{color: #525F7A;}
+    }
+  }
+}
+.btn-order{
+  &[disabled],&[disabled=true]{
+    background: #31446f !important;
     border: 1px solid #525F7A;
     color: #66728C;
   }
@@ -69,23 +90,83 @@
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  .btn-pay-quota{
+  .btn-pay-cancel,.btn-pay-icp{
     width: 100%;
     margin-right: 0 !important;
   }
-  .btn-pay-quota:last-child{
-    margin-top: .75rem;
-    order:1;
+  .btn-pay-cancel{
+    order: 2;
+    margin-top: 0.75rem;
+  }
+}
+
+
+.order-info{
+  flex-shrink: 0;
+  display: flex;
+  .order-info-text{
+    @include  singleline-ellipsis(0%);
+    width: auto;
+  }
+}
+.order-info-msg{
+  font-size: 1.2rem;
+  color: #ccc;
+  font-family: "AlibabaPuHuiTiR";
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 1.5rem 0;
+  min-height: 200px;
+}
+
+.block-height-wrap{
+  :global{
+    .semi-input-wrapper-focus{
+      border-color: #00CFBB;
+    }
+  }
+}
+
+.modal-warning-cancel{
+  :global{
+    .semi-modal-content{
+      background: linear-gradient(180deg, #334773 0%, #1C2A4A 100%) !important;
+    }
+    .semi-modal-body{
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+    }
+    .semi-modal-confirm-content{
+      color: #00CFBB;
+      font-size: 22px;
+    }
+    .semi-button{
+      border: 1px solid #00CFBB;
+      color : #00CFBB;
+      background: rgba(0, 207, 187, 0.1);
+      &:hover,&:focus{
+        background: rgba(0, 255, 230, 0.3) !important;
+        border: 1px solid #00FFE6;
+      }
+    }
   }
 }
 @media screen and (min-width: 576px){
   .btn-pay-wrap{
     flex-direction: row;
-    .btn-pay-quota{
+    .btn-pay-cancel,.btn-pay-icp{
       width: 260px;
       margin-right: 0 !important;
     }
-    .btn-pay-quota:last-child{
+    .btn-pay-cancel{
+      order: 1;
+      margin-top: 0;
+    }
+    .btn-pay-icp{
       margin-top: 0;
       order:1;
       margin-left: 20px;

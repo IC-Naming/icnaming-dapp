@@ -12,6 +12,7 @@ export interface AuthWalletContextInterface {
   walletAddress: string;
   principal?: Principal;
   accountId: string;
+  walletType: string;
   connectPlugWallet();
   connectII();
   quitWallet();
@@ -22,15 +23,18 @@ export interface AuthWalletContextInterface {
 function useProvideAuthWallet() {
   const [isAuthWalletConnected, setAuthWalletConnected] = useState<boolean>(false)
   const [walletAddress, setWalletAddress] = useState<string>('')
-  const [accountId, setAccountId] = useState<string>('')
+  const [walletAccountId, setWalletAccountId] = useState<string>('')
+  const [walletType, setWalletType] = useState<string>('plug')
   const [principal, setPrincipal] = useState<Principal>()
   const whitelist = whietLists();
 
-  const setPlugWalletState = (accountId, principalId, connected) => {
-    setAccountId(accountId)
+  const setauthWalletState = (accountId, principalId, connected, walletType) => {
+    setWalletAccountId(accountId)
     setPrincipal(principalId)
     setAuthWalletConnected(connected)
     setWalletAddress(principalId.toText())
+    setWalletType(walletType)
+    sessionStorage.setItem('walletType', walletType)
   }
   const connectPlugWallet = async () => {
     return new Promise(async (resolve, reject) => {
@@ -47,7 +51,8 @@ function useProvideAuthWallet() {
             const principalId = await window.ic?.plug?.agent.getPrincipal();
             actorFactory.authenticateWithAgent(await window.ic?.plug?.agent);
             const accountId = principalToAccountID(principalId)
-            setPlugWalletState(accountId, principalId, true)
+            setauthWalletState(accountId, principalId, true, 'plug')
+            sessionStorage.setItem("connectStatus", 'connected');
             resolve({ connected: requestConnect, account: principalId })
           } else {
             console.log('error')
@@ -60,40 +65,10 @@ function useProvideAuthWallet() {
     });
   }
 
-  /* 
-   *  Connect Icp 
-   */
-  const connectII = async () => {
-    return new Promise(async (resolve, reject) => {
-      const authClient = await AuthClient.create();
-      await authClient.login({
-        onSuccess: async () => {
-          const identity = await authClient.getIdentity();
-          actorFactory.authenticateWithIdentity(identity);
-          setAuthWalletConnected(true)
-          setWalletAddress(identity.getPrincipal().toText())
-          setPrincipal(identity.getPrincipal())
-          resolve({ connected: true, account: identity.getPrincipal().toText() })
-        }
-      })
-    });
-  }
-
   useEffect(() => {
-    const getCurrentAccountOfII = async () => {
-      const authClient = await AuthClient.create();
-      if (await authClient.isAuthenticated()) {
-        const identity = await authClient.getIdentity();
-        actorFactory.authenticateWithIdentity(identity);
-        setAuthWalletConnected(true)
-        setWalletAddress(identity.getPrincipal().toText())
-        setPrincipal(identity.getPrincipal())
-      }
+    if (sessionStorage.getItem('connectStatus') === 'connected') {
+      setAuthWalletConnected(true)
     }
-    getCurrentAccountOfII()
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
     const getCurrentAccountOfPlug = () => {
       return new Promise(async (resolve, reject) => {
         if (typeof (window as any).ic === 'undefined') {
@@ -106,7 +81,7 @@ function useProvideAuthWallet() {
               const principalId = await window.ic?.plug?.agent.getPrincipal();
               actorFactory.authenticateWithAgent(await window.ic?.plug?.agent)
               const accountId = principalToAccountID(principalId)
-              setPlugWalletState(accountId, principalId, true)
+              setauthWalletState(accountId, principalId, true, 'plug')
               resolve({ connected: true, account: principalId });
             } else {
               resolve({ connected: false, account: "" });
@@ -120,14 +95,50 @@ function useProvideAuthWallet() {
     getCurrentAccountOfPlug()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
+  /* 
+   *  Connect Icp 
+   */
+  const connectII = async () => {
+    return new Promise(async (resolve, reject) => {
+      const authClient = await AuthClient.create();
+      await authClient.login({
+        onSuccess: async () => {
+          const identity = await authClient.getIdentity();
+          actorFactory.authenticateWithIdentity(identity);
+          const accountId = principalToAccountID(identity.getPrincipal())
+          setauthWalletState(accountId, identity.getPrincipal(), true, 'nns')
+          sessionStorage.setItem("connectStatus", 'connected');
+          resolve({ connected: true, account: identity.getPrincipal().toText() })
+        }
+      })
+    });
+  }
+
+  useEffect(() => {
+    if (sessionStorage.getItem('connectStatus') === 'connected') {
+      setAuthWalletConnected(true)
+    }
+    const getCurrentAccountOfII = async () => {
+      const authClient = await AuthClient.create();
+      if (await authClient.isAuthenticated()) {
+        const identity = await authClient.getIdentity();
+        actorFactory.authenticateWithIdentity(identity);
+        const accountId = principalToAccountID(identity.getPrincipal())
+        setauthWalletState(accountId, identity.getPrincipal(), true, 'nns')
+      }
+    }
+    getCurrentAccountOfII()
+  }, [])// eslint-disable-line react-hooks/exhaustive-deps
+
   const quitWallet = async () => {
+    sessionStorage.removeItem("connectStatus");
     setAuthWalletConnected(false)
-    setAccountId('')
+    setWalletAccountId('')
     setWalletAddress('')
     setPrincipal(undefined)
     if (window.ic.plug.agent) {
       window.ic?.plug?.disconnect()
-    }else{
+    } else {
       const authClient = await AuthClient.create();
       authClient.logout()
     }
@@ -137,7 +148,8 @@ function useProvideAuthWallet() {
     isAuthWalletConnected: isAuthWalletConnected,
     walletAddress: walletAddress,
     principal: principal,
-    accountId: accountId,
+    accountId: walletAccountId,
+    walletType: walletType,
     setAuthWalletConnected,
     setWalletAddress,
     connectPlugWallet,
