@@ -52,11 +52,11 @@ export const CancelOrderIcp: React.FC<CancelOrderIcpProps> = ({ name }) => {
   const cancelConfirm = async () => {
     Modal.warning({
       'title': 'Warning: cancellation of order',
-      'content': 'If this order has already been paid, please do not cancel',
+      'content': 'Please do not cancel order if you have already paid, do you want to cancel the order indeed?',
       'onOk': cancelRegisterOrder,
       'maskClosable': false,
-      'okText': 'Confirm',
-      'cancelText': 'Cancel',
+      'okText': 'Yes',
+      'cancelText': 'No',
       'className': `${payStyles['modal-warning-cancel']}`
     });
   }
