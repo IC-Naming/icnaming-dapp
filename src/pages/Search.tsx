@@ -11,7 +11,7 @@ import { IC_EXTENSION } from '../utils/config';
 import { CanisterError } from '../utils/exception';
 import { isLocalEnv } from 'config/env';
 import { toast } from 'react-toastify';
-import { useAnalytics } from '../utils/GoogleGA';
+
 import { GetNameOrderResponse } from 'utils/canisters/registrar/interface';
 
 interface NameModel {
@@ -22,7 +22,6 @@ interface NameModel {
 }
 
 export const Search = (props) => {
-  useAnalytics('Search');
   const { ...authWallet } = useAuthWallet();
   const serviceApi = useMemo(() => 
   new ServiceApi(), 
@@ -130,6 +129,7 @@ export const Search = (props) => {
           }
         } catch(err) {
           if (err instanceof CanisterError) {
+            console.log('CanisterError', err);
             if (err.code === 9) {
               creatNameSearchResult(searchName, false);
             } else {
@@ -208,6 +208,13 @@ export const Search = (props) => {
       <div className="container pt-5">
         <div className={styles['serach-content']}>
           <SearchInput word={typeof word === 'string' ? word : word.toText()} />
+          {/* <div className={styles['pending-order']}>
+            <Banner
+              closeIcon={null}
+              type="info"
+              description={<>you have pending order <Link to="/pay">View</Link></>}
+            />
+          </div> */}
           <Container className={`pt-5`}>
             {
               (loading || pendingOrderLoading) ?
@@ -239,7 +246,7 @@ export const Search = (props) => {
                             <PendingOrderCard order={existPendingOrderInfo}></PendingOrderCard>
                             :
                             <Card name={nameSearchResult?.name || ''}
-                              expireAt={nameSearchResult?.expireAt || ''}
+                              regTime={nameSearchResult?.expireAt || ''}
                               available={nameSearchResult?.available || false}
                               favorite={nameSearchResult?.favorite || false} />
                           }
@@ -254,7 +261,7 @@ export const Search = (props) => {
                                   {
                                     namesOfRegistrant?.map((item, index) => {
                                       return <Card key={index} name={`${item.name}`}
-                                        expireAt={`Expires ${item?.expireAt}`}
+                                        regTime={`Expires ${item?.expireAt}`}
                                         available={item.available}
                                         favorite={item.favorite} />
                                     })
@@ -270,7 +277,7 @@ export const Search = (props) => {
                                 <div className={styles.list}>
                                   {
                                     namesOfController?.map((item, index) => {
-                                      return <Card key={index} name={`${item.name}`} expireAt="" available={item.available} favorite={item.favorite} />
+                                      return <Card key={index} name={`${item.name}`} regTime="" available={item.available} favorite={item.favorite} />
                                     })
                                   }
                                 </div>

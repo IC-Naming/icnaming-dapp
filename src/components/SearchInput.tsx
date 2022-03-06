@@ -10,7 +10,7 @@ export const SearchInput = (props: Props) => {
   const [value, setValue] = useState<string>('')
 
   const handleChange = (e) => {
-    setValue(e.target.value.replace(/\s+/g, '').toLowerCase())
+    setValue(e.target.value.toLowerCase())
     e.preventDefault()
   }
   const handleKeyUp = (e: any) => {
@@ -23,7 +23,7 @@ export const SearchInput = (props: Props) => {
     if (value.split('.')[0].length > 3) {
       history.push(`/search/${value}`)
     } else {
-      toast.error("second level name must be more than 3 characters", {
+      toast.error("second level name must be more than 6 characters", {
         position: "top-center",
         autoClose: 2000,
         theme: 'dark'

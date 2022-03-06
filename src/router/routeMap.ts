@@ -6,15 +6,17 @@ import { Name } from "../pages/Name";
 import { Pay } from "../pages/Pay";
 import { Faq } from "../pages/Faq";
 import { Error } from "../pages/Error";
+import { ComingSoon } from "../pages/ComingSoon";
 
-const routeMaps = [
-  { path: "/", exact: true, name: "Home", component: Home, auth: false },
-  { path: "/search/:word", exact: false, name: "Search", component: Search, auth: false },
-  { path: "/myaccount", exact: true, name: "MyAccount", component: MyAccount, auth: true },
-  { path: "/favourites", exact: true, name: "Favourites", component: Favourites, auth: true },
-  { path: "/name/:name/:action", exact: true, name: "Name", component: Name, auth: false },
-  { path: "/pay", exact: true, name: "Pay", component: Pay, auth: true },
-  { path: "/faq", exact: true, name: "Faq", component: Faq, auth: false },
-  { path: "/404", exact: false, name: "NotFind", component: Error, auth: false },
+const routeMaps =[
+  { path: "/",exact:true, name: "Home", component: Home, auth: false ,comingsoon:false },
+  { path: "/search/:word",exact:false, name: "Search", component: Search, auth: false ,comingsoon:false },
+  { path: "/myaccount",exact:true, name: "MyAccount", component: MyAccount, auth: true ,comingsoon:false },
+  { path: "/favourites",exact:true, name: "Favourites", component: Favourites, auth: true ,comingsoon:false },
+  { path: "/name/:name/:action",exact:true, name: "Name", component: Name, auth: false ,comingsoon:false },
+  { path: "/pay",exact:true, name: "Pay", component: Pay, auth: true ,comingsoon:false },
+  { path: "/faq", name: "Faq",exact:true, component: Faq, auth: false ,comingsoon:false },
+  { path: "/comingsoon",exact:true, name: "ComingSoon", component: ComingSoon, auth: false ,comingsoon:false },
+  { path: "/404",exact:false, name: "NotFind", component: Error, auth: false ,comingsoon:false },
 ];
 export default routeMaps;

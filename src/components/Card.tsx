@@ -11,12 +11,12 @@ import { PendingOrderTip } from '.';
 
 export interface CardProps {
   name: string,
-  expireAt: string,
+  regTime: string,
   available: boolean,
   isMyAccount?: boolean,
   favorite: boolean,
 }
-export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccount, favorite }) => {
+export const Card: React.FC<CardProps> = ({ name, regTime, available, isMyAccount, favorite }) => {
   const { ...auth } = useAuthWallet();
   const { ...myInfo } = useMyInfo();
   const history = useHistory();
@@ -84,28 +84,23 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
   }
 
   const checkOrder = () => {
-    const fromSearch = location.pathname === '/favourites' ? '?from=favourites' : ''
     if (auth.walletAddress) {
       setCheckOrderIng(true)
       myInfo.checkPendingOrder()
       if (myInfo.hasPendingOrder) {
         setVisible(true)
       } else {
-        history.push(`/name/${name}/reg${fromSearch}`)
+        history.push(`/name/${name}/reg`)
       }
     } else {
-      history.push(`/name/${name}/reg${fromSearch}`)
+      history.push(`/name/${name}/reg`)
     }
   }
   const handleCardClick = useCallback(() => {
-    let fromSearch = '';
-    if (location.pathname === '/myaccount') {
-      fromSearch = '?from=myaccount'
-    } else if (location.pathname === '/favourites') {
-      fromSearch = '?from=favourites'
-    }
-    history.push(`/name/${name}/details${fromSearch}`)
+      const fromSearch = location.pathname === '/myaccount' ? '?from=myaccount' : '' ;
+      history.push(`/name/${name}/details${fromSearch}`)
   }, [location.pathname, name, history]);
+
   return (
     <div className={`${styles["card"]}`} onClick={handleCardClick}>
       <div className={styles['card-left']}>
@@ -113,7 +108,7 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
           <i className={`bi ${isFavorite ? 'bi-heart-fill' : 'bi-heart'}`}></i>
         </div>
         <div className={styles.name}>{name}</div>
-        <div className={styles.time}>{expireAt}</div>
+        <div className={styles.time}>{regTime}</div>
       </div>
       {
         isMyAccount ? null
@@ -132,7 +127,7 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
             <div className={styles.unavailable}>Unavailable</div>
       }
       <PendingOrderTip visible={visible}
-        hide={() => { setVisible(false); setCheckOrderIng(false) }}
+        hide={() => { setVisible(false);setCheckOrderIng(false) }}
       />
     </div>
   )
