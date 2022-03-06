@@ -87,7 +87,6 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
     const fromSearch = location.pathname === '/favourites' ? '?from=favourites' : ''
     if (auth.walletAddress) {
       setCheckOrderIng(true)
-      myInfo.checkPendingOrder()
       if (myInfo.hasPendingOrder) {
         setVisible(true)
       } else {
@@ -97,7 +96,7 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
       history.push(`/name/${name}/reg${fromSearch}`)
     }
   }
-  const handleCardClick = useCallback(() => {
+  const handleCardClick = useCallback((e) => {
     let fromSearch = '';
     if (location.pathname === '/myaccount') {
       fromSearch = '?from=myaccount'
@@ -107,33 +106,35 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
     history.push(`/name/${name}/details${fromSearch}`)
   }, [location.pathname, name, history]);
   return (
-    <div className={`${styles["card"]}`} onClick={handleCardClick}>
-      <div className={styles['card-left']}>
-        <div className={styles['add-favorite']} onClick={(e) => { handleFavorite(e) }}>
-          <i className={`bi ${isFavorite ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+    <>
+      <div className={`${styles["card"]}`} onClick={handleCardClick}>
+        <div className={styles['card-left']}>
+          <div className={styles['add-favorite']} onClick={(e) => { handleFavorite(e) }}>
+            <i className={`bi ${isFavorite ? 'bi-heart-fill' : 'bi-heart'}`}></i>
+          </div>
+          <div className={styles.name}>{name}</div>
+          <div className={styles.time}>{expireAt}</div>
         </div>
-        <div className={styles.name}>{name}</div>
-        <div className={styles.time}>{expireAt}</div>
-      </div>
-      {
-        isMyAccount ? null
-          :
-          available ?
-            <>
-              <div className={styles['card-right']}>
-                <button onClick={e => { e.stopPropagation(); checkOrder(); }} className={styles['btn-reg']}>
-                  {checkOrderIng && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
-                  register
-                </button>
-              </div>
-              <div className={styles.available}>Available</div>
-            </>
+        {
+          isMyAccount ? null
             :
-            <div className={styles.unavailable}>Unavailable</div>
-      }
+            available ?
+              <>
+                <div className={styles['card-right']}>
+                  <button onClick={e => { e.stopPropagation(); checkOrder(); }} className={styles['btn-reg']}>
+                    {checkOrderIng && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                    register
+                  </button>
+                </div>
+                <div className={styles.available}>Available</div>
+              </>
+              :
+              <div className={styles.unavailable}>Unavailable</div>
+        }
+      </div>
       <PendingOrderTip visible={visible}
         hide={() => { setVisible(false); setCheckOrderIng(false) }}
       />
-    </div>
+    </>
   )
 }

@@ -81,6 +81,7 @@ function useProvideAuthWallet() {
               const principalId = await window.ic?.plug?.agent.getPrincipal();
               actorFactory.authenticateWithAgent(await window.ic?.plug?.agent)
               const accountId = principalToAccountID(principalId)
+              sessionStorage.setItem("connectStatus", 'connected');
               setauthWalletState(accountId, principalId, true, 'plug')
               resolve({ connected: true, account: principalId });
             } else {
@@ -124,14 +125,14 @@ function useProvideAuthWallet() {
         const identity = await authClient.getIdentity();
         actorFactory.authenticateWithIdentity(identity);
         const accountId = principalToAccountID(identity.getPrincipal())
+        sessionStorage.setItem("connectStatus", 'connected');
         setauthWalletState(accountId, identity.getPrincipal(), true, 'nns')
       }
     }
     getCurrentAccountOfII()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
-  const quitWallet = async () => {
-    sessionStorage.removeItem("connectStatus");
+  const quitWallet = async () => {   
     setAuthWalletConnected(false)
     setWalletAccountId('')
     setWalletAddress('')
@@ -139,8 +140,11 @@ function useProvideAuthWallet() {
     if (window.ic.plug.agent) {
       window.ic?.plug?.disconnect()
     } else {
+      console.log('quitWallet nns')
       const authClient = await AuthClient.create();
       authClient.logout()
+      localStorage.removeItem('ic-identity');
+      localStorage.removeItem('ic-delegation');
     }
   }
 

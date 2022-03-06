@@ -49,16 +49,20 @@ export const MyAccount = () => {
           });
         })
       }, 'getNamesOfRegistrant' + authWallet.walletAddress, 60).then(async (res) => {
-        // console.log("my address result of registation", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
-        const names = res.map(n => {
-          const expireAt = 'Expires ' + dateFormat(new Date(Number(n.expired_at)), "isoDateTime")
-          let fav = myNamesOfFavorite.find(item => item === n.name);
-          return { name: n.name, avaiable: false, expireAt, favorite: fav }
+        let namesOfRegistrant = res.sort((a, b) => {
+          return a.expired_at > b.expired_at ? -1 : 1
+        }).map(item => {
+          return {
+            name: item.name,
+            expireAt: 'Expires ' + dateFormat(new Date(Number(item.expired_at)), "isoDateTime"),
+            favorite: myNamesOfFavorite.includes(item.name),
+            avaiable: false
+          }
         })
 
-        setNamesOfRegistrant(names)
+        setNamesOfRegistrant(namesOfRegistrant)
         getNamesOfRegistrantLoaded = true;
         if (getNamesOfRegistrantLoaded && getNamesOfControllerLoaded)
           setLoading(false)

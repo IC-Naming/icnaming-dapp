@@ -45,6 +45,9 @@ export const Header = () => {
     setCurrentIndex(0)
     localStorage.removeItem('myFavoriteNames');
     localStorage.removeItem('myQuotas');
+    sessionStorage.removeItem("connectStatus");
+    sessionStorage.removeItem("walletType");
+    sessionStorage.removeItem("orderInfo");
   }
 
   const HeaderWallet = () => {

@@ -32,6 +32,7 @@ function useProvideMyInfo() {
     payStatus: {},
     payYears: 1,
     payType: 'icp',
+    quotaType: 7
   })
   const [icpToCycles, setIcpToCycles] = useState<Array<{ icp: string, cycles: string }>>([])
   const [pendingOrder, setPendingOrder] = useState<boolean>(false)
@@ -51,6 +52,7 @@ function useProvideMyInfo() {
   }
 
   const getMyQuotas = async () => {
+    console.log('getMyQuotas start ...................')
     const get_MyQuotas = async (user: Principal) => {
       const quota4 = await serviceApi.getQuota(user, 4);
       const quota5 = await serviceApi.getQuota(user, 5);
@@ -67,13 +69,15 @@ function useProvideMyInfo() {
   }
 
   const checkPendingOrder = async () => {
+    console.log('getPendingOrder start')
     serviceApi.getPendingOrder().then(res => {
+      console.log('getPendingOrder', res)
       if (res.length !== 0) {
         setPendingOrder(true)
-        setOrderInfo({
+        createOrder({
           name: res[0].name,
-          payStatus: res[0].status,
           nameLen: res[0].name.split('.').length,
+          payStatus: res[0].status,
           payYears: res[0].years,
           payType: 'icp',
         })
