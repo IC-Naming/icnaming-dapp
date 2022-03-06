@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
-import { toast } from "react-toastify";
 import styles from '../assets/styles/Name.module.scss'
 import { ModalTipFull } from "./ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
 import ServiceApi from "../utils/ServiceApi";
 import { CanisterError } from "utils/exception";
+import toast from "@douyinfe/semi-ui/lib/es/toast";
 
 export const Refund = (props) => {
   const history = useHistory();
@@ -23,22 +23,14 @@ export const Refund = (props) => {
     setVisiableModalTipFullText('Refund in progress')
     serviceApi.refundOrder().then(res => {
       if (res) {
-        toast.success('Refund success', {
-          position: 'top-center',
-          autoClose: 2000,
-          theme: 'dark'
-        })
+        toast.success('Refund success')
         myInfo.cleanPendingOrder()
       }
       setVisiableModalTipFull(false)
     }).catch(err => {
       setVisiableModalTipFull(false)
       if (err instanceof CanisterError) {
-        toast.error(err.message, {
-          position: 'top-center',
-          autoClose: 2000,
-          theme: 'dark'
-        })
+        toast.error(err.message)
       }
     }).finally(() => {
       setLoading(false);

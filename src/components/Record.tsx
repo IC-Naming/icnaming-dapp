@@ -1,12 +1,12 @@
 import styles from "../assets/styles/Name.module.scss";
 import { useEffect, useState } from "react";
 import { useAuthWallet } from "../context/AuthWallet";
-import { toast } from 'react-toastify';
 import ServiceApi from "../utils/ServiceApi";
 import { Spinner } from "react-bootstrap";
 import { CopyToClipboard } from ".";
 import { isValidAddress, isEmail } from "../utils/helper";
 import { deleteCache } from '../utils/localCache';
+import toast from "@douyinfe/semi-ui/lib/es/toast";
 
 interface Props {
   name: string;
@@ -31,11 +31,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
   };
 
   const notToast = (msg) => {
-    toast.error(msg, {
-      position: "top-center",
-      autoClose: 2000,
-      theme: "dark",
-    });
+    toast.error(msg);
   }
 
   useEffect(() => {
@@ -50,29 +46,17 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
     setRecordSaveLoading(true);
     serviceApi.setRecord(name, recordKey, recordVal).then(res => {
       if (res) {
-        toast.success('Set record success', {
-          position: "top-center",
-          autoClose: 2000,
-          theme: "dark",
-        });
+        toast.success('Set record success');
         console.log('clear Records cache')
         deleteCache(name + 'Records')
       } else {
-        toast.error('Set record failed', {
-          position: "top-center",
-          autoClose: 2000,
-          theme: "dark",
-        });
+        toast.error('Set record failed');
       }
       setRecordSaveLoading(false);
       setIschangeRecordVal(false)
     })
       .catch(err => {
-        toast('Set record failed', {
-          position: "top-center",
-          autoClose: 2000,
-          theme: "dark",
-        });
+        toast.error('Set record failed');
       })
   }
 

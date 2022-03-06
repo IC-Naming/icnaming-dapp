@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Row, Col, Spinner } from "react-bootstrap";
-import { Modal, Spin, Input } from "@douyinfe/semi-ui";
+import { Modal, Spin, Input, Toast } from "@douyinfe/semi-ui";
 import { useHistory } from "react-router-dom";
-import { toast } from "react-toastify";
 import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
@@ -46,11 +45,11 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 			Exception
 		}
 		if (blockHeight === '') {
-			toast.error('Please enter the payment block height', { position: 'top-center', theme: 'dark' })
+			Toast.error('Please enter the payment block height')
 			return
 		}
 		if (isNaN(Number(blockHeight))) {
-			toast.error('Please enter the correct block height', { position: 'top-center', theme: 'dark' })
+			Toast.error('Please enter the correct block height')
 			return
 		}
 		setSubmitLoading(true)
@@ -63,7 +62,7 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 			for (let i = 0; i < max_retry; i++) {
 				try {
 					let result = await serviceApi.confirmOrder(BigInt(blockHeight));
-					console.log('confirmOrder result',result)
+					console.log('confirmOrder result', result)
 					if (result) {
 						result_status = ConfirmStatus.Success;
 						break;
@@ -160,10 +159,7 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 					break;
 				case OrderStatus.NotOrder:
 					history.push('/myaccount');
-					toast.error('no pending order', {
-						position: 'top-center',
-						theme: 'dark'
-					})
+					Toast.error('no pending order')
 					break;
 				case OrderStatus.Refund:
 					checkRefund();
@@ -174,7 +170,7 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 
 	useEffect(() => {
 		const orderInfo = localStorage.getItem('orderInfo');
-		if(orderInfo){
+		if (orderInfo) {
 			const orderInfoObj = JSON.parse(orderInfo)
 			checkOrder(orderInfoObj.name)
 		}

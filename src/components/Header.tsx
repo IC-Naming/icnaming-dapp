@@ -5,8 +5,6 @@ import { Link } from "react-router-dom";
 import { ConnectWallets } from "./ConnectWallets";
 import { useAuthWallet } from "../context/AuthWallet";
 import { formatAddress } from '../utils/helper';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 export const Header = () => {
   const history = useHistory();
@@ -149,7 +147,6 @@ export const Header = () => {
           </ul>
         </div>
       </div>
-      <ToastContainer />
       <ConnectWallets visible={showWallets} hide={() => { setShowWallets(false) }} />
     </header>
   )

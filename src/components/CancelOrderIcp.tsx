@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
-import { toast } from "react-toastify";
 import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { ModalTipFull } from "./ModalTipFull";
@@ -9,6 +8,7 @@ import { useMyInfo } from "../context/MyInfo";
 import ServiceApi from "../utils/ServiceApi";
 import { CanisterError } from "utils/exception";
 import { Modal } from "@douyinfe/semi-ui";
+import toast from "@douyinfe/semi-ui/lib/es/toast";
 interface CancelOrderIcpProps {
   name: string;
 }
@@ -27,11 +27,7 @@ export const CancelOrderIcp: React.FC<CancelOrderIcpProps> = ({ name }) => {
       if (res) {
         setLoading(false)
         setVisiableModalTipFull(false)
-        toast.success('Order cancelled success', {
-          position: 'top-center',
-          autoClose: 1000,
-          theme: 'dark'
-        })
+        toast.success('Order cancelled success')
         myInfo.cleanPendingOrder();
         localStorage.removeItem('orderInfo');
         history.push(`/search/${name.split('.')[0]}`);
@@ -40,10 +36,7 @@ export const CancelOrderIcp: React.FC<CancelOrderIcpProps> = ({ name }) => {
       if (err instanceof CanisterError) {
         setLoading(false)
         setVisiableModalTipFull(false)
-        toast.error(err.message, {
-          position: 'top-center',
-          theme: 'dark'
-        })
+        toast.error(err.message)
       }
       console.log('cancelRegisterOrder', err)
     })

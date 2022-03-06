@@ -3,6 +3,7 @@ import { Principal } from "@dfinity/principal";
 import ServiceApi from "../utils/ServiceApi";
 import { useAuthWallet } from "./AuthWallet";
 import BigNumber from "bignumber.js";
+import toast from "@douyinfe/semi-ui/lib/es/toast";
 
 export interface MyInfoContextInterface {
   orderInfo: {
@@ -98,15 +99,18 @@ function useProvideMyInfo() {
   }, [auth.walletAddress])
 
   const getIcpToCycles = async () => {
-    const res_IcpToCycles = await serviceApi.getIcpToCycles();
-    const res_IcpToCycles_map = res_IcpToCycles.map((item, index) => {
-      return {
-        icp: new BigNumber(item.price_in_icp_e8s.toString()).div(100000000).toString(),
-        cycles: new BigNumber(item.price_in_xdr_permyriad.toString()).div(10000).toString()
-      }
-    })
-    localStorage.setItem('icpToCycles', JSON.stringify(res_IcpToCycles_map))
+    serviceApi.getIcpToCycles().then(res_IcpToCycles=>{
+      const res_IcpToCycles_map = res_IcpToCycles.map((item, index) => {
+        return {
+          icp: new BigNumber(item.price_in_icp_e8s.toString()).div(100000000).toString(),
+          cycles: new BigNumber(item.price_in_xdr_permyriad.toString()).div(10000).toString()
+        }
+      })
+      localStorage.setItem('icpToCycles', JSON.stringify(res_IcpToCycles_map))
     setIcpToCycles(res_IcpToCycles_map)
+    }).catch(err=>{
+      toast.error(err.message)
+    });
   }
 
   useEffect(() => {

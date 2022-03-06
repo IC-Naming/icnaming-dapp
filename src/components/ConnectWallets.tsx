@@ -4,7 +4,8 @@ import plugimg from '../assets/images/pluglogo.png';
 import styles from "../assets/styles/ConnectWallets.module.scss";
 import { Row, Col, Modal, Spinner } from "react-bootstrap";
 import { useAuthWallet } from "../context/AuthWallet";
-import { ToastContainer, toast } from 'react-toastify';
+import toast from "@douyinfe/semi-ui/lib/es/toast";
+
 interface propsType {
   visible: boolean;
   hide: () => void;
@@ -19,16 +20,11 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
       if (res && res.connected) {
         hide()
       } else {
-        toast.error('fail connect', {
-          position: "top-center"
-        })
+        toast.error('fail connect')
       }
     }).catch(err => {
       hide();
-      console.log(err)
-      toast.error(`${err}`, {
-        position: "top-center"
-      })
+      toast.error(err)
     }).finally(() => {
       setConnecting(false)
     });
@@ -41,9 +37,7 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
       if (res && res.connected) {
         hide()
       } else {
-        toast.error('fail connect', {
-          position: "top-center"
-        })
+        toast.error('fail connect')
       }
     })
   }
@@ -94,7 +88,6 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
               </Row>
             </React.Fragment>
         }
-        <ToastContainer />
       </Modal.Body>
     </Modal>
   );

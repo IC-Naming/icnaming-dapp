@@ -3,11 +3,11 @@ import { useHistory, useLocation } from "react-router-dom";
 import styles from '../assets/styles/Card.module.scss'
 import ServiceApi from '../utils/ServiceApi'
 import { useAuthWallet } from '../context/AuthWallet';
-import { toast } from 'react-toastify';
 import { deleteCache } from '../utils/localCache';
 import { Spinner } from 'react-bootstrap';
 import { useMyInfo } from '../context/MyInfo';
 import { PendingOrderTip } from '.';
+import toast from '@douyinfe/semi-ui/lib/es/toast';
 
 export interface CardProps {
   name: string,
@@ -75,11 +75,7 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
         addFavorite(e)
       }
     } else {
-      toast.warning('Wallet is not connected', {
-        position: "top-center",
-        autoClose: 2000,
-        theme: 'dark'
-      })
+      toast.warning('Wallet is not connected')
     }
   }
 

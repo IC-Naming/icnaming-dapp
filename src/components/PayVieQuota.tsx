@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
-import { toast } from "react-toastify";
 import styles from '../assets/styles/Name.module.scss'
 import { ModalTipFull } from "../components/ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
@@ -9,6 +8,7 @@ import { useAuthWallet } from '../context/AuthWallet';
 import ServiceApi from "../utils/ServiceApi";
 import { deleteCache } from "../utils/localCache";
 import { CanisterError } from "utils/exception";
+import toast from "@douyinfe/semi-ui/lib/es/toast";
 interface QuotaTypeProps {
   quotaType: number;
   quotaTypeCount: number;
@@ -32,10 +32,7 @@ export const PayVieQuota: React.FC<QuotaTypeProps> = ({ quotaType, quotaTypeCoun
 
     serviceApi.registerNameByQuota(myInfo.orderInfo.name, quotaType).then(res => {
       if (res === true) {
-        toast.success(`Congratulations! Now you are the owner of ${myInfo.orderInfo.name}!`, {
-          position: 'top-center',
-          theme: 'dark'
-        })
+        toast.success(`Congratulations! Now you are the owner of ${myInfo.orderInfo.name}!`)
         setLoading(false)
         setVisiableModalTipFull(false)
         myInfo.getMyQuotas();
@@ -43,21 +40,13 @@ export const PayVieQuota: React.FC<QuotaTypeProps> = ({ quotaType, quotaTypeCoun
         deleteCache('getNamesOfRegistrant' + auth.walletAddress)
         deleteCache('namesOfController' + auth.walletAddress)
       } else {
-        toast.error('fail register', {
-          position: 'top-center',
-          autoClose: 2000,
-          theme: 'dark'
-        })
+        toast.error('fail register')
       }
     }).catch(err => {
       setLoading(false)
       setVisiableModalTipFull(false)
       if (err instanceof CanisterError) {
-        toast.error(err.message, {
-          position: 'top-center',
-          autoClose: 2000,
-          theme: 'dark'
-        })
+        toast.error(err.message)
       }
     })
   }

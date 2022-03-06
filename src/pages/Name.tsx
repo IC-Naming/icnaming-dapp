@@ -1,13 +1,13 @@
 import { Container, Tabs, Tab, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import { SearchInput, CopyToClipboard, Record, Register, ConnectWallets } from "../components";
 import styles from "../assets/styles/Name.module.scss";
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
 import { CanisterError } from "../utils/exception";
 import { useAnalytics } from '../utils/GoogleGA';
+import toast from "@douyinfe/semi-ui/lib/es/toast";
 export const Name = (props) => {
   useAnalytics('Name');
   const serviceApi = new ServiceApi();
@@ -61,16 +61,10 @@ export const Name = (props) => {
         }
       }).catch(err => {
         if(err in CanisterError){
-          toast.error(err.message, {
-            position: "top-center",
-            theme: "dark",
-          });
+          toast.error(err.message);
         }
         setLoadingName(false);
-        toast.error('Get name details failed', {
-          position: "top-center",
-          theme: "dark",
-        });
+        toast.error('Get name details failed');
       });
 
       queryWithCache(() => {
@@ -107,11 +101,7 @@ export const Name = (props) => {
       }).catch(err => {
         console.log(err)
         setLoadingName(false);
-        toast.error('Get records of name failed', {
-          position: "top-center",
-          autoClose: 2000,
-          theme: "dark",
-        });
+        toast.error('Get records of name failed');
       })
     }
     return () => ac.abort();

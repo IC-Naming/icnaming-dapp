@@ -10,9 +10,9 @@ import dateFormat from "dateformat";
 import { IC_EXTENSION } from '../utils/config';
 import { CanisterError } from '../utils/exception';
 import { isLocalEnv } from 'config/env';
-import { toast } from 'react-toastify';
 import { useAnalytics } from '../utils/GoogleGA';
 import { GetNameOrderResponse } from 'utils/canisters/registrar/interface';
+import toast from '@douyinfe/semi-ui/lib/es/toast';
 
 interface NameModel {
   name: string;
@@ -133,11 +133,7 @@ export const Search = (props) => {
             if (err.code === 9) {
               creatNameSearchResult(searchName, false);
             } else {
-              toast.error(err.message, {
-                position: "top-center",
-                autoClose: 2000,
-                theme: "dark"
-              })
+              toast.error(err.message)
             }
           }
         }

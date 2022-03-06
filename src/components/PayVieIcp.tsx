@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { Modal, Timeline, Spin } from "@douyinfe/semi-ui";
 import { useHistory } from "react-router-dom";
-import { toast } from "react-toastify";
 import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
@@ -11,6 +10,7 @@ import { deleteCache } from "../utils/localCache";
 import { CancelOrderIcp } from "components/CancelOrderIcp";
 import BigNumber from "bignumber.js";
 import { useMyInfo } from "context/MyInfo";
+import toast from "@douyinfe/semi-ui/lib/es/toast";
 declare var window: any;
 interface IcpPayProps {
 	orderInfo: {
@@ -186,10 +186,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 					break;
 				case OrderStatus.NotOrder:
 					history.push('/myaccount');
-					toast.error('no pending order', {
-						position: 'top-center',
-						theme: 'dark'
-					})
+					toast.error('no pending order')
 					break;
 				case OrderStatus.Refund:
 					checkRefund();

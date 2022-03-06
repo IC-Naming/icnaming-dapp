@@ -3,7 +3,6 @@ import { Row, Col, Spinner } from "react-bootstrap";
 import styles from '../assets/styles/Name.module.scss'
 import { useAuthWallet } from "../context/AuthWallet";
 import { useMyInfo } from "../context/MyInfo";
-import { toast } from 'react-toastify';
 import ServiceApi from "../utils/ServiceApi";
 import { useHistory } from "react-router-dom";
 import { ConnectWallets } from ".";
@@ -11,6 +10,7 @@ import { PendingOrderTip } from "./PendingOrderTip";
 import { CanisterError } from "../utils/exception";
 import { Select } from '@douyinfe/semi-ui';
 import { ModalTipFull } from "./ModalTipFull";
+import toast from "@douyinfe/semi-ui/lib/es/toast";
 const Option = Select.Option;
 interface RegProps {
   regname: string;
@@ -30,11 +30,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const [quotaLoading, setQuotaLoading] = useState<boolean>(true);
   const [recomQuota, setRecomQuota] = useState<number>(0);
   const errorToast = (msg: string) => {
-    toast.error(msg, {
-      position: 'top-center',
-      autoClose: 2000,
-      theme: 'dark',
-    })
+    toast.error(msg)
   }
 
   const registerVidIcp = async () => {
