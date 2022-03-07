@@ -6,10 +6,8 @@ import styles from "../assets/styles/Name.module.scss";
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
 import { CanisterError } from "../utils/exception";
-import { useAnalytics } from '../utils/GoogleGA';
 import toast from "@douyinfe/semi-ui/lib/es/toast";
 export const Name = (props) => {
-  useAnalytics('Name');
   const serviceApi = new ServiceApi();
   const location = useLocation();
   const showBackMyAccountLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'myaccount';
@@ -162,7 +160,7 @@ export const Name = (props) => {
                         <div className={styles.flexrow}>
                           <div className={styles.flexcol}>Registrant</div>
                           <div className={styles.flexcol}>
-                            <a className={styles['d-text']} href="/#">{nameDetails?.registrant}</a>
+                            <span className={styles['d-text']}>{nameDetails?.registrant}</span>
                             <CopyToClipboard text={nameDetails?.registrant} />
                           </div>
                           <div className={styles.flexcol}>
@@ -176,7 +174,7 @@ export const Name = (props) => {
                         <div className={styles.flexrow}>
                           <div className={styles.flexcol}>Controller</div>
                           <div className={styles.flexcol}>
-                            <a className={styles['d-text']} href="/#">{nameDetails?.controller}</a>
+                            <span className={styles['d-text']}>{nameDetails?.controller}</span>
                             <CopyToClipboard text={nameDetails?.controller} />
                           </div>
                           <div className={styles.flexcol}>
@@ -201,7 +199,7 @@ export const Name = (props) => {
                         <div className={styles.flexrow}>
                           <div className={styles.flexcol}>Resolver</div>
                           <div className={styles.flexcol}>
-                            <a className={styles['d-text']} href="/#">{nameDetails?.resolver}</a>
+                            <span className={styles['d-text']}>{nameDetails?.resolver}</span>
                             <CopyToClipboard text={nameDetails?.resolver} />
                           </div>
                           <div className={styles.flexcol}>

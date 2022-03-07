@@ -8,9 +8,7 @@ import { queryWithCache } from '../utils/localCache';
 import { Container } from 'react-bootstrap';
 import { CanisterError } from '../utils/exception';
 import { List, Pagination, Skeleton } from '@douyinfe/semi-ui';
-import { useAnalytics } from '../utils/GoogleGA';
 export const Favourites = () => {
-  useAnalytics('Favourites');
   const { ...authWallet } = useAuthWallet();
   const serviceApi = new ServiceApi();
   const [loading, setLoading] = useState<boolean>(true)
