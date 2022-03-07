@@ -6,10 +6,8 @@ import styles from "../assets/styles/Name.module.scss";
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
 import { CanisterError } from "../utils/exception";
-import { useAnalytics } from '../utils/GoogleGA';
 import toast from "@douyinfe/semi-ui/lib/es/toast";
 export const Name = (props) => {
-  useAnalytics('Name');
   const serviceApi = new ServiceApi();
   const location = useLocation();
   const showBackMyAccountLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'myaccount';
