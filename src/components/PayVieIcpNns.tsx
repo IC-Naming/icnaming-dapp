@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Row, Col } from "react-bootstrap";
 // import { Modal, Spin, Input } from "@douyinfe/semi-ui";
-import { Input } from "@douyinfe/semi-ui";
+import { Input, Banner } from "@douyinfe/semi-ui";
 import { useHistory } from "react-router-dom";
-import styles from '../assets/styles/Name.module.scss'
+// import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
 import ServiceApi from "../utils/ServiceApi";
@@ -34,77 +34,77 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 	const [nameAvailable, setNameAvailable] = useState<boolean>(false)
 
 	const [blockHeight, setBlockHeight] = useState<string>('')
-/* 	const [submitLoading, setSubmitLoading] = useState<boolean>(false)
-	const [confirmStatus, setConfirmStatus] = useState<'success' | 'fail' | 'exception'>('success')
-	const [modalVisible, setModalVisible] = useState<boolean>(false)
-	const [confirmAgain, setConfirmAgain] = useState<boolean>(false) */
+	/* 	const [submitLoading, setSubmitLoading] = useState<boolean>(false)
+		const [confirmStatus, setConfirmStatus] = useState<'success' | 'fail' | 'exception'>('success')
+		const [modalVisible, setModalVisible] = useState<boolean>(false)
+		const [confirmAgain, setConfirmAgain] = useState<boolean>(false) */
 
 
-	const confirmOrderFunction = async () => {
-		toast.warning({
-			content: 'Only plug wallet payment is supported for now',
-			duration: 4,
-		})
-		return false;
-	/* 	enum ConfirmStatus {
-			Success,
-			Fail,
-			Exception
-		}
-		if (blockHeight === '') {
-			toast.error('Please enter the payment block height')
-			return
-		}
-		if (isNaN(Number(blockHeight))) {
-			toast.error('Please enter the correct block height')
-			return
-		}
-		setSubmitLoading(true)
-		console.log('block_height-----------', blockHeight);
-		console.assert(Number(blockHeight) > 0, 'blockHeight must be greater than 0');
-		// get confirm status
-		let confirmStatus = await (async () => {
-			const max_retry = 3;
-			let result_status = ConfirmStatus.Success;
-			for (let i = 0; i < max_retry; i++) {
-				try {
-					let result = await serviceApi.confirmOrder(BigInt(blockHeight));
-					console.log('confirmOrder result', result)
-					if (result) {
-						result_status = ConfirmStatus.Success;
-						break;
-					} else {
-						result_status = ConfirmStatus.Fail;
-					}
-				} catch (error) {
-					console.error(`exception when confirm order: ${error}`);
-					return ConfirmStatus.Exception;
-				}
+	/* 	const confirmOrderFunction = async () => {
+			toast.warning({
+				content: 'Only plug wallet payment is supported for now',
+				duration: 4,
+			})
+			return false;
+			enum ConfirmStatus {
+				Success,
+				Fail,
+				Exception
 			}
-			return result_status;
-		})();
-		console.log(`confirm status: ${confirmStatus}`);
-		setModalVisible(true);
-		setSubmitLoading(false);
-		setConfirmAgain(false)
-		switch (confirmStatus) {
-			case ConfirmStatus.Success:
-				console.log('You got the name! please check it out from MyAccount');
-				myInfo.cleanPendingOrder()
-				setConfirmStatus('success');
-				deleteCache('getNamesOfRegistrant' + authWallet.walletAddress)
-				deleteCache('namesOfController' + authWallet.walletAddress)
-				break;
-			case ConfirmStatus.Exception:
-				setConfirmStatus('exception');
-				break;
-			case ConfirmStatus.Fail:
-				// name is not available or invalid request from client
-				setConfirmStatus('fail');
-				console.log('fail confirm order, but payment success');
-				break;
-		} */
-	}
+			if (blockHeight === '') {
+				toast.error('Please enter the payment block height')
+				return
+			}
+			if (isNaN(Number(blockHeight))) {
+				toast.error('Please enter the correct block height')
+				return
+			}
+			setSubmitLoading(true)
+			console.log('block_height-----------', blockHeight);
+			console.assert(Number(blockHeight) > 0, 'blockHeight must be greater than 0');
+			// get confirm status
+			let confirmStatus = await (async () => {
+				const max_retry = 3;
+				let result_status = ConfirmStatus.Success;
+				for (let i = 0; i < max_retry; i++) {
+					try {
+						let result = await serviceApi.confirmOrder(BigInt(blockHeight));
+						console.log('confirmOrder result', result)
+						if (result) {
+							result_status = ConfirmStatus.Success;
+							break;
+						} else {
+							result_status = ConfirmStatus.Fail;
+						}
+					} catch (error) {
+						console.error(`exception when confirm order: ${error}`);
+						return ConfirmStatus.Exception;
+					}
+				}
+				return result_status;
+			})();
+			console.log(`confirm status: ${confirmStatus}`);
+			setModalVisible(true);
+			setSubmitLoading(false);
+			setConfirmAgain(false)
+			switch (confirmStatus) {
+				case ConfirmStatus.Success:
+					console.log('You got the name! please check it out from MyAccount');
+					myInfo.cleanPendingOrder()
+					setConfirmStatus('success');
+					deleteCache('getNamesOfRegistrant' + authWallet.walletAddress)
+					deleteCache('namesOfController' + authWallet.walletAddress)
+					break;
+				case ConfirmStatus.Exception:
+					setConfirmStatus('exception');
+					break;
+				case ConfirmStatus.Fail:
+					// name is not available or invalid request from client
+					setConfirmStatus('fail');
+					console.log('fail confirm order, but payment success');
+					break;
+			} 
+		}*/
 
 	const checkOrder = async (name) => {
 		enum OrderStatus {
@@ -181,6 +181,13 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 
 	return (
 		<React.Fragment>
+
+			<Banner
+				type="warning"
+				description="Only plug wallet payment is supported for now"
+				closeIcon={null}
+				className="mb-4"
+			/>
 			{
 				checkOrderIng ? <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div> :
 					<>
@@ -232,12 +239,12 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 
 						<div className={`${payStyles['btn-pay-wrap']}`}>
 							<CancelOrderIcp name={orderInfo.name} />
-							{
+							{/* {
 								nameAvailable &&
 								<button className={`${styles.btn} ${payStyles['btn-pay-icp']}`} disabled={false} title="Only plug wallet payment is supported for now" onClick={() => { confirmOrderFunction() }}>
-									{/* {submitLoading && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />} */}Confirm
+									{submitLoading && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}Confirm
 								</button>
-							}
+							} */}
 						</div>
 					</>
 			}
