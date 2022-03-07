@@ -8,9 +8,10 @@ import { AuthRoute } from "./router/authRoute"
 import { Header, Footer } from "./components";
 import { LocaleProvider } from '@douyinfe/semi-ui';
 import en_US from '@douyinfe/semi-ui/lib/es/locale/source/en_US';
-import { useAnalytics } from './utils/GoogleGA';
+import ReactGA4 from "react-ga4";
+
 const App = () => {
-  useAnalytics('App');
+  ReactGA4.send({ hitType: "pageview", page: window.location.pathname });
   return (
     <div className="App">
       <Router basename="/">

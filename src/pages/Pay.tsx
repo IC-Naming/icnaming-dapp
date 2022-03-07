@@ -3,10 +3,8 @@ import styles from '../assets/styles/Name.module.scss'
 import { PayVieQuota } from "components/PayVieQuota";
 import { PayVieIcp } from "components/PayVieIcp";
 import { Refund } from "components/Refund";
-import { useAnalytics } from '../utils/GoogleGA';
 import { PayVieIcpNns } from "components/PayVieIcpNns";
 export const Pay = (props) => {
-  useAnalytics('Pay')
   const [hasRefund, setHasRefund] = useState<boolean>(false)
   const [quotaTypeCount, setQuotaTypeCount] = useState<any>(0);
   const [quotaType, setQuotaType] = useState<number>(7)
