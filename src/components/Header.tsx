@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { ConnectWallets } from "./ConnectWallets";
 import { useAuthWallet } from "../context/AuthWallet";
 import { formatAddress } from '../utils/helper';
+import { deleteCache } from 'utils/localCache';
 
 export const Header = () => {
   const history = useHistory();
@@ -46,6 +47,8 @@ export const Header = () => {
     sessionStorage.removeItem("connectStatus");
     sessionStorage.removeItem("walletType");
     sessionStorage.removeItem("orderInfo");
+    deleteCache('getNamesOfRegistrant' + authWallet.walletAddress)
+    deleteCache('namesOfController' + authWallet.walletAddress)
   }
 
   const HeaderWallet = () => {
