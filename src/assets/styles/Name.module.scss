@@ -363,6 +363,18 @@
     margin-left: 0;
   }
 }
+.skeleton-pargraph{
+  background: linear-gradient(180deg, #101B34 0%, #060E23 100%);
+  padding: 1.6rem .75rem 0;
+  border-radius:12px;
+  border: 1px solid #1E2C44;
+  .skeleton-pargraph-item{
+    padding: 0 50px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+  }
+}
 @media screen and (min-width: 576px){
   .btn-reg-wrap{
     flex-direction: row;
