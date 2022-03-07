@@ -1,21 +1,19 @@
-
 import { Container, Tabs, Tab, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
-
 import { SearchInput, CopyToClipboard, Record, Register, ConnectWallets } from "../components";
 import styles from "../assets/styles/Name.module.scss";
-
 import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
 import { CanisterError } from "../utils/exception";
-
-
+import { useAnalytics } from '../utils/GoogleGA';
+import toast from "@douyinfe/semi-ui/lib/es/toast";
 export const Name = (props) => {
+  useAnalytics('Name');
   const serviceApi = new ServiceApi();
   const location = useLocation();
-  const showBackLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'myaccount';
+  const showBackMyAccountLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'myaccount';
+  const showBackFavLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'favourites';
   const [showWallets, setShowWallets] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
   const [loadingName, setLoadingName] = useState<boolean>(false);
@@ -37,7 +35,6 @@ export const Name = (props) => {
 
   const [recordsText, setRecordsText] = useState([
     { title: 'Email', key: 'email', value: "Not set" },
-    { title: 'Url', key: 'url', value: "Not set" },
     { title: 'Avatar', key: 'avatar', value: "Not set" },
     { title: 'Description', key: 'description', value: "Not set" },
     { title: 'Notice', key: 'notice', value: "Not set" },
@@ -47,9 +44,7 @@ export const Name = (props) => {
   ]);
 
   const [canister, setCanister] = useState<any>();
-  const [action, setAction] = useState('');
-  const [activeKey, setActiveKey] = useState('details');
-
+  const [action, setAction] = useState('details');
 
   useEffect(() => {
     const ac = new AbortController();
@@ -57,33 +52,7 @@ export const Name = (props) => {
       let getNameDetailsLoaded = false;
       let getRecordsOfNameLoaded = false;
 
-      /* queryWithCache(() => {
-        return new Promise((resolve, reject) => {
-          serviceApi.getNameDetails(name).then(data => {
-            resolve(data)
-          }).catch(errs => {
-            reject(errs)
-          });
-        })
-      }, name + 'details').then(res => {
-        console.log('details', res)
-        setNameDetails(res);
-        getNameDetailsLoaded = true;
-        if (getNameDetailsLoaded && getRecordsOfNameLoaded) {
-          setLoadingName(false);
-        }
-      }).catch(err => {
-        console.log(err)
-        setLoadingName(false);
-        toast.error('Get name details failed', {
-          position: "top-center",
-          autoClose: 2000,
-          theme: "dark",
-        });
-      }) */
-
       serviceApi.getNameDetails(name).then(res => {
-        console.log(name)
         console.log('details', res)
         setNameDetails(res);
         getNameDetailsLoaded = true;
@@ -92,14 +61,10 @@ export const Name = (props) => {
         }
       }).catch(err => {
         if(err in CanisterError){
-          console.log(err.message)
+          toast.error(err.message);
         }
         setLoadingName(false);
-        toast.error('Get name details failed', {
-          position: "top-center",
-          autoClose: 2000,
-          theme: "dark",
-        });
+        toast.error('Get name details failed');
       });
 
       queryWithCache(() => {
@@ -110,7 +75,7 @@ export const Name = (props) => {
             reject(errs)
           });
         })
-      }, name + 'Records').then(res => {
+      }, name + 'Records',30).then(res => {
         const records = recordsAddress.map(item => {
           const record = res.find(record => {
             console.log(record)
@@ -136,29 +101,12 @@ export const Name = (props) => {
       }).catch(err => {
         console.log(err)
         setLoadingName(false);
-        toast.error('Get records of name failed', {
-          position: "top-center",
-          autoClose: 2000,
-          theme: "dark",
-        });
+        toast.error('Get records of name failed');
       })
     }
     return () => ac.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [name])
-
-  useEffect(() => {
-    // if action is reg 
-    if (action === 'reg') {
-      setActiveKey('register')
-    } else if (action === 'details') {
-      setActiveKey('details')
-    }
-    return () => {
-      setActiveKey('details')
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [action])
 
   useEffect(() => {
     console.log(props.match.params)
@@ -183,8 +131,14 @@ export const Name = (props) => {
           <Container className="pt-5">
             <h1 className={`${styles.title} text-right`}>
               {
-                showBackLink && 
+                showBackMyAccountLink && 
                 <Link to='/myaccount' className={styles['name-back-link']}>
+                  <i className="bi bi-chevron-left"></i>
+                </Link>
+              }
+              {
+                showBackFavLink &&
+                <Link to='/favourites' className={styles['name-back-link']}>
                   <i className="bi bi-chevron-left"></i>
                 </Link>
               }
@@ -194,8 +148,8 @@ export const Name = (props) => {
               loadingName ?
                 <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
                 :
-                <Tabs activeKey={activeKey} onSelect={(k) => setActiveKey(k || "register")} className="mb-3">
-                  <Tab eventKey="register" title="Register">
+                <Tabs activeKey={action} onSelect={(k) => setAction(k || "register")} className="mb-3">
+                  <Tab eventKey="reg" title="Register">
                     <Register regname={props.match.params.name} available={nameDetails?.available} />
                   </Tab>
                   <Tab eventKey="details" title="Details">

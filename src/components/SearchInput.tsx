@@ -1,6 +1,6 @@
+import toast from '@douyinfe/semi-ui/lib/es/toast'
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import { toast } from 'react-toastify';
 import styles from '../assets/styles/SearchInput.module.scss'
 interface Props {
   word?: string
@@ -10,7 +10,7 @@ export const SearchInput = (props: Props) => {
   const [value, setValue] = useState<string>('')
 
   const handleChange = (e) => {
-    setValue(e.target.value.toLowerCase())
+    setValue(e.target.value.replace(/\s+/g, '').toLowerCase())
     e.preventDefault()
   }
   const handleKeyUp = (e: any) => {
@@ -23,11 +23,7 @@ export const SearchInput = (props: Props) => {
     if (value.split('.')[0].length > 3) {
       history.push(`/search/${value}`)
     } else {
-      toast.error("second level name must be more than 6 characters", {
-        position: "top-center",
-        autoClose: 2000,
-        theme: 'dark'
-      })
+      toast.error("second level name must be more than 3 characters")
     }
   }
   useEffect(() => {

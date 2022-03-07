@@ -1,10 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import ReactGA from 'react-ga';
 import './assets/styles/index.scss';
 import App from './App';
-
-ReactDOM.render(
-    <App />,
-  document.getElementById('root')
-);
-
+ReactGA.initialize('G-GYJBL2WBZZ');
+ReactDOM.render(<App />,document.getElementById('root'));

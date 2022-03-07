@@ -3,6 +3,7 @@ import { Principal } from "@dfinity/principal";
 import ServiceApi from "../utils/ServiceApi";
 import { useAuthWallet } from "./AuthWallet";
 import BigNumber from "bignumber.js";
+import toast from "@douyinfe/semi-ui/lib/es/toast";
 
 export interface MyInfoContextInterface {
   orderInfo: {
@@ -32,6 +33,7 @@ function useProvideMyInfo() {
     payStatus: {},
     payYears: 1,
     payType: 'icp',
+    quotaType: 7
   })
   const [icpToCycles, setIcpToCycles] = useState<Array<{ icp: string, cycles: string }>>([])
   const [pendingOrder, setPendingOrder] = useState<boolean>(false)
@@ -47,32 +49,36 @@ function useProvideMyInfo() {
       payType: order.payType,
       quotaType: order.quotaType,
     })
+    localStorage.setItem('orderInfo', JSON.stringify(order))
   }
 
   const getMyQuotas = async () => {
+    console.log('getMyQuotas start ...................')
+    const get_MyQuotas = async (user: Principal) => {
+      const quota4 = await serviceApi.getQuota(user, 4);
+      const quota5 = await serviceApi.getQuota(user, 5);
+      const quota6 = await serviceApi.getQuota(user, 6);
+      const quota7 = await serviceApi.getQuota(user, 7);
+      return Promise.all([quota4, quota5, quota6, quota7])
+    }
     if (auth.principal) {
-      const get_MyQuotas = async (user: Principal) => {
-        const quota4 = await serviceApi.getQuota(user, 4);
-        const quota5 = await serviceApi.getQuota(user, 5);
-        const quota6 = await serviceApi.getQuota(user, 6);
-        const quota7 = await serviceApi.getQuota(user, 7);
-        return Promise.all([quota4, quota5, quota6, quota7])
-      }
       const res = await get_MyQuotas(auth.principal);
-      console.log(res)
+      console.log('myQuotas', res)
       localStorage.setItem('myQuotas', JSON.stringify(res))
       setQuotas(res)
     }
   }
+
   const checkPendingOrder = async () => {
+    console.log('getPendingOrder start')
     serviceApi.getPendingOrder().then(res => {
-      console.log('checkPendingOrdersssss',res)
+      console.log('getPendingOrder', res)
       if (res.length !== 0) {
         setPendingOrder(true)
-        setOrderInfo({
+        createOrder({
           name: res[0].name,
-          payStatus: res[0].status,
           nameLen: res[0].name.split('.').length,
+          payStatus: res[0].status,
           payYears: res[0].years,
           payType: 'icp',
         })
@@ -83,24 +89,27 @@ function useProvideMyInfo() {
   }
 
   useEffect(() => {
-    console.log('getMyQuotas principal -----------------',auth.principal)
-    if (auth.principal) {
+    console.log('getMyQuotas checkPendingOrder')
+    if (auth.walletAddress) {
       getMyQuotas();
       checkPendingOrder();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.principal])
+  }, [auth.walletAddress])
 
   const getIcpToCycles = async () => {
-    const res_IcpToCycles = await serviceApi.getIcpToCycles();
-    const res_IcpToCycles_map = res_IcpToCycles.map((item, index) => {
-      return {
-        icp: new BigNumber(item.price_in_icp_e8s.toString()).div(100000000).toString(),
-        cycles: new BigNumber(item.price_in_xdr_permyriad.toString()).div(10000).toString()
-      }
-    })
-    localStorage.setItem('icpToCycles', JSON.stringify(res_IcpToCycles_map))
+    serviceApi.getIcpToCycles().then(res_IcpToCycles=>{
+      const res_IcpToCycles_map = res_IcpToCycles.map((item, index) => {
+        return {
+          icp: new BigNumber(item.price_in_icp_e8s.toString()).div(100000000).toString(),
+          cycles: new BigNumber(item.price_in_xdr_permyriad.toString()).div(10000).toString()
+        }
+      })
+      localStorage.setItem('icpToCycles', JSON.stringify(res_IcpToCycles_map))
     setIcpToCycles(res_IcpToCycles_map)
+    }).catch(err=>{
+      toast.error(err.message)
+    });
   }
 
   useEffect(() => {
@@ -132,7 +141,7 @@ function useProvideMyInfo() {
     getMyQuotas,
     getIcpToCycles,
     checkPendingOrder,
-    cleanPendingOrder:()=>{setPendingOrder(false)}
+    cleanPendingOrder: () => { setPendingOrder(false) }
   }
 }
 

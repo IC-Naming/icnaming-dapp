@@ -30,6 +30,7 @@
   .address{
     color: #D9E1F2;
     margin-right: .6rem;
+    height: 20px;
     @include no-wrap();
   }
 }
@@ -75,6 +76,18 @@
   margin: 0.75rem 0.75rem 0;
   color: #00CFBB;
 }
+.skeleton-pargraph{
+  width: 100%;
+  :global{
+    .semi-skeleton-paragraph li{
+      height: 64px;
+    }
+    .semi-skeleton-paragraph li:last-child{
+      width: 100%;
+    }
+  }
+}
+
 @media screen and (min-width: 768px){
   .serach-content{
     padding-top: 80px;
