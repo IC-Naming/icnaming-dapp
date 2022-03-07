@@ -27,7 +27,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
   const [icpToCycles, SetIcpToCycles] = useState<string>('');
   const [quotas, setQuotas] = useState<Array<any>>([]);
-  const [quotaLoading, setQuotaLoading] = useState<boolean>(true);
+  const [quotaLoading, setQuotaLoading] = useState<boolean>(false);
   const [recomQuota, setRecomQuota] = useState<number>(0);
   const errorToast = (msg: string) => {
     toast.error(msg)
@@ -158,44 +158,51 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                   <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect Wallet</button>
                 </div>
                 :
-                
-                  // <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
-                  
-                  <div className={`${styles['btn-wrap']} ${styles['btn-reg-wrap']}`}>
-                    <button
-                      className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={registerVidIcp}
-                      disabled={auth.walletType === 'nns'}
-                      title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
-                    >
-                      {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
-                      Register via ICP
-                    </button>
-                    {
-                      quotaLoading ? null:
+
+                // <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
+
+                <div className={`${styles['btn-wrap']} ${styles['btn-reg-wrap']}`}>
+                  <button
+                    className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={registerVidIcp}
+                    disabled={auth.walletType === 'nns'}
+                    title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
+                  >
+                    {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                    Register via ICP
+                  </button>
+
+                  {
+                    quotaLoading ?
+                      <div className={styles['selcet-quota-wrap']}>
+                        <div className="text-center"><Spinner animation="border" size="sm" style={{ marginRight: 10 }} />quota Loading</div>
+                      </div>
+                      :
                       avaliableQuotas.length > 0 &&
-                      <Select size='large' className={styles['selcet-quota']}
-                        placeholder="Please choose your quota"
-                        onChange={(e) => {
-                          registerVidQuota(e)
-                        }}>
-                        {
-                          avaliableQuotas.map((quota, index) => {
-                            return <Option showTick={false} className={styles['quota-option-item']} key={index} value={quota.quotaType}>
-                              <div className={styles['quota-option-con']}>
-                                <span className={styles['quota-option-type']}>
-                                  [Length-{quota.quotaType}]
-                                </span>
-                                <span className={styles['quota-count']}>{quota.quotaCount}</span>
-                              </div>
-                              {
-                                recomQuota === quota.quotaType && <span className={styles['recommend']}>recom</span>
-                              }
-                            </Option>
-                          })
-                        }
-                      </Select>
-                    }
-                  </div>
+                      <div className={styles['selcet-quota-wrap']}>
+                        <Select size='large' className={styles['selcet-quota']}
+                          placeholder="Please choose your quota"
+                          onChange={(e) => {
+                            registerVidQuota(e)
+                          }}>
+                          {
+                            avaliableQuotas.map((quota, index) => {
+                              return <Option showTick={false} className={styles['quota-option-item']} key={index} value={quota.quotaType}>
+                                <div className={styles['quota-option-con']}>
+                                  <span className={styles['quota-option-type']}>
+                                    [Length-{quota.quotaType}]
+                                  </span>
+                                  <span className={styles['quota-count']}>{quota.quotaCount}</span>
+                                </div>
+                                {
+                                  recomQuota === quota.quotaType && <span className={styles['recommend']}>recom</span>
+                                }
+                              </Option>
+                            })
+                          }
+                        </Select>
+                      </div>
+                  }
+                </div>
             }
           </React.Fragment>
       }

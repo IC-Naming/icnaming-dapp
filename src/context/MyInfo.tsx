@@ -89,11 +89,10 @@ function useProvideMyInfo() {
   }
 
   useEffect(() => {
-    if (sessionStorage.getItem('connectStatus') === 'connected') {
-      if (auth.walletAddress) {
-        getMyQuotas();
-        checkPendingOrder();
-      }
+    console.log('getMyQuotas checkPendingOrder')
+    if (auth.walletAddress) {
+      getMyQuotas();
+      checkPendingOrder();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth.walletAddress])

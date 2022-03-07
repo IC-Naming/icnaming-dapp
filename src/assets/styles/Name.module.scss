@@ -345,6 +345,15 @@
 
 .btn-reg-wrap{
   flex-direction: column;
+  .selcet-quota-wrap{
+    height: 40px;
+    margin-bottom: .75rem;
+    width: 100% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #00CFBB;
+  }
   .btn-via-icp,
   .selcet-quota{
     margin-bottom: .75rem;
@@ -357,14 +366,17 @@
 @media screen and (min-width: 576px){
   .btn-reg-wrap{
     flex-direction: row;
+    .selcet-quota-wrap{
+      margin-bottom: 0;
+      width:260px!important;
+      margin-left: 40px;
+    }
     .btn-via-icp,
     .selcet-quota{
       margin-bottom: 0;
-      min-width: 260 !important;
+      width: 260px !important;
     }
-    .selcet-quota{
-      margin-left: 40px;
-    }
+
   }
 .records{
   .flexrow{
