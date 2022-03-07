@@ -36,6 +36,7 @@ export const PayVieQuota: React.FC<QuotaTypeProps> = ({ quotaType, quotaTypeCoun
         setLoading(false)
         setVisiableModalTipFull(false)
         myInfo.getMyQuotas();
+        localStorage.removeItem('myQuotas');
         history.push('/myaccount')
         deleteCache('getNamesOfRegistrant' + auth.walletAddress)
         deleteCache('namesOfController' + auth.walletAddress)
