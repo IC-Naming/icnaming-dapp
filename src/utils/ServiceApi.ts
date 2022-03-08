@@ -240,7 +240,7 @@ export default class ServiceApi {
     // console.log('getNamesOfRegistrant----------', address)
     return executeWithLogging(async () => {
       const res = await this.registrarQueryActor.get_names(address, pagingArgs);
-      // console.log('get_names----------', res)
+      // console.log('getNamesOfRegistrant----------', res)
       if ("Ok" in res) {
         return res.Ok.items;
       } else {
@@ -261,6 +261,7 @@ export default class ServiceApi {
         address,
         pagingArgs
       );
+      // console.log('getNamesOfController----------', res)
       if ("Ok" in res) {
         return res.Ok.items;
       } else {

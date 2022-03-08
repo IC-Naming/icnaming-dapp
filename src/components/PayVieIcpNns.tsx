@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Row, Col, Spinner } from "react-bootstrap";
-import { Modal, Spin, Input, Toast } from "@douyinfe/semi-ui";
+import { Row, Col } from "react-bootstrap";
+// import { Modal, Spin, Input } from "@douyinfe/semi-ui";
+import { Input, Banner } from "@douyinfe/semi-ui";
 import { useHistory } from "react-router-dom";
-import styles from '../assets/styles/Name.module.scss'
+// import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
 import ServiceApi from "../utils/ServiceApi";
-import { deleteCache } from "../utils/localCache";
+// import { deleteCache } from "../utils/localCache";
 import { CancelOrderIcp } from "components/CancelOrderIcp";
 import { CopyToClipboard } from "components/CopyToClipboard";
 import BigNumber from "bignumber.js";
-import { useMyInfo } from "context/MyInfo";
-declare var window: any;
+// import { useMyInfo } from "context/MyInfo";
+import toast from "@douyinfe/semi-ui/lib/es/toast";
+// declare var window: any;
 interface IcpPayProps {
 	orderInfo: {
 		name: string,
@@ -26,78 +28,83 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 	const history = useHistory();
 	const serviceApi = new ServiceApi();
 	const { ...authWallet } = useAuthWallet();
-	const { ...myInfo } = useMyInfo();
+	// const { ...myInfo } = useMyInfo();
 	const [checkOrderIng, setCheckOrderIng] = useState<boolean>(true)
 	const [paymentInfo, setPaymentInfo] = useState<any>({ paymentAccountId: 0, paymentMemo: 0, years: 1, priceIcp: 0, cycles: 2 })
 	const [nameAvailable, setNameAvailable] = useState<boolean>(false)
 
 	const [blockHeight, setBlockHeight] = useState<string>('')
-	const [submitLoading, setSubmitLoading] = useState<boolean>(false)
-	const [confirmStatus, setConfirmStatus] = useState<'success' | 'fail' | 'exception'>('success')
-	const [modalVisible, setModalVisible] = useState<boolean>(false)
-	const [confirmAgain, setConfirmAgain] = useState<boolean>(false)
+	/* 	const [submitLoading, setSubmitLoading] = useState<boolean>(false)
+		const [confirmStatus, setConfirmStatus] = useState<'success' | 'fail' | 'exception'>('success')
+		const [modalVisible, setModalVisible] = useState<boolean>(false)
+		const [confirmAgain, setConfirmAgain] = useState<boolean>(false) */
 
 
-	const confirmOrderFunction = async () => {
-		enum ConfirmStatus {
-			Success,
-			Fail,
-			Exception
-		}
-		if (blockHeight === '') {
-			Toast.error('Please enter the payment block height')
-			return
-		}
-		if (isNaN(Number(blockHeight))) {
-			Toast.error('Please enter the correct block height')
-			return
-		}
-		setSubmitLoading(true)
-		console.log('block_height-----------', blockHeight);
-		console.assert(Number(blockHeight) > 0, 'blockHeight must be greater than 0');
-		// get confirm status
-		let confirmStatus = await (async () => {
-			const max_retry = 3;
-			let result_status = ConfirmStatus.Success;
-			for (let i = 0; i < max_retry; i++) {
-				try {
-					let result = await serviceApi.confirmOrder(BigInt(blockHeight));
-					console.log('confirmOrder result', result)
-					if (result) {
-						result_status = ConfirmStatus.Success;
-						break;
-					} else {
-						result_status = ConfirmStatus.Fail;
-					}
-				} catch (error) {
-					console.error(`exception when confirm order: ${error}`);
-					return ConfirmStatus.Exception;
-				}
+	/* 	const confirmOrderFunction = async () => {
+			toast.warning({
+				content: 'Only plug wallet payment is supported for now',
+				duration: 4,
+			})
+			return false;
+			enum ConfirmStatus {
+				Success,
+				Fail,
+				Exception
 			}
-			return result_status;
-		})();
-		console.log(`confirm status: ${confirmStatus}`);
-		setModalVisible(true);
-		setSubmitLoading(false);
-		setConfirmAgain(false)
-		switch (confirmStatus) {
-			case ConfirmStatus.Success:
-				console.log('You got the name! please check it out from MyAccount');
-				myInfo.cleanPendingOrder()
-				setConfirmStatus('success');
-				deleteCache('getNamesOfRegistrant' + authWallet.walletAddress)
-				deleteCache('namesOfController' + authWallet.walletAddress)
-				break;
-			case ConfirmStatus.Exception:
-				setConfirmStatus('exception');
-				break;
-			case ConfirmStatus.Fail:
-				// name is not available or invalid request from client
-				setConfirmStatus('fail');
-				console.log('fail confirm order, but payment success');
-				break;
-		}
-	}
+			if (blockHeight === '') {
+				toast.error('Please enter the payment block height')
+				return
+			}
+			if (isNaN(Number(blockHeight))) {
+				toast.error('Please enter the correct block height')
+				return
+			}
+			setSubmitLoading(true)
+			console.log('block_height-----------', blockHeight);
+			console.assert(Number(blockHeight) > 0, 'blockHeight must be greater than 0');
+			// get confirm status
+			let confirmStatus = await (async () => {
+				const max_retry = 3;
+				let result_status = ConfirmStatus.Success;
+				for (let i = 0; i < max_retry; i++) {
+					try {
+						let result = await serviceApi.confirmOrder(BigInt(blockHeight));
+						console.log('confirmOrder result', result)
+						if (result) {
+							result_status = ConfirmStatus.Success;
+							break;
+						} else {
+							result_status = ConfirmStatus.Fail;
+						}
+					} catch (error) {
+						console.error(`exception when confirm order: ${error}`);
+						return ConfirmStatus.Exception;
+					}
+				}
+				return result_status;
+			})();
+			console.log(`confirm status: ${confirmStatus}`);
+			setModalVisible(true);
+			setSubmitLoading(false);
+			setConfirmAgain(false)
+			switch (confirmStatus) {
+				case ConfirmStatus.Success:
+					console.log('You got the name! please check it out from MyAccount');
+					myInfo.cleanPendingOrder()
+					setConfirmStatus('success');
+					deleteCache('getNamesOfRegistrant' + authWallet.walletAddress)
+					deleteCache('namesOfController' + authWallet.walletAddress)
+					break;
+				case ConfirmStatus.Exception:
+					setConfirmStatus('exception');
+					break;
+				case ConfirmStatus.Fail:
+					// name is not available or invalid request from client
+					setConfirmStatus('fail');
+					console.log('fail confirm order, but payment success');
+					break;
+			} 
+		}*/
 
 	const checkOrder = async (name) => {
 		enum OrderStatus {
@@ -107,7 +114,6 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 			Refund,
 		}
 		if (authWallet.walletAddress) {
-			console.log('checkOrder nns start.................')
 			setCheckOrderIng(true)
 			const serviecOrderInfo: any = [];
 			let orderStatus = await (async () => {
@@ -117,7 +123,6 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 				}), serviceApi.getPendingOrder()]);
 				if (orderResult.length !== 0) {
 					serviecOrderInfo.push(orderResult[0])
-					console.log(serviecOrderInfo)
 					const arrayToHex = (arr: Array<number>) => {
 						return arr.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"), "")
 					}
@@ -140,7 +145,6 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 					if ("WaitingToRefund" in orderResult[0].status) {
 						result_Status = OrderStatus.Refund;
 					} else {
-						console.log('availableResult', availableResult)
 						result_Status = availableResult === true ? OrderStatus.Available : OrderStatus.Disabled;
 					}
 				} else {
@@ -149,7 +153,6 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 				return result_Status;
 			})();
 			setCheckOrderIng(false)
-			console.log('OrderStatus', orderStatus)
 			switch (orderStatus) {
 				case OrderStatus.Available:
 					setNameAvailable(true)
@@ -159,7 +162,7 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 					break;
 				case OrderStatus.NotOrder:
 					history.push('/myaccount');
-					Toast.error('no pending order')
+					toast.error('no pending order')
 					break;
 				case OrderStatus.Refund:
 					checkRefund();
@@ -178,6 +181,13 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 
 	return (
 		<React.Fragment>
+
+			<Banner
+				type="warning"
+				description="Only plug wallet payment is supported for now"
+				closeIcon={null}
+				className="mb-4"
+			/>
 			{
 				checkOrderIng ? <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div> :
 					<>
@@ -229,18 +239,18 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 
 						<div className={`${payStyles['btn-pay-wrap']}`}>
 							<CancelOrderIcp name={orderInfo.name} />
-							{
+							{/* {
 								nameAvailable &&
-								<button className={`${styles.btn} ${payStyles['btn-pay-icp']}`} disabled={submitLoading} onClick={() => { confirmOrderFunction() }}>
+								<button className={`${styles.btn} ${payStyles['btn-pay-icp']}`} disabled={false} title="Only plug wallet payment is supported for now" onClick={() => { confirmOrderFunction() }}>
 									{submitLoading && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}Confirm
 								</button>
-							}
+							} */}
 						</div>
 					</>
 			}
 
 
-			<Modal
+			{/* <Modal
 				header={null}
 				footer={null}
 				visible={modalVisible}
@@ -287,7 +297,7 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 						</div>
 					</React.Fragment>
 				}
-			</Modal>
+			</Modal> */}
 		</React.Fragment>
 	)
 }

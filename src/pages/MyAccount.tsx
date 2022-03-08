@@ -47,6 +47,7 @@ export const MyAccount = () => {
           });
         })
       }, 'getNamesOfRegistrant' + authWallet.walletAddress, 60).then(async (res) => {
+        // console.log("my address result of Registrant", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
         let namesOfRegistrant = res.sort((a, b) => {
@@ -55,8 +56,7 @@ export const MyAccount = () => {
           return {
             name: item.name,
             expireAt: 'Expires ' + dateFormat(new Date(Number(item.expired_at)), "isoDateTime"),
-            favorite: myNamesOfFavorite.includes(item.name),
-            avaiable: false
+            favorite: myNamesOfFavorite.includes(item.name)
           }
         })
 
@@ -81,11 +81,20 @@ export const MyAccount = () => {
         // console.log("my address result of controller", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
-        const names = res.map(n => {
+        let namesOfController = res.sort((a, b) => {
+          return a > b ? 1 : -1
+        }).map(item => {
+          return {
+            name: item,
+            favorite: myNamesOfFavorite.includes(item)
+          }
+        })
+
+        /* const names = res.map(n => {
           let fav = myNamesOfFavorite.find(item => item === n);
           return { name: n, avaiable: false, expireAt: "", favorite: fav }
-        })
-        setNamesOfController(names)
+        }) */
+        setNamesOfController(namesOfController)
         getNamesOfControllerLoaded = true;
         if (getNamesOfRegistrantLoaded && getNamesOfControllerLoaded)
           setLoading(false)
@@ -101,10 +110,10 @@ export const MyAccount = () => {
   }, [authWallet.walletAddress])
 
 
-  const getData = (page: number) => {
+  const getData = (page: number,list:any) => {
     let start = (page - 1) * pageSize;
     let end = page * pageSize;
-    return namesOfRegistrant.slice(start, end);
+    return list.slice(start, end);
   }
 
   const myAccountId = (
@@ -142,7 +151,7 @@ export const MyAccount = () => {
                   <Tabs defaultActiveKey="registrant" className="mb-3">
                     <Tab eventKey="registrant" title="Registrant">
                       <List
-                        dataSource={getData(pageReg)}
+                        dataSource={getData(pageReg,namesOfRegistrant)}
                         split={false}
                         className={styles.list}
                         renderItem={item =>
@@ -155,7 +164,7 @@ export const MyAccount = () => {
                     </Tab>
                     <Tab eventKey="controller" title="Controller">
                       <List
-                        dataSource={getData(pageCtrl)}
+                        dataSource={getData(pageCtrl,namesOfController)}
                         split={false}
                         className={styles.list}
                         renderItem={item =>
@@ -163,7 +172,7 @@ export const MyAccount = () => {
                         }
                       />
                       {
-                        namesOfController.length > 0 && <Pagination className='ic-pagination' pageSize={pageSize} currentPage={pageCtrl} total={namesOfRegistrant.length} onChange={cPage => onPageCtrlChange(cPage)}></Pagination>
+                        namesOfController.length > 0 && <Pagination className='ic-pagination' pageSize={pageSize} currentPage={pageCtrl} total={namesOfController.length} onChange={cPage => onPageCtrlChange(cPage)}></Pagination>
                       }
                     </Tab>
                   </Tabs>
