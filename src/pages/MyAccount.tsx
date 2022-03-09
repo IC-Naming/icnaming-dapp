@@ -167,7 +167,14 @@ export const MyAccount = () => {
                         dataSource={getData(pageReg, searchNamesOfRegistrant)}
                         split={false}
                         className={styles['myaccount-list']}
-                        header={<Input onChange={(v) => onSearch(v.replace(/\s+/g, ''), namesOfRegistrant, 'registrant')} placeholder='Search name' prefix={<IconSearch />} />}
+                        header={<Input onEnterPress={
+                          (e) => {
+                            e.preventDefault();
+                            console.log(e.currentTarget.value)
+                            onSearch(e.currentTarget.value.replace(/\s+/g, ''), namesOfRegistrant, 'registrant')
+                          }
+                        }
+                          onChange={(v) =>!v? onSearch('', namesOfRegistrant, 'registrant'):null} placeholder='Search name' prefix={<IconSearch />} />}
                         renderItem={item =>
                           <Card key={item.name} name={item.name} expireAt={item.expireAt} available={false} isMyAccount={true} favorite={item.favorite} />
                         }
@@ -183,7 +190,16 @@ export const MyAccount = () => {
                         dataSource={getData(pageReg, searchNamesOfController)}
                         split={false}
                         className={styles['myaccount-list']}
-                        header={<Input onChange={(v) => onSearch(v.replace(/\s+/g, ''), namesOfController, 'controller')} placeholder='Search name' prefix={<IconSearch />} />}
+                        header={<Input 
+                          onEnterPress={
+                            (e) => {
+                              e.preventDefault();
+                              console.log(e.currentTarget.value)
+                              onSearch(e.currentTarget.value.replace(/\s+/g, ''), namesOfController, 'controller')
+                            }
+                          }
+                          onChange={(v) =>!v? onSearch('', namesOfController, 'controller'):null}
+                          placeholder='Search name' prefix={<IconSearch />} />}
                         renderItem={item =>
                           <Card name={item.name} expireAt="" available={false} isMyAccount={true} favorite={item.favorite} />
                         }
