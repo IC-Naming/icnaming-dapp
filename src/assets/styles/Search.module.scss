@@ -87,6 +87,26 @@
     }
   }
 }
+.myaccount-list{
+  :global{
+    .semi-list-header{
+      padding: 0 0 .75rem;
+    }
+    .semi-input-wrapper-default{
+      height: 40px;
+      border-radius: 4px;
+      border:1px solid RGBA(23, 34, 58, 1)
+    }
+    .semi-input-wrapper-focus,
+    .semi-input-wrapper-focus:active{
+      border-color: #00CFBB;
+    }
+    .semi-input-default{
+      @include beauty-placeholder(16px,rgba(249,249,249,.6))
+    }
+  }
+}
+
 
 @media screen and (min-width: 768px){
   .serach-content{
@@ -115,6 +135,17 @@
         } 
       }
       
+    }
+  }
+  .myaccount-list{
+    position: relative;
+    :global{
+      .semi-list-header{
+        position: absolute;
+        right: 0;
+        top: -54px;
+        padding: 0;
+      }
     }
   }
 }

@@ -7,16 +7,36 @@ import ServiceApi from '../utils/ServiceApi';
 import { useAuthWallet } from '../context/AuthWallet';
 import dateFormat from "dateformat";
 import { queryWithCache } from '../utils/localCache';
-import { Skeleton, Pagination, List } from '@douyinfe/semi-ui';
+import { Skeleton, Pagination, List, Input } from '@douyinfe/semi-ui';
+import { IconSearch } from '@douyinfe/semi-icons';
 export const MyAccount = () => {
   const { ...authWallet } = useAuthWallet();
   const serviceApi = new ServiceApi();
   const [loading, setLoading] = useState<boolean>(true)
   const [namesOfRegistrant, setNamesOfRegistrant] = useState<any>();
   const [namesOfController, setNamesOfController] = useState<any>();
+  const [searchNamesOfRegistrant, setSearchNamesOfRegistrant] = useState<any>([]);
+  const [searchNamesOfController, setSearchNamesOfController] = useState<any>([]);
   const [pageReg, onPageRegChange] = useState<number>(1);
   const [pageCtrl, onPageCtrlChange] = useState<number>(1);
   let pageSize = 5;
+
+  const getData = (page: number, list) => {
+    let start = (page - 1) * pageSize;
+    let end = page * pageSize;
+    return list.slice(start, end)
+  }
+
+  const onSearch = (searchName: string, list: any[], searchType: string) => {
+    let newList: any;
+    if (searchName) {
+      newList = list.filter(item => item.name.includes(searchName));
+    } else {
+      newList = list
+    }
+    searchType === 'registrant' ? setSearchNamesOfRegistrant(newList) : setSearchNamesOfController(newList)
+    onPageRegChange(1);
+  };
 
   const getMyFavourites = async () => {
     let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
@@ -61,6 +81,7 @@ export const MyAccount = () => {
         })
 
         setNamesOfRegistrant(namesOfRegistrant)
+        setSearchNamesOfRegistrant(namesOfRegistrant)
         getNamesOfRegistrantLoaded = true;
         if (getNamesOfRegistrantLoaded && getNamesOfControllerLoaded)
           setLoading(false)
@@ -89,12 +110,8 @@ export const MyAccount = () => {
             favorite: myNamesOfFavorite.includes(item)
           }
         })
-
-        /* const names = res.map(n => {
-          let fav = myNamesOfFavorite.find(item => item === n);
-          return { name: n, avaiable: false, expireAt: "", favorite: fav }
-        }) */
         setNamesOfController(namesOfController)
+        setSearchNamesOfController(namesOfController)
         getNamesOfControllerLoaded = true;
         if (getNamesOfRegistrantLoaded && getNamesOfControllerLoaded)
           setLoading(false)
@@ -109,22 +126,18 @@ export const MyAccount = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authWallet.walletAddress])
 
-
-  const getData = (page: number,list:any) => {
-    let start = (page - 1) * pageSize;
-    let end = page * pageSize;
-    return list.slice(start, end);
-  }
-
   const myAccountId = (
     <>
       <div style={{ display: 'flex', alignItems: 'center', width: '80%', marginBottom: '2rem' }}>
         <Skeleton.Avatar style={{ width: 70, height: 60, marginRight: '1rem' }} />
         <Skeleton.Title style={{ width: '100%', height: 32 }} />
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '1rem' }}>
-        <Skeleton.Button style={{ marginRight: 5 }} />
-        <Skeleton.Button />
+      <div style={{ display: 'flex', alignItems: 'center',justifyContent:'space-between', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center'}}>
+          <Skeleton.Button style={{ marginRight: 5 }} />
+          <Skeleton.Button />
+        </div>
+        <Skeleton.Title style={{width:200,height:40}}></Skeleton.Title>
       </div>
       <div className={styles['skeleton-pargraph']}>
         <Skeleton.Paragraph rows={3} />
@@ -151,28 +164,48 @@ export const MyAccount = () => {
                   <Tabs defaultActiveKey="registrant" className="mb-3">
                     <Tab eventKey="registrant" title="Registrant">
                       <List
-                        dataSource={getData(pageReg,namesOfRegistrant)}
+                        dataSource={getData(pageReg, searchNamesOfRegistrant)}
                         split={false}
-                        className={styles.list}
+                        className={styles['myaccount-list']}
+                        header={<Input onEnterPress={
+                          (e) => {
+                            e.preventDefault();
+                            console.log(e.currentTarget.value)
+                            onSearch(e.currentTarget.value.replace(/\s+/g, ''), namesOfRegistrant, 'registrant')
+                          }
+                        }
+                          onChange={(v) =>!v? onSearch('', namesOfRegistrant, 'registrant'):null} placeholder='Search name' prefix={<IconSearch />} />}
                         renderItem={item =>
                           <Card key={item.name} name={item.name} expireAt={item.expireAt} available={false} isMyAccount={true} favorite={item.favorite} />
                         }
                       />
                       {
-                        namesOfRegistrant.length > 0 && <Pagination className='ic-pagination' pageSize={pageSize} currentPage={pageReg} total={namesOfRegistrant.length} onChange={cPage => onPageRegChange(cPage)}></Pagination>
+                        searchNamesOfRegistrant.length > 0 && <Pagination className='ic-pagination'
+                          pageSize={pageSize} currentPage={pageReg}
+                          total={searchNamesOfRegistrant.length} onChange={cPage => onPageRegChange(cPage)}></Pagination>
                       }
                     </Tab>
                     <Tab eventKey="controller" title="Controller">
                       <List
-                        dataSource={getData(pageCtrl,namesOfController)}
+                        dataSource={getData(pageReg, searchNamesOfController)}
                         split={false}
-                        className={styles.list}
+                        className={styles['myaccount-list']}
+                        header={<Input 
+                          onEnterPress={
+                            (e) => {
+                              e.preventDefault();
+                              console.log(e.currentTarget.value)
+                              onSearch(e.currentTarget.value.replace(/\s+/g, ''), namesOfController, 'controller')
+                            }
+                          }
+                          onChange={(v) =>!v? onSearch('', namesOfController, 'controller'):null}
+                          placeholder='Search name' prefix={<IconSearch />} />}
                         renderItem={item =>
                           <Card name={item.name} expireAt="" available={false} isMyAccount={true} favorite={item.favorite} />
                         }
                       />
                       {
-                        namesOfController.length > 0 && <Pagination className='ic-pagination' pageSize={pageSize} currentPage={pageCtrl} total={namesOfController.length} onChange={cPage => onPageCtrlChange(cPage)}></Pagination>
+                        searchNamesOfController.length > 0 && <Pagination className='ic-pagination' pageSize={pageSize} currentPage={pageCtrl} total={searchNamesOfController.length} onChange={cPage => onPageCtrlChange(cPage)}></Pagination>
                       }
                     </Tab>
                   </Tabs>
