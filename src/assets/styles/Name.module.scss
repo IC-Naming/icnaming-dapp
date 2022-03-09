@@ -209,6 +209,8 @@
       }
       .d-text{
         @include no-wrap;
+        height: 20px;
+        line-height: 19px;
       }
       
     }
