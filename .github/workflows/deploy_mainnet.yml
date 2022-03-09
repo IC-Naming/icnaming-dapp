@@ -20,13 +20,40 @@ jobs:
         - name: Build
           run: npm run build:mainnet
 
-        - name: Deploy
+        # app.icnaming.com
+        - name: Deploy app.icnaming.com
           uses: reggionick/s3-deploy@v3
           with:
             folder: build
             bucket: ${{ secrets.S3_BUCKET }}
             bucket-region: ${{ secrets.S3_BUCKET_REGION }}
             dist-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+            invalidation: /*
+            delete-removed: true
+            no-cache: false
+            private: true
+
+        # app-testnet.icnaming.com
+        - name: Deploy app-testnet.icnaming.com
+          uses: reggionick/s3-deploy@v3
+          with:
+            folder: build
+            bucket: ${{ secrets.TESTNET_S3_BUCKET }}
+            bucket-region: ${{ secrets.S3_BUCKET_REGION }}
+            dist-id: ${{ secrets.TESTNET_CLOUDFRONT_DISTRIBUTION_ID }}
+            invalidation: /*
+            delete-removed: true
+            no-cache: false
+            private: true
+
+        # whitelist.icnaming.com        
+        - name: Deploy whitelist.icnaming.com
+          uses: reggionick/s3-deploy@v3
+          with:
+            folder: build
+            bucket: ${{ secrets.S3_WHITE_LIST_BUCKET }}
+            bucket-region: ${{ secrets.S3_BUCKET_REGION }}
+            dist-id: ${{ secrets.WHITE_LIST_CLOUDFRONT_DISTRIBUTION_ID }}
             invalidation: /*
             delete-removed: true
             no-cache: false
