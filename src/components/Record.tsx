@@ -56,6 +56,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
       setIschangeRecordVal(false)
     })
       .catch(err => {
+        setRecordSaveLoading(false)
         toast.error('Set record failed');
       })
   }
