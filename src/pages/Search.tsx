@@ -12,6 +12,7 @@ import { CanisterError } from '../utils/exception';
 import { isLocalEnv } from 'config/env';
 import { GetNameOrderResponse } from 'utils/canisters/registrar/interface';
 import toast from '@douyinfe/semi-ui/lib/es/toast';
+import { queryWithCache } from 'utils/localCache';
 
 interface NameModel {
   name: string;
@@ -22,9 +23,9 @@ interface NameModel {
 
 export const Search = (props) => {
   const { ...authWallet } = useAuthWallet();
-  const serviceApi = useMemo(() => 
-  new ServiceApi(), 
-  [authWallet.walletAddress]);// eslint-disable-line
+  const serviceApi = useMemo(() =>
+    new ServiceApi(),
+    [authWallet.walletAddress]);// eslint-disable-line
   const [word, setWord] = useState<string | Principal>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [isSearchAddress, setIsSearchAddress] = useState<boolean>(false)
@@ -75,16 +76,16 @@ export const Search = (props) => {
   }, [serviceApi, authWallet.walletAddress]);
 
   const getPendingOrder = useCallback(async () => {
-    if(!authWallet.walletAddress) {
+    if (!authWallet.walletAddress) {
       return undefined;
     }
     setPendingOrderLoading(true);
     try {
       const res = await serviceApi.getPendingOrder();
-      if(res[0]) {
+      if (res[0]) {
         return res[0];
       }
-    } catch(err) {
+    } catch (err) {
       console.log('getPendingOrder', err);
     } finally {
       setPendingOrderLoading(false);
@@ -92,7 +93,25 @@ export const Search = (props) => {
     return undefined;
   }, [serviceApi, authWallet.walletAddress]);
 
+
+
   const handlWordChange = useCallback(async () => {
+    const getMyFavourites = async () => {
+      if (authWallet.walletAddress) {
+        let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
+        if (myFavoriteNamesStorage && myFavoriteNamesStorage.length > 0) {
+          return myFavoriteNamesStorage;
+        } else {
+          return await queryWithCache(async () => {
+            const favoriteNamesSevice = await serviceApi.getFavoriteNames()
+            localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
+            return serviceApi.getFavoriteNames();
+          }, 'myNamesOfFavorite' + authWallet.walletAddress);
+        }
+      } else {
+        return [];
+      }
+    }
     if (word) {
       // if word is string
       if (typeof word === 'string') {
@@ -120,13 +139,13 @@ export const Search = (props) => {
         }
         try {
           const [userPendingOrder, available] = await Promise.all([getPendingOrder(), serviceApi.available(searchName)]);
-          if(userPendingOrder?.name === searchName) {
+          if (userPendingOrder?.name === searchName) {
             setExistPendingOrderInfo(userPendingOrder);
             setLoading(false);
           } else {
             await creatNameSearchResult(searchName, available);
           }
-        } catch(err) {
+        } catch (err) {
           if (err instanceof CanisterError) {
             if (err.code === 9) {
               creatNameSearchResult(searchName, false);
@@ -140,37 +159,43 @@ export const Search = (props) => {
       else {
         let getNamesOfRegistrantLoaded = false;
         let getNamesOfControllerLoaded = false;
-        serviceApi.getNamesOfRegistrant(word).then(res => {
+        serviceApi.getNamesOfRegistrant(word).then(async res => {
           console.log("search address result of registation", res)
           // for each res ,map it to NameModel
-          const names = res.map(n => {
-            const expireAt = dateFormat(new Date(Number(n.expired_at)), "isoDateTime")
-            let fav = false;
-            if (authWallet.walletAddress) {
-              const myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
-              fav = myFavoriteNames.find(item => item === n.name)
+          let myNamesOfFavorite = await getMyFavourites()
+          let namesOfRegistrant = res.sort((a, b) => {
+            return a.expired_at > b.expired_at ? -1 : 1
+          }).map(item => {
+            return {
+              name: item.name,
+              avaiable: false,
+              expireAt: 'Expires ' + dateFormat(new Date(Number(item.expired_at)), "isoDateTime"),
+              favorite: myNamesOfFavorite.includes(item.name)
             }
-            return { name: n.name, avaiable: false, expireAt, favorite: fav }
           })
-          setNamesOfRegistrant(names)
+
+          setNamesOfRegistrant(namesOfRegistrant)
           getNamesOfRegistrantLoaded = true;
           if (getNamesOfRegistrantLoaded && getNamesOfControllerLoaded) setLoading(false)
         }).catch(err => {
           console.log(err)
           setLoading(false)
         });
-        serviceApi.getNamesOfController(word).then(res => {
+        serviceApi.getNamesOfController(word).then(async res => {
           console.log("search address result of controller", res)
           // for each res ,map it to NameModel
-          const names = res.map(n => {
-            let fav = false;
-            if (authWallet.walletAddress) {
-              const myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
-              fav = myFavoriteNames.find(item => item === n)
+
+          let myNamesOfFavorite = await getMyFavourites()
+          let namesOfController = res.sort((a, b) => {
+            return a > b ? 1 : -1
+          }).map(item => {
+            return {
+              name: item,
+              favorite: myNamesOfFavorite.includes(item)
             }
-            return { name: n, avaiable: false, expireAt: "", favorite: fav }
           })
-          setNamesOfController(names)
+
+          setNamesOfController(namesOfController)
           getNamesOfControllerLoaded = true;
           if (getNamesOfRegistrantLoaded && getNamesOfControllerLoaded) setLoading(false)
         }
@@ -228,16 +253,16 @@ export const Search = (props) => {
                           </div>
                           :
                           <div className={styles.list}>
-                          {
-                            existPendingOrderInfo ?
-                            <PendingOrderCard order={existPendingOrderInfo}></PendingOrderCard>
-                            :
-                            <Card name={nameSearchResult?.name || ''}
-                              expireAt={nameSearchResult?.expireAt || ''}
-                              available={nameSearchResult?.available || false}
-                              favorite={nameSearchResult?.favorite || false} />
-                          }
-                            
+                            {
+                              existPendingOrderInfo ?
+                                <PendingOrderCard order={existPendingOrderInfo}></PendingOrderCard>
+                                :
+                                <Card name={nameSearchResult?.name || ''}
+                                  expireAt={nameSearchResult?.expireAt || ''}
+                                  available={nameSearchResult?.available || false}
+                                  favorite={nameSearchResult?.favorite || false} />
+                            }
+
                           </div>
                         :
                         <Tabs defaultActiveKey="registrant" className="mb-3">
@@ -248,7 +273,7 @@ export const Search = (props) => {
                                   {
                                     namesOfRegistrant?.map((item, index) => {
                                       return <Card key={index} name={`${item.name}`}
-                                        expireAt={`Expires ${item?.expireAt}`}
+                                        expireAt={item?.expireAt}
                                         available={item.available}
                                         favorite={item.favorite} />
                                     })

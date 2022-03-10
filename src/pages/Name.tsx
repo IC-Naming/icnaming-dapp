@@ -36,6 +36,7 @@ export const Name = (props) => {
   const [recordsText, setRecordsText] = useState([
     { title: 'Email', key: 'email', value: "Not set" },
     { title: 'Avatar', key: 'avatar', value: "Not set" },
+    { title: 'Url', key: 'url', value: "Not set" },
     { title: 'Description', key: 'description', value: "Not set" },
     { title: 'Notice', key: 'notice', value: "Not set" },
     { title: 'Keywords', key: 'keywords', value: "Not set" },
