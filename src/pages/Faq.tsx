@@ -26,37 +26,37 @@ export const Faq: React.FC = () => {
     {
       key: '2',
       name: '6',
-      price: '2.20 T Cycles',
+      price: '2.20 T Cycles (Not open yet)',
       year: '2.20 T Cycles',
     },
     {
       key: '3',
       name: '5',
-      price: '2.42 T Cycles',
+      price: '2.42 T Cycles (Not open yet)',
       year: '2.42 T Cycles',
     },
     {
       key: '4',
       name: '4',
-      price: '2.66 T Cycles',
+      price: '2.66 T Cycles (Not open yet)',
       year: '2.66 T Cycles',
     },
     {
       key: '5',
       name: '3',
-      price: '2.92 T Cycles',
+      price: '2.92 T Cycles (Not open yet)',
       year: '2.92 T Cycles',
     },
     {
       key: '6',
       name: '2',
-      price: '3.22 T Cycles',
+      price: '3.22 T Cycles (Not open yet)',
       year: '3.22 T Cycles',
     },
     {
       key: '7',
       name: '1',
-      price: '3.54 T Cycles',
+      price: '3.54 T Cycles (Not open yet)',
       year: '3.54 T Cycles',
     }
   ]
