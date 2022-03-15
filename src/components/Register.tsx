@@ -160,15 +160,19 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                 :
                 <div className={`${styles['btn-wrap']} ${styles['btn-reg-wrap']}`}>
                   {
-                    nameLen > 6 &&
-                    <button
-                      className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={registerVidIcp}
-                      disabled={auth.walletType === 'nns'}
-                      title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
-                    >
-                      {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
-                      Register via ICP
-                    </button>
+                    nameLen > 6 ?
+                      <button
+                        className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={registerVidIcp}
+                        disabled={auth.walletType === 'nns'}
+                        title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
+                      >
+                        {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                        Register via ICP
+                      </button>
+                      :
+                      <button className={`${styles.btn} ${styles['btn-via-icp']}`} style={{fontSize:14}} disabled={true}>
+                        Register via ICP (Not open yet)
+                      </button>
                   }
 
                   {
