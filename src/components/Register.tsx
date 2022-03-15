@@ -158,18 +158,18 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                   <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect Wallet</button>
                 </div>
                 :
-
-                // <div className="text-center"><div className="spinner-border text-primary" role="status"></div></div>
-
                 <div className={`${styles['btn-wrap']} ${styles['btn-reg-wrap']}`}>
-                  <button
-                    className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={registerVidIcp}
-                    disabled={auth.walletType === 'nns'}
-                    title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
-                  >
-                    {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
-                    Register via ICP
-                  </button>
+                  {
+                    nameLen > 6 &&
+                    <button
+                      className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={registerVidIcp}
+                      disabled={auth.walletType === 'nns'}
+                      title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
+                    >
+                      {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                      Register via ICP
+                    </button>
+                  }
 
                   {
                     quotaLoading ?

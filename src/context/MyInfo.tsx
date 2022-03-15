@@ -53,7 +53,6 @@ function useProvideMyInfo() {
   }
 
   const getMyQuotas = async () => {
-    console.log('getMyQuotas start ...................')
     const get_MyQuotas = async (user: Principal) => {
       const quota4 = await serviceApi.getQuota(user, 4);
       const quota5 = await serviceApi.getQuota(user, 5);
@@ -63,16 +62,13 @@ function useProvideMyInfo() {
     }
     if (auth.principal) {
       const res = await get_MyQuotas(auth.principal);
-      console.log('myQuotas', res)
       localStorage.setItem('myQuotas', JSON.stringify(res))
       setQuotas(res)
     }
   }
 
   const checkPendingOrder = async () => {
-    console.log('getPendingOrder start')
     serviceApi.getPendingOrder().then(res => {
-      console.log('getPendingOrder', res)
       if (res.length !== 0) {
         setPendingOrder(true)
         createOrder({
@@ -89,7 +85,6 @@ function useProvideMyInfo() {
   }
 
   useEffect(() => {
-    console.log('getMyQuotas checkPendingOrder')
     if (auth.walletAddress) {
       getMyQuotas();
       checkPendingOrder();
@@ -113,10 +108,10 @@ function useProvideMyInfo() {
   }
 
   useEffect(() => {
-    console.debug('getIcpToCycles start')
+    // console.debug('getIcpToCycles start')
     getIcpToCycles()
     return () => {
-      console.debug('getIcpToCycles end')
+      // console.debug('getIcpToCycles end')
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [innerTimerTick])
