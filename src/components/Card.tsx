@@ -50,6 +50,8 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
         deleteCache('myNamesOfFavorite' + auth.walletAddress);
         console.log("addFavorite", res)
       }
+    }).catch(err=>{
+      toast.error(err.message)
     })
   }
 
@@ -63,6 +65,8 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
         deleteCache('myNamesOfFavorite' + auth.walletAddress);
         console.log("removeFavorite", res)
       }
+    }).catch(err=>{
+      toast.error(err.message)
     })
   }
 

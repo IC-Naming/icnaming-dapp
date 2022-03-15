@@ -48,7 +48,14 @@ export const Favourites = () => {
             expireAt: expireAtOfName > 0 ? 'Expires ' + dateFormat(new Date(expireAtOfName), "isoDateTime") : ''
           }
         })
-        queryWithCache(async () => {
+        Promise.all(myFavoriteNamesWithExpireAt).then(res =>{
+          setNameResult(res)
+          setLoading(false)
+        }).catch(err=>{
+          console.log(err)
+          setLoading(false)
+        })
+        /* queryWithCache(async () => {
           return await Promise.all(myFavoriteNamesWithExpireAt);
         }, 'favoriteall' + authWallet.walletAddress).then(res => {
           setNameResult(res)
@@ -56,7 +63,7 @@ export const Favourites = () => {
         }).catch(err => {
           console.log(err)
           setLoading(false)
-        });
+        }); */
       }
     }
     getMyFavoriteNames()
