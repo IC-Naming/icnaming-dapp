@@ -8,10 +8,7 @@ const getRegistrarId = (): Principal => {
     return Principal.fromText("cymrc-fqaaa-aaaam-aacaa-cai");
   }
   if (isTestNetEnv()) {
-    // test
-    // return Principal.fromText("onof3-pyaaa-aaaal-qac6a-cai");
-    // main
-    return Principal.fromText("cymrc-fqaaa-aaaam-aacaa-cai");
+    return Principal.fromText("onof3-pyaaa-aaaal-qac6a-cai");
   }
   throw new Error("Unknown environment");
 };

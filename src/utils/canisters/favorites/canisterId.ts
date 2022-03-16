@@ -8,10 +8,7 @@ const getFavoriteId = (): Principal => {
     return Principal.fromText("crp26-tyaaa-aaaam-aacbq-cai");
   }
   if (isTestNetEnv()) {
-    // test
-    // return Principal.fromText("oyjuw-oqaaa-aaaal-qac5q-cai");
-    // main
-    return Principal.fromText("crp26-tyaaa-aaaam-aacbq-cai");
+    return Principal.fromText("oyjuw-oqaaa-aaaal-qac5q-cai");
   }
   throw new Error("Unknown environment");
 };
