@@ -5,37 +5,65 @@ import { IC_HOST } from "../utils/config";
 import { principalToAccountID } from "../utils/helper";
 import { Principal } from "@dfinity/principal";
 import { whietLists } from "../utils/canisters/plugWhiteListConfig";
+// import icpbox from "@icpbox/js-sdk";
+// import { StoicIdentity } from "ic-stoic-identity";
+import { Toast } from "@douyinfe/semi-ui";
+
 declare const window: any;
 
 export interface AuthWalletContextInterface {
   isAuthWalletConnected: boolean;
   walletAddress: string;
-  principal?: Principal;
+  principal?: Principal | undefined;
   accountId: string;
   walletType: string;
   connectPlugWallet();
   connectII();
+  // connectStoic();
   quitWallet();
-  setAuthWalletConnected: (arg0: boolean) => void;
-  setWalletAddress: (arg0: string) => void;
 }
 
 function useProvideAuthWallet() {
   const [isAuthWalletConnected, setAuthWalletConnected] = useState<boolean>(false)
   const [walletAddress, setWalletAddress] = useState<string>('')
   const [walletAccountId, setWalletAccountId] = useState<string>('')
-  const [walletType, setWalletType] = useState<string>('plug')
-  const [principal, setPrincipal] = useState<Principal>()
+  const [principal, setPrincipal] = useState<Principal | undefined>(undefined)
+  const [walletType, setWalletType] = useState<string>('')
   const whitelist = whietLists();
-
   const setauthWalletState = (accountId, principalId, connected, walletType) => {
+    setAuthWalletConnected(connected)
     setWalletAccountId(accountId)
     setPrincipal(principalId)
-    setAuthWalletConnected(connected)
     setWalletAddress(principalId.toText())
     setWalletType(walletType)
+    sessionStorage.setItem("connectStatus", 'connected');
     sessionStorage.setItem('walletType', walletType)
   }
+  /* const connectStoic = async () => {
+    console.log('connectStoic')
+    return new Promise(async (resolve, reject) => {
+      StoicIdentity.load().then(async (identity) => {
+        if (identity !== false) {
+          //ID is a already connected wallet!
+        } else {
+          //No existing connection, lets make one!
+          identity = await StoicIdentity.connect();
+        }
+        console.log(identity)
+        actorFactory.authenticateWithIdentity(identity);
+        const principalId = identity?.getPrincipal();
+        const accountId = principalToAccountID(principalId)
+        // console.log('getPublicKey', identity.getPublicKey())
+        setauthWalletState(accountId, principalId, true, 'stioc')
+        resolve({ connected: true });
+        // StoicIdentity.disconnect();
+      }).catch(err => {
+        Toast.error(err)
+        reject(err)
+      })
+    })
+  } */
+
   const connectPlugWallet = async () => {
     return new Promise(async (resolve, reject) => {
       if (typeof (window as any).ic === 'undefined') {
@@ -52,101 +80,109 @@ function useProvideAuthWallet() {
             actorFactory.authenticateWithAgent(await window.ic?.plug?.agent);
             const accountId = principalToAccountID(principalId)
             setauthWalletState(accountId, principalId, true, 'plug')
-            sessionStorage.setItem("connectStatus", 'connected');
-            resolve({ connected: requestConnect, account: principalId })
+            resolve({ connected: true });
           } else {
-            console.log('error')
-            reject({ connected: requestConnect, account: "" });
+            Toast.error('Fail Connect')
+            resolve({ connected: false });
           }
         } catch (error) {
+          Toast.error('Authorization Rejected')
           reject(error)
         }
       }
     });
   }
 
-  useEffect(() => {
-    if (sessionStorage.getItem('connectStatus') === 'connected') {
-      setAuthWalletConnected(true)
-    }
-    const getCurrentAccountOfPlug = () => {
-      return new Promise(async (resolve, reject) => {
-        if (typeof (window as any).ic === 'undefined') {
-          resolve({ connected: false, account: "" });
-        } else {
-          try {
-            const connected = await window.ic.plug.isConnected();
-            if (connected && !window.ic.plug.agent) {
-              await window.ic?.plug?.createAgent({ whitelist, host: IC_HOST });
-              const principalId = await window.ic?.plug?.agent.getPrincipal();
-              actorFactory.authenticateWithAgent(await window.ic?.plug?.agent)
-              const accountId = principalToAccountID(principalId)
-              sessionStorage.setItem("connectStatus", 'connected');
-              setauthWalletState(accountId, principalId, true, 'plug')
-              resolve({ connected: true, account: principalId });
-            } else {
-              resolve({ connected: false, account: "" });
-            }
-          } catch (error) {
-            reject(error)
-          }
-        }
-      });
-    }
-    getCurrentAccountOfPlug()
-  }, [])// eslint-disable-line react-hooks/exhaustive-deps
-
-  /* 
-   *  Connect Icp 
-   */
   const connectII = async () => {
     return new Promise(async (resolve, reject) => {
-      const authClient = await AuthClient.create();
-      await authClient.login({
-        onSuccess: async () => {
-          const identity = await authClient.getIdentity();
-          actorFactory.authenticateWithIdentity(identity);
-          const accountId = principalToAccountID(identity.getPrincipal())
-          setauthWalletState(accountId, identity.getPrincipal(), true, 'nns')
-          sessionStorage.setItem("connectStatus", 'connected');
-          resolve({ connected: true, account: identity.getPrincipal().toText() })
-        }
-      })
+      try {
+        const authClient = await AuthClient.create();
+        await authClient.login({
+          onSuccess: async () => {
+            const identity = await authClient.getIdentity();
+            console.log(identity)
+            actorFactory.authenticateWithIdentity(identity);
+            const accountId = principalToAccountID(identity.getPrincipal())
+            setauthWalletState(accountId, identity.getPrincipal(), true, 'nns')
+            resolve({ connected: true });
+          },
+          onError: async () => {
+            Toast.error('Fail Connect');
+            resolve({ connected: false });
+          }
+        })
+      } catch (error) {
+        Toast.error('Authorization Rejected')
+        reject(error)
+      }
     });
   }
 
   useEffect(() => {
-    if (sessionStorage.getItem('connectStatus') === 'connected') {
-      setAuthWalletConnected(true)
-    }
-    const getCurrentAccountOfII = async () => {
-      const authClient = await AuthClient.create();
-      if (await authClient.isAuthenticated()) {
-        const identity = await authClient.getIdentity();
-        actorFactory.authenticateWithIdentity(identity);
-        const accountId = principalToAccountID(identity.getPrincipal())
-        sessionStorage.setItem("connectStatus", 'connected');
-        setauthWalletState(accountId, identity.getPrincipal(), true, 'nns')
-      }
-    }
-    getCurrentAccountOfII()
+     (async () => {
+       if (sessionStorage.getItem('connectStatus') === 'connected') {
+         setAuthWalletConnected(true)
+         let walletTypeStorage = sessionStorage.getItem('walletType')
+         if (walletTypeStorage) {
+           switch (walletTypeStorage) {
+             case 'plug':
+               if (typeof (window as any).ic === 'undefined') {
+                 setAuthWalletConnected(false);
+               } else {
+                 try {
+                   const connected = await window.ic.plug.isConnected();
+                   if (connected && !window.ic.plug.agent) {
+                     await window.ic?.plug?.createAgent({ whitelist, host: IC_HOST });
+                     const principalId = await window.ic?.plug?.agent.getPrincipal();
+                     actorFactory.authenticateWithAgent(await window.ic?.plug?.agent)
+                     const accountId = principalToAccountID(principalId)
+                     setauthWalletState(accountId, principalId, true, 'plug')
+                     setAuthWalletConnected(true);
+                   } else {
+                     setAuthWalletConnected(false);
+                   }
+                 } catch (error) {
+                   console.log(error)
+                 }
+               }
+               break;
+             case 'nns':
+               const authClient = await AuthClient.create();
+               if (await authClient.isAuthenticated()) {
+                 const identity = await authClient.getIdentity();
+                 actorFactory.authenticateWithIdentity(identity);
+                 const accountId = principalToAccountID(identity.getPrincipal())
+                 setauthWalletState(accountId, identity.getPrincipal(), true, 'nns')
+               }
+               break;
+      
+           }
+         }
+       }
+     })()
   }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
-  const quitWallet = async () => {   
+
+  const quitWallet = async () => {
     setAuthWalletConnected(false)
     setWalletAccountId('')
-    setWalletAddress('')
     setPrincipal(undefined)
-    if (window.ic.plug.agent) {
+    setWalletAddress('')
+    sessionStorage.removeItem("connectStatus");
+    sessionStorage.removeItem("walletType");
+    localStorage.removeItem('ic-identity');//Disconnect NNS Wallet
+    localStorage.removeItem('ic-delegation');//Disconnect NNS Wallet
+    if (localStorage.getItem("_scApp")) {
+      localStorage.removeItem("_scApp"); //Disconnect Stoic Wallet
+      // StoicIdentity.disconnect();
+    } else if (window.ic.plug.agent) {
       window.ic?.plug?.disconnect()
     } else {
-      console.log('quitWallet nns')
       const authClient = await AuthClient.create();
       authClient.logout()
-      localStorage.removeItem('ic-identity');
-      localStorage.removeItem('ic-delegation');
     }
   }
+
 
   return {
     isAuthWalletConnected: isAuthWalletConnected,
@@ -154,13 +190,13 @@ function useProvideAuthWallet() {
     principal: principal,
     accountId: walletAccountId,
     walletType: walletType,
-    setAuthWalletConnected,
-    setWalletAddress,
     connectPlugWallet,
     connectII,
+    // connectStoic,
     quitWallet,
   }
 }
+
 
 export const ConnectContext = React.createContext<AuthWalletContextInterface>(null!);
 export function ProvideConnectContext({ children }) {

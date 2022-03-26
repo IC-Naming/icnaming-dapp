@@ -54,7 +54,7 @@ export const Header = () => {
   const HeaderWallet = () => {
     return (<div className={`${styles['wallet-wrap']} appheader-wallet-wrap`}>
       {
-        authWallet.isAuthWalletConnected ?
+        authWallet.walletAddress ?
           <div className={styles.wallet}>
             <i className="bi bi-person"></i>
             <span className={styles.address}>{formatAddress(authWallet.walletAddress)}</span>
