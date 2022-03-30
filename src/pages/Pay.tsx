@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import styles from '../assets/styles/Name.module.scss'
 import { PayVieQuota } from "components/PayVieQuota";
 import { PayVieIcp } from "components/PayVieIcp";
 import { Refund } from "components/Refund";
 import { PayVieIcpNns } from "components/PayVieIcpNns";
-export const Pay = (props) => {
+export const Pay = () => {
   const [hasRefund, setHasRefund] = useState<boolean>(false)
   const [quotaTypeCount, setQuotaTypeCount] = useState<any>(0);
   const [quotaType, setQuotaType] = useState<number>(7)
@@ -51,10 +51,10 @@ export const Pay = (props) => {
                   :
                   <>
                     {
-                      sessionStorage.getItem('walletType') === 'plug' ?
-                        <PayVieIcp orderInfo={orderInfoObj} checkRefund={() => { setHasRefund(true) }} />
-                        :
+                      sessionStorage.getItem('walletType') === 'nns' ?
                         <PayVieIcpNns orderInfo={orderInfoObj} checkRefund={() => { setHasRefund(true) }} />
+                        :
+                        <PayVieIcp orderInfo={orderInfoObj} checkRefund={() => { setHasRefund(true) }} />
                     }
                   </>
             }

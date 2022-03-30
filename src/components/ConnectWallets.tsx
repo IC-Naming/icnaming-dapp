@@ -54,7 +54,6 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 			}
 		}).catch(err => {
 			hide();
-			toast.error(err)
 		}).finally(() => {
 			setConnecting(false)
 		});

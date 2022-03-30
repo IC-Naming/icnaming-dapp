@@ -184,7 +184,7 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 
 			<Banner
 				type="warning"
-				description="Only plug wallet payment is supported for now"
+				description="Currently only plugWallet and StiocWallet are supported"
 				closeIcon={null}
 				className="mb-4"
 			/>
