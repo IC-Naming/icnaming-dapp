@@ -123,6 +123,7 @@
       }
       .nav-item:first-child{
         .nav-link{
+          outline: none;
           border-top-left-radius: 0.25rem;
           border-top-right-radius: 0;
           border-bottom-left-radius: 0.25rem;
