@@ -61,6 +61,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
           if (err instanceof CanisterError) {
             if (err.code === 22) {
               setPendingOrderTipVisible(true)
+              myInfo.checkPendingOrder();
             } else if (err.code === 26) {
               errorToast(err.message)
             } else {

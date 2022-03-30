@@ -60,6 +60,7 @@
       font-size: 1rem;
       height: 40px;
       box-shadow: none;
+      outline: none;
       &:hover, &:focus{
         border: 1px solid #384B6E;
       }
@@ -122,7 +123,6 @@
       }
       .nav-item:first-child{
         .nav-link{
-          outline: none;
           border-top-left-radius: 0.25rem;
           border-top-right-radius: 0;
           border-bottom-left-radius: 0.25rem;
