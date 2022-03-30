@@ -74,7 +74,7 @@ export const Header = () => {
     { title: 'FAQ', path: '/faq' },
   ])
   useEffect(() => {
-    if (authWallet.isAuthWalletConnected) {
+    if (authWallet.walletAddress) {
       setNavitems([
         { title: 'Home', path: '/' },
         { title: 'My Account', path: '/myaccount' },
@@ -87,7 +87,7 @@ export const Header = () => {
         { title: 'FAQ', path: '/faq' },
       ])
     }
-  }, [authWallet.isAuthWalletConnected])
+  }, [authWallet.walletAddress])
 
  
   return (
