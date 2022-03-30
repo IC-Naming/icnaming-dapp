@@ -8,9 +8,6 @@ import { whietLists } from "utils/canisters/plugWhiteListConfig";
 import { StoicIdentity } from "utils/ic-stoic-identity/index";
 import { Toast } from "@douyinfe/semi-ui";
 declare const window: any;
-/* const u = navigator.userAgent;
-const isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1;
-const isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); */
 
 export interface AuthWalletContextInterface {
   isAuthWalletConnected: boolean;

@@ -6,7 +6,10 @@ import styles from "../assets/styles/ConnectWallets.module.scss";
 import { Row, Col, Modal, Spinner } from "react-bootstrap";
 import { useAuthWallet } from "../context/AuthWallet";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
-
+const u = navigator.userAgent;
+const isMobile = !!u.match(/AppleWebKit.*Mobile.*/);
+/* const isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1;
+const isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); */
 interface propsType {
 	visible: boolean;
 	hide: () => void;
@@ -97,12 +100,14 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 										<span>Internet Identity</span>
 									</button>
 								</Col>
-								<Col sm="12">
-									<button className={styles["btn-connect"]} onClick={connPlugWallet} disabled={connecting}>
-										<img src={plugimg} alt="plug" />
-										<span>Plug</span>
-									</button>
-								</Col>
+								{
+									!isMobile && <Col sm="12">
+										<button className={styles["btn-connect"]} onClick={connPlugWallet} disabled={connecting}>
+											<img src={plugimg} alt="plug" />
+											<span>Plug</span>
+										</button>
+									</Col>
+								}
 								<Col sm="12">
 									<button className={styles["btn-connect"]} onClick={connectStiocWallet} disabled={connecting}>
 										<img src={stoicwallet} alt="stioc" />
