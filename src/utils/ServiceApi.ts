@@ -77,7 +77,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, 'getIcpToCycles');
   }
 
  
@@ -94,7 +94,7 @@ export default class ServiceApi {
         } else {
           throw new CanisterError(res.Err);
         }
-      });
+      }, "available");
     } else return Promise.reject(new Error("Invalid search word"));
   };
 
@@ -128,7 +128,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "registerNameByQuota");
   };
 
   // submit order
@@ -145,7 +145,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "submitRegisterOrder");
   };
 
   // cancel order
@@ -169,7 +169,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "refundOrder");
   }
 
   // get pending order
@@ -182,7 +182,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "getPendingOrder");
   };
 
   // confirm order
@@ -194,7 +194,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "confirmOrder");
   };
 
   // get credit
@@ -207,7 +207,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "creditOfEthAddress");
   };
 
   // set record
@@ -227,7 +227,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "setRecord");
   };
 
   public getNamesOfRegistrant = (
@@ -267,7 +267,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "getNamesOfController");
   };
 
   // get name's registrant
@@ -293,7 +293,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "getControllerOfName");
   };
 
   // get name's resolver
@@ -305,7 +305,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "getResolverOfName");
   };
 
   // get name's RegistrationDetails
@@ -325,7 +325,7 @@ export default class ServiceApi {
           'expired_at': BigInt(0),
         }
       }
-    });
+    }, "getRegistrationDetailsOfName");
   };
 
   // get name's records
@@ -342,7 +342,7 @@ export default class ServiceApi {
         return [];
         // throw new CanisterError(res.Err);
       }
-    });
+    }, "getRecordsOfName");
   };
 
   // get details of name  registry
@@ -360,20 +360,20 @@ export default class ServiceApi {
           'name': '',
         }
       }
-    });
+    },  "getRegistryDetailsOfName");
   };
 
   // get quota
   public getQuota = (user: Principal, quotaType: number): Promise<number> => {
     return executeWithLogging(async () => {
       const quotaParsed: QuotaType = { LenGte: quotaType };
-      const res: any = await this.registrarUpdateActor.get_quota(user, quotaParsed);
+      const res = await this.registrarUpdateActor.get_quota(user, quotaParsed);
       if ("Ok" in res) {
         return Number(res.Ok);
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "getQuota");
   };
 
   // get name details
@@ -404,7 +404,7 @@ export default class ServiceApi {
           expireAt: new Date(Number(values[0].expired_at)),
         };
       }
-    });
+    }, "getNameDetails");
   };
 
   // get favorite names
@@ -417,7 +417,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "getFavoriteNames");
   };
 
   // add favorite name
@@ -429,7 +429,7 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "addFavoriteName");
   };
 
   // remove favorite name
@@ -441,6 +441,6 @@ export default class ServiceApi {
       } else {
         throw new CanisterError(res.Err);
       }
-    });
+    }, "removeFavoriteName");
   };
 }

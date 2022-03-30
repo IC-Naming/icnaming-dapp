@@ -49,8 +49,9 @@ function useProvideAuthWallet() {
           //No existing connection, lets make one!
           identity = await StoicIdentity.connect();
         }
-        console.log(identity)
-        actorFactory.authenticateWithIdentity(identity);
+        console.debug(`StoicIdentity.connect()`, identity);
+        await actorFactory.authenticateWithIdentity(identity);
+        console.debug(`stonic Connected`);
         const principalId = identity?.getPrincipal();
         const accountId = principalToAccountID(principalId)
         console.log('getPrincipal', identity.getPrincipal())
@@ -59,6 +60,7 @@ function useProvideAuthWallet() {
         // StoicIdentity.disconnect();
       }).catch(err => {
         Toast.error(err)
+        console.error(`stonic connect error${err}`);
         reject(err)
       })
     })
