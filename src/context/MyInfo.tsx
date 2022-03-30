@@ -54,11 +54,13 @@ function useProvideMyInfo() {
 
   const getMyQuotas = async () => {
     const get_MyQuotas = async (user: Principal) => {
-      const quota4 = await serviceApi.getQuota(user, 4);
-      const quota5 = await serviceApi.getQuota(user, 5);
-      const quota6 = await serviceApi.getQuota(user, 6);
-      const quota7 = await serviceApi.getQuota(user, 7);
-      return Promise.all([quota4, quota5, quota6, quota7])
+      const [quota4, quota5, quota6, quota7] = await Promise.all([
+        serviceApi.getQuota(user, 4),
+        serviceApi.getQuota(user, 5),
+        serviceApi.getQuota(user, 6),
+        serviceApi.getQuota(user, 7),
+      ]);
+      return [quota4, quota5, quota6, quota7];
     }
     if (auth.principal) {
       const res = await get_MyQuotas(auth.principal);
