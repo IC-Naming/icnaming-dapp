@@ -1,5 +1,4 @@
 import styles from '../assets/styles/Footer.module.scss'
-import { isMainNetEnv } from "../utils/config";
 export const Footer = () => {
   return (
     <footer className={`${styles["footer"]} app-footer`}>
@@ -14,9 +13,7 @@ export const Footer = () => {
             <a href="https://github.com/IC-Naming" target="_blank" rel="noreferrer" className={`${styles['icon']} ${styles['icon-github']}`}>Github</a>
             <a href="https://discord.gg/FJ63ckXn6n" target="_blank" rel="noreferrer" className={`${styles['icon']} ${styles['icon-discord']}`}>Discord</a>
             <span className={styles.divider}></span>
-            <a href={
-              isMainNetEnv() ? "https://icnaming.com/presskit": "https://testnet.icnaming.com/presskit"
-            } className={`${styles['icon']} ${styles['icon-press']}`} title="press kit">press kit</a>
+            <a href="https://icnaming.com/presskit" className={`${styles['icon']} ${styles['icon-press']}`} title="press kit">press kit</a>
           </div>
         </div>
       </div>

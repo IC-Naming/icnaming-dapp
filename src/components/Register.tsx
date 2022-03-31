@@ -61,6 +61,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
           if (err instanceof CanisterError) {
             if (err.code === 22) {
               setPendingOrderTipVisible(true)
+              myInfo.checkPendingOrder();
             } else if (err.code === 26) {
               errorToast(err.message)
             } else {
@@ -155,7 +156,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
               <Col md={4} sm={12}></Col>
             </Row>
             {
-              !auth.isAuthWalletConnected
+              !auth.walletAddress
                 ?
                 <div className="d-grid gap-2">
                   <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect Wallet</button>
