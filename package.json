@@ -55,7 +55,8 @@
     "jest-localstorage-mock": "^2.4.16",
     "test-console": "^1.1.0",
     "typescript": "^4.4.3",
-    "typescript-plugin-css-modules": "^3.4.0"
+    "typescript-plugin-css-modules": "^3.4.0",
+    "vconsole": "^3.14.2"
   },
   "eslintConfig": {
     "extends": [

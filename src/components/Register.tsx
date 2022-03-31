@@ -8,14 +8,14 @@ import { useHistory } from "react-router-dom";
 import { ConnectWallets } from ".";
 import { PendingOrderTip } from "./PendingOrderTip";
 import { CanisterError } from "../utils/exception";
-import { Select } from '@douyinfe/semi-ui';
+import { Select,Toast } from '@douyinfe/semi-ui';
 import { ModalTipFull } from "./ModalTipFull";
-import toast from "@douyinfe/semi-ui/lib/es/toast";
 const Option = Select.Option;
 interface RegProps {
   regname: string;
   available: boolean;
 }
+
 export const Register: React.FC<RegProps> = ({ regname, available }) => {
   let nameLen = regname.split('.')[0].length >= 7 ? 7 : regname.split('.')[0].length;
   const { ...auth } = useAuthWallet();
@@ -30,15 +30,18 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const [quotaLoading, setQuotaLoading] = useState<boolean>(false);
   const [recomQuota, setRecomQuota] = useState<number>(0);
   const errorToast = (msg: string) => {
-    toast.error(msg)
+    Toast.error({
+      content:msg,
+      duration:3
+    })
   }
 
-  const registerVidIcp = async () => {
+  const registerVidIcp = async (btnNamelen) => {
     if (loadingSubmit) return
     if (myInfo.hasPendingOrder) {
       setPendingOrderTipVisible(true)
     } else {
-      if (regname.split('.')[0].length >= 7) {
+      if (regname.split('.')[0].length >= btnNamelen) {
         setLoadingSubmit(true)
         serviceApi.submitRegisterOrder(regname, 1).then(res => {
           if (res) {
@@ -66,7 +69,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
           }
         })
       } else {
-        errorToast(' Name length must more than or equal 7')
+        errorToast(' Name length must more than or equal ' + btnNamelen)
       }
     }
   }
@@ -160,9 +163,9 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                 :
                 <div className={`${styles['btn-wrap']} ${styles['btn-reg-wrap']}`}>
                   {
-                    nameLen > 6 ?
+                    nameLen >= 7 ?
                       <button
-                        className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={registerVidIcp}
+                        className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={() => { registerVidIcp(7) }}
                         disabled={auth.walletType === 'nns'}
                         title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
                       >
@@ -170,9 +173,19 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                         Register via ICP
                       </button>
                       :
-                      <button className={`${styles.btn} ${styles['btn-via-icp']}`} style={{fontSize:14}} disabled={true}>
-                        Register via ICP (Not open yet)
-                      </button>
+                      (nameLen >= 6 && new Date().getTime() > 1648771200000) ?
+                        <button
+                          className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={() => { registerVidIcp(6) }}
+                          disabled={auth.walletType === 'nns'}
+                          title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
+                        >
+                          {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
+                          Register via ICP
+                        </button>
+                        :
+                        <button className={`${styles.btn} ${styles['btn-via-icp']}`} style={{ fontSize: 14 }} disabled={true}>
+                          Register via ICP (Not open yet)
+                        </button>
                   }
 
                   {
