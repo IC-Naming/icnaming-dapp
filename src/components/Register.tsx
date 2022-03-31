@@ -156,7 +156,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
               <Col md={4} sm={12}></Col>
             </Row>
             {
-              !auth.isAuthWalletConnected
+              !auth.walletAddress
                 ?
                 <div className="d-grid gap-2">
                   <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect Wallet</button>

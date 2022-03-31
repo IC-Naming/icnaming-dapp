@@ -4,6 +4,7 @@ import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { ConnectWallets } from "./ConnectWallets";
 import { useAuthWallet } from "../context/AuthWallet";
+import { AuthError } from 'components/AuthError';
 import { formatAddress } from '../utils/helper';
 import { deleteCache } from 'utils/localCache';
 
@@ -151,6 +152,7 @@ export const Header = () => {
         </div>
       </div>
       <ConnectWallets visible={showWallets} hide={() => { setShowWallets(false) }} />
+      <AuthError visible={authWallet.authError.err} errDesc={authWallet.authError.desc} />
     </header>
   )
 }
