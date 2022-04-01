@@ -75,7 +75,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		console.assert(blockHeight > 0, 'blockHeight must be greater than 0');
 		// get confirm status
 		let confirmStatus = await (async () => {
-			const max_retry = 3;
+			const max_retry = 2;
 			let result_status = ConfirmStatus.Success;
 			for (let i = 0; i < max_retry; i++) {
 				try {
@@ -89,7 +89,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 					}
 				} catch (error) {
 					console.error(`exception when confirm order: ${error}`);
-					return ConfirmStatus.Exception;
+					result_status = ConfirmStatus.Exception;
 				}
 			}
 			return result_status;
@@ -106,7 +106,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				deleteCache('namesOfController' + authWallet.walletAddress)
 				break;
 			case ConfirmStatus.Exception:
-				setConfirmStatus('exception');
+				setConfirmStatus('fail');
 				break;
 			case ConfirmStatus.Fail:
 				// name is not available or invalid request from client
@@ -118,7 +118,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 
 	useEffect(() => {
 		if (blockHeight !== 0) { confirmOrderFunction() };
-		return () => { setBlockHeight(0) };
+		// return () => { setBlockHeight(0) };
 	}, [blockHeight])// eslint-disable-line react-hooks/exhaustive-deps
 
 	const arrayToHex = (arr: Array<number>) => {
@@ -265,7 +265,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		}
 	}, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
 
-
 	return (
 		<React.Fragment>
 			{
@@ -287,7 +286,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 										<Col md={4} sm={12}></Col>
 									</Row>
 								</> :
-
 								<div className={payStyles['order-info-msg']}>
 									The domain name is not available
 								</div>
@@ -301,7 +299,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 								</button>
 							}
 						</div>
-
 					</React.Fragment>
 			}
 			<Modal

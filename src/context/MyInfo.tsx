@@ -70,8 +70,8 @@ function useProvideMyInfo() {
 				setQuotas(res)
 			} catch (error) {
 				console.log('get_MyQuotas', error)
-				auth.setAuthErr({err:true,desc:JSON.stringify(error)})
 				auth.quitWallet()
+				auth.setAuthErr({err:true,desc:'There was an error - please ensure you have Cookies Enabled'})
 			}
 		}
 	}
@@ -92,8 +92,8 @@ function useProvideMyInfo() {
 			}
 		}).catch(error => {
 			console.log('getPendingOrder', error)
-			auth.setAuthErr({err:true,desc:error})
 			auth.quitWallet()
+			auth.setAuthErr({err:true,desc:'There was an error - please ensure you have Cookies Enabled'})
 		})
 	}
 

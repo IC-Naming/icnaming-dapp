@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 import { ConnectWallets } from ".";
 import { PendingOrderTip } from "./PendingOrderTip";
 import { CanisterError } from "../utils/exception";
-import { Select,Toast } from '@douyinfe/semi-ui';
+import { Select, Toast } from '@douyinfe/semi-ui';
 import { ModalTipFull } from "./ModalTipFull";
 const Option = Select.Option;
 interface RegProps {
@@ -31,8 +31,8 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   const [recomQuota, setRecomQuota] = useState<number>(0);
   const errorToast = (msg: string) => {
     Toast.error({
-      content:msg,
-      duration:3
+      content: msg,
+      duration: 3
     })
   }
 
@@ -164,9 +164,9 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                 :
                 <div className={`${styles['btn-wrap']} ${styles['btn-reg-wrap']}`}>
                   {
-                    nameLen >= 7 ?
+                    nameLen >= 6 ?
                       <button
-                        className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={() => { registerVidIcp(7) }}
+                        className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={() => { registerVidIcp(6) }}
                         disabled={auth.walletType === 'nns'}
                         title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
                       >
@@ -174,19 +174,9 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                         Register via ICP
                       </button>
                       :
-                      (nameLen >= 6 && new Date().getTime() > 1648771200000) ?
-                        <button
-                          className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={() => { registerVidIcp(6) }}
-                          disabled={auth.walletType === 'nns'}
-                          title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
-                        >
-                          {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
-                          Register via ICP
-                        </button>
-                        :
-                        <button className={`${styles.btn} ${styles['btn-via-icp']}`} style={{ fontSize: 14 }} disabled={true}>
-                          Register via ICP (Not open yet)
-                        </button>
+                      <button className={`${styles.btn} ${styles['btn-via-icp']}`} style={{ fontSize: 14 }} disabled={true}>
+                        Register via ICP (Not open yet)
+                      </button>
                   }
 
                   {
