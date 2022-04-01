@@ -25,7 +25,7 @@ export const AuthError: React.FC<IAuthErrorProps> = ({ visible, errDesc }) => {
             </div>
             <div className={styles['notice-btn-wrap']}>
                 <button className={styles['notice-btn']} onClick={hide}>close</button>
-                <a target="_blank" rel="noreferrer" href="https://medium.com/@icnaming/the-tutorial-of-pay-of-icp-on-icnaming-19f758d1f0c9" className={styles['link-btn']} style={{marginLeft:10,display:'inline-block'}}>help</a>
+                <a target="_blank" rel="noreferrer" href="https://lake-reward-33f.notion.site/common-problem-51ec86f0eaec4886b4806ea8586933d6" className={styles['link-btn']} style={{marginLeft:10,display:'inline-block'}}>help</a>
             </div>
         </Modal>
     )
