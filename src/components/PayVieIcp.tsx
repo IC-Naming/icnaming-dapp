@@ -75,22 +75,22 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		console.assert(blockHeight > 0, 'blockHeight must be greater than 0');
 		// get confirm status
 		let confirmStatus = await (async () => {
-			const max_retry = 2;
 			let result_status = ConfirmStatus.Success;
+			/* const max_retry = 2;
 			for (let i = 0; i < max_retry; i++) {
-				try {
-					let result = await serviceApi.confirmOrder(BigInt(blockHeight));
-					console.log('confirmOrder result', result)
-					if (result) {
-						result_status = ConfirmStatus.Success;
-						break;
-					} else {
-						result_status = ConfirmStatus.Fail;
-					}
-				} catch (error) {
-					console.error(`exception when confirm order: ${error}`);
-					result_status = ConfirmStatus.Exception;
+				
+			} */
+			try {
+				let result = await serviceApi.confirmOrder(BigInt(blockHeight));
+				console.log('confirmOrder result', result)
+				if (result) {
+					result_status = ConfirmStatus.Success;
+				} else {
+					result_status = ConfirmStatus.Fail;
 				}
+			} catch (error) {
+				console.error(`exception when confirm order: ${error}`);
+				result_status = ConfirmStatus.Exception;
 			}
 			return result_status;
 		})();
@@ -106,7 +106,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				deleteCache('namesOfController' + authWallet.walletAddress)
 				break;
 			case ConfirmStatus.Exception:
-				setConfirmStatus('fail');
+				setConfirmStatus('exception');
 				break;
 			case ConfirmStatus.Fail:
 				// name is not available or invalid request from client
@@ -265,6 +265,11 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		}
 	}, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
 
+	const retryToConfirm = () => {
+		if(confirmAgain) return
+		setConfirmAgain(true)
+		checkOrder(myInfo.orderInfo.name)
+	}
 	return (
 		<React.Fragment>
 			{
@@ -359,10 +364,12 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 										Sorry, something error, please retry to confirm payment.
 									</div>
 									<div className="d-grid gap-2">
-										<button className={`${payStyles['btn']}  ${payStyles['btn-order']}`} disabled={confirmAgain} onClick={() => {
-											setConfirmAgain(true)
-											confirmOrderFunction()
-										}}>{confirmAgain && <Spin size="middle" />}Retry to confirm</button>
+										<button
+											className={`${payStyles['btn']}  ${payStyles['btn-order']}`}
+											disabled={confirmAgain}
+											onClick={retryToConfirm}>
+											{confirmAgain && <Spin size="middle" />}Retry to confirm
+										</button>
 									</div>
 								</React.Fragment>
 							}
@@ -387,10 +394,12 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				maskClosable={false}
 				className={payStyles['modal-wrap-stoicpay']}
 			>
+		
 				<div className={payStyles['modal-wrap-stoicpay-conent']}>
 					<h2>Please confirm that you are about to send</h2>
 					<h3>Amount: {paymentInfo.priceIcp} ICP</h3>
-					<div className="d-grid gap-2">
+					<div className={payStyles['modal-stoic-btn-wrap']}>
+						<button className={payStyles['btn']} onClick={() => { setStoicVisible(false) }}>Decline</button>
 						<button className={payStyles['btn']} onClick={payStoic}>
 							Confirm
 						</button>
