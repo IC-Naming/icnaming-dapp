@@ -8,29 +8,28 @@ import ServiceApi from "../utils/ServiceApi";
 import { CanisterError } from "utils/exception";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
 
-export const Refund = (props) => {
+export const Refund = () => {
   const history = useHistory();
   const serviceApi = new ServiceApi();
   const { ...myInfo } = useMyInfo();
   const [visiableModalTipFull, setVisiableModalTipFull] = useState<boolean>(false)
-  const [visiableModalTipFullText, setVisiableModalTipFullText] = useState<string>('')
 
   const [loading, setLoading] = useState<boolean>(false)
   const refund = async () => {
     if (loading) return
     setLoading(true)
     setVisiableModalTipFull(true)
-    setVisiableModalTipFullText('Refund in progress')
     serviceApi.refundOrder().then(res => {
       if (res) {
         toast.success('Refund success')
+        setVisiableModalTipFull(false)
         myInfo.cleanPendingOrder()
+        sessionStorage.removeItem("orderInfo");
       }
-      setVisiableModalTipFull(false)
     }).catch(err => {
-      setVisiableModalTipFull(false)
       if (err instanceof CanisterError) {
         toast.error(err.message)
+        setVisiableModalTipFull(false)
       }
     }).finally(() => {
       setLoading(false);
@@ -51,7 +50,7 @@ export const Refund = (props) => {
           Refund
         </button>
       </div>
-      <ModalTipFull visible={visiableModalTipFull} text={visiableModalTipFullText} />
+      <ModalTipFull visible={visiableModalTipFull} text={'Refund in progress'} />
     </>
   )
 }

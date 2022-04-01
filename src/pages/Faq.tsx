@@ -26,7 +26,7 @@ export const Faq: React.FC = () => {
     {
       key: '2',
       name: '6',
-      price: `2.20 T Cycles ${new Date().getTime() < 1648771200000 ? '(Not open yet)' : ''}`,
+      price: '2.20 T Cycles',
       year: '2.20 T Cycles',
     },
     {
@@ -72,7 +72,7 @@ export const Faq: React.FC = () => {
               <p>Contains letters (lowercase a-z), numbers (0-9), and hyphens ('-'), with a maximum length of 63 characters</p>
             </Collapse.Panel>
             <Collapse.Panel header="How to get an IC Naming name?" itemKey="Panel3">
-              <p>Currently open ≥ {new Date().getTime() < 1648771200000 ? 7 : 6}-digit name registration, anyone can register</p>
+              <p>Currently open ≥ 6-digit name registration, anyone can register</p>
             </Collapse.Panel>
             <Collapse.Panel header="What is the registration fee and renewal fee for name?" itemKey="Panel4">
               <Table columns={columns} dataSource={data} pagination={false} className={styles['faq-table']} />

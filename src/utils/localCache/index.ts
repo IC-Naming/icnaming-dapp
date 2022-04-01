@@ -63,14 +63,13 @@ class LocalCache implements ILocalCache {
 }
 const CACHE_BUCKET = "__local_cache_bkt";
 const cache = new LocalCache();
-
+cache.setCurrentBucket(CACHE_BUCKET);
 //cache key generate rule : cacheKey = pageName + uniqueKeyInPage
 export const queryWithCache = async (
   query: () => Promise<any>,
   cacheKey: string,
   ttl?: number
 ) => {
-  await cache.setCurrentBucket(CACHE_BUCKET);
   const cacheItem = await cache.get(cacheKey);
   if (cacheItem) return cacheItem;
 
