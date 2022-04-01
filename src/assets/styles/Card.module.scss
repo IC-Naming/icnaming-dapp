@@ -54,7 +54,8 @@
 }
 .card-left{
   @include flex(row,flex-start,center,nowrap);
-  width: 60%;
+  @include no-wrap;
+  // width: 60%;
 }
 .add-favorite{
   margin-right: .8rem;
