@@ -188,6 +188,11 @@
       padding: 1rem 0;
     }
   }
+  .modal-stoic-btn-wrap{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 0.5rem;
+  }
 }
 
 @media screen and (min-width: 576px){
