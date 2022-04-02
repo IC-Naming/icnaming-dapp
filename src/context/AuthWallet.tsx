@@ -7,7 +7,10 @@ import { Principal } from "@dfinity/principal";
 import { whietLists } from "utils/canisters/plugWhiteListConfig";
 import { StoicIdentity } from "utils/ic-stoic-identity/index";
 import { Toast } from "@douyinfe/semi-ui";
+// import icpbox from 'utils/icpboxts'
+// import { createAgent } from "utils/icpboxts/agent";
 declare const window: any;
+
 
 export interface AuthWalletContextInterface {
 	isAuthWalletConnected: boolean;
@@ -16,7 +19,7 @@ export interface AuthWalletContextInterface {
 	principal?: Principal | undefined;
 	accountId: string;
 	walletType: string;
-	setAuthErr: ({err: boolean, desc: string}) => void;
+	setAuthErr: ({ err: boolean, desc: string }) => void;
 	connectPlugWallet();
 	connectII();
 	connectStoic();
@@ -170,6 +173,7 @@ function useProvideAuthWallet() {
 		localStorage.removeItem('ic-delegation');//Disconnect NNS Wallet
 		localStorage.removeItem("_scApp");//Disconnect Stoic Wallet
 		StoicIdentity.disconnect();
+
 		if (window.ic.plug.agent) {
 			window.ic?.plug?.disconnect()
 		} else {
