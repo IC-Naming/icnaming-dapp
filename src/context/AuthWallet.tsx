@@ -161,6 +161,10 @@ function useProvideAuthWallet() {
 		}
 	}
 
+	const disconnectWallet = () => {
+		if (wallet) WalletConnector.disconnect(wallet.type);
+	}
+
 	useEffect(() => {
 		(async () => {
 			if (sessionStorage.getItem('connectStatus') === 'connected') {
@@ -216,7 +220,8 @@ function useProvideAuthWallet() {
 		connectII,
 		connectStoic,
 		quitWallet,
-		connectWallet
+		connectWallet,
+		disconnectWallet
 	}
 }
 
