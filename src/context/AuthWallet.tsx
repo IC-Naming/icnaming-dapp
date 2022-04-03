@@ -7,10 +7,11 @@ import { Principal } from "@dfinity/principal";
 import { whietLists } from "utils/canisters/plugWhiteListConfig";
 import { StoicIdentity } from "utils/ic-stoic-identity/index";
 import { Toast } from "@douyinfe/semi-ui";
+import { WalletConnector, WalletResponse, WalletType } from "utils/connector";
+import { WalletConnectError } from "utils/exception";
 // import icpbox from 'utils/icpboxts'
 // import { createAgent } from "utils/icpboxts/agent";
 declare const window: any;
-
 
 export interface AuthWalletContextInterface {
 	isAuthWalletConnected: boolean;
@@ -19,11 +20,14 @@ export interface AuthWalletContextInterface {
 	principal?: Principal | undefined;
 	accountId: string;
 	walletType: string;
+	wallet: WalletResponse,
 	setAuthErr: ({ err: boolean, desc: string }) => void;
 	connectPlugWallet();
 	connectII();
 	connectStoic();
 	quitWallet();
+	connectWallet: (walletType: WalletType) => Promise<void>;
+	disconnectWallet();
 }
 
 function useProvideAuthWallet() {
@@ -33,6 +37,7 @@ function useProvideAuthWallet() {
 	const [walletAccountId, setWalletAccountId] = useState<string>('')
 	const [principal, setPrincipal] = useState<Principal | undefined>(undefined)
 	const [walletType, setWalletType] = useState<string>('')
+	const [wallet, setWallet] = useState<WalletResponse>()
 	const whitelist = whietLists();
 	const setauthWalletState = (accountId, principalId, connected, walletType) => {
 		setAuthWalletConnected(connected)
@@ -43,7 +48,6 @@ function useProvideAuthWallet() {
 		sessionStorage.setItem("connectStatus", 'connected');
 		sessionStorage.setItem('walletType', walletType)
 	}
-
 
 	const connectStoic = async () => {
 		return new Promise(async (resolve, reject) => {
@@ -139,6 +143,24 @@ function useProvideAuthWallet() {
 		});
 	}
 
+	const connectWallet = async (walletType: WalletType) => {
+		try {
+			const res = await WalletConnector.connect(walletType, whitelist);
+			setWallet(res)
+			await actorFactory.authenticate(res!);
+		}
+		catch (err) {
+			if (err instanceof WalletConnectError) {
+				Toast.error(`connect error${err}`)
+				console.error(`connect error${err}`);
+			}
+			else {
+				Toast.error(`connect error${err}`)
+				console.error(`connect error${err}`);
+			}
+		}
+	}
+
 	useEffect(() => {
 		(async () => {
 			if (sessionStorage.getItem('connectStatus') === 'connected') {
@@ -194,6 +216,7 @@ function useProvideAuthWallet() {
 		connectII,
 		connectStoic,
 		quitWallet,
+		connectWallet
 	}
 }
 
