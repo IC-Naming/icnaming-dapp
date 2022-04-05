@@ -10,7 +10,7 @@ import { CanisterError } from "../utils/exception";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
 import { Skeleton } from "@douyinfe/semi-ui";
 export const Name = (props) => {
-  const serviceApi = new ServiceApi();
+  const [serviceApi] = useState(() => new ServiceApi());
   const location = useLocation();
   const showBackMyAccountLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'myaccount';
   const showBackFavLink = location.search?.match(/from=([a-zA-Z]+)[&|\b]?/)?.[1] === 'favourites';

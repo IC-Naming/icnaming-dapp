@@ -6,6 +6,7 @@ import styles from "../assets/styles/ConnectWallets.module.scss";
 import { Row, Col, Modal, Spinner } from "react-bootstrap";
 import { useAuthWallet } from "../context/AuthWallet";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
+import { WalletType } from "utils/connector";
 const u = navigator.userAgent;
 const isMobile = !!u.match(/AppleWebKit.*Mobile.*/);
 /* const isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1;
@@ -17,49 +18,18 @@ interface propsType {
 export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 	const { ...authWallet } = useAuthWallet()
 	const [connecting, setConnecting] = React.useState<boolean>(false)
-	const connPlugWallet = () => {
+	const connetcWallet = async (walletType: WalletType) => {
 		setConnecting(true)
-		authWallet.connectPlugWallet().then(async (res: any) => {
-			setConnecting(false)
-			if (res && res.connected) {
-				hide()
-			} else {
-				toast.error('fail connect')
+		try {
+			const connectResult: any = await authWallet.connectWallet(walletType);
+			if (connectResult === true) {
+				hide();
+				setConnecting(false)
 			}
-		}).catch(err => {
-			hide();
-			toast.error(err)
-		}).finally(() => {
-			setConnecting(false)
-		});
-	}
-
-	const connectIIWallet = () => {
-		setConnecting(true)
-		authWallet.connectII().then((res: any) => {
-			setConnecting(false)
-			if (res && res.connected) {
-				hide()
-			} else {
-				toast.error('fail connect')
-			}
-		})
-	}
-
-	const connectStiocWallet = () => {
-		setConnecting(true)
-		authWallet.connectStoic().then((res: any) => {
-			setConnecting(false)
-			if (res && res.connected) {
-				hide()
-			} else {
-				toast.error('fail connect')
-			}
-		}).catch(err => {
-			hide();
-		}).finally(() => {
-			setConnecting(false)
-		});
+		} catch (error) {
+			console.log(error)
+			toast.error('connect error')
+		}
 	}
 
 	return (
@@ -95,22 +65,22 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 							<div className="mb-4 modal-text-color">Please select a wallet to connect to this dapp:</div>
 							<Row>
 								<Col sm="12">
-									<button className={styles["btn-connect"]} onClick={connectIIWallet} disabled={connecting}>
-										<img src={logoipc} alt="ipc" />
+									<button className={styles["btn-connect"]} onClick={() => { connetcWallet(0) }} disabled={connecting}>
+										<img src={logoipc} alt="Nns" />
 										<span>Internet Identity</span>
 									</button>
 								</Col>
 								{
 									!isMobile && <Col sm="12">
-										<button className={styles["btn-connect"]} onClick={connPlugWallet} disabled={connecting}>
-											<img src={plugimg} alt="plug" />
+										<button className={styles["btn-connect"]} onClick={() => { connetcWallet(1) }} disabled={connecting}>
+											<img src={plugimg} alt="Plug" />
 											<span>Plug</span>
 										</button>
 									</Col>
 								}
 								<Col sm="12">
-									<button className={styles["btn-connect"]} onClick={connectStiocWallet} disabled={connecting}>
-										<img src={stoicwallet} alt="stioc" />
+									<button className={styles["btn-connect"]} onClick={() => { connetcWallet(2) }} disabled={connecting}>
+										<img src={stoicwallet} alt="Stoic" />
 										<span>Stioc Wallet</span>
 									</button>
 								</Col>

@@ -22,13 +22,11 @@ export const PayVieQuota: React.FC<QuotaTypeProps> = ({ quotaType, quotaTypeCoun
 
   const [loading, setLoading] = useState<boolean>(false)
   const [visiableModalTipFull, setVisiableModalTipFull] = useState<boolean>(false)
-  const [visiableModalTipFullText, setVisiableModalTipFullText] = useState<string>('')
 
   const payVidQuota = async () => {
     if (loading) return
     setLoading(true)
     setVisiableModalTipFull(true)
-    setVisiableModalTipFullText('Payment in progress')
 
     serviceApi.registerNameByQuota(myInfo.orderInfo.name, quotaType).then(res => {
       if (res === true) {
@@ -38,8 +36,8 @@ export const PayVieQuota: React.FC<QuotaTypeProps> = ({ quotaType, quotaTypeCoun
         myInfo.getMyQuotas();
         localStorage.removeItem('myQuotas');
         history.push('/myaccount')
-        deleteCache('getNamesOfRegistrant' + auth.walletAddress)
-        deleteCache('namesOfController' + auth.walletAddress)
+        deleteCache('getNamesOfRegistrant' + auth.wallet?.accountId)
+        deleteCache('namesOfController' + auth.wallet?.accountId)
       } else {
         toast.error('fail register')
       }
@@ -70,7 +68,7 @@ export const PayVieQuota: React.FC<QuotaTypeProps> = ({ quotaType, quotaTypeCoun
           Submit
         </button>
       </div>
-      <ModalTipFull visible={visiableModalTipFull} text={visiableModalTipFullText} />
+      <ModalTipFull visible={visiableModalTipFull} text={'Payment in progress'} />
     </>
   )
 }

@@ -1,4 +1,5 @@
 import { Principal } from "@dfinity/principal";
+import { AsyncConstructor } from 'async-constructor'
 import {
   createRegistrarQueryActor,
   createRegistrarUpdateActor,
@@ -14,7 +15,7 @@ import {
 } from "./canisters/registrar/interface";
 import {
   createWhiteListQueryActor,
-  createWhiteListUpdateActor,
+  // createWhiteListUpdateActor,
   WhiteListActor,
 } from "./canisters/whiteList";
 import {
@@ -27,13 +28,13 @@ import {
   createResolverUpdateActor,
   ResolverActor,
 } from "./canisters/resolver";
+import { createLedgerActor, LedgerActor } from "./canisters/ledger";
 import { createFavoriteActor, FavoritesActor } from "./canisters/favorites";
 // import { WHITE_LIST_PROXY_API } from "./config";
 import { executeWithLogging } from "./errorLogger";
 import { RegistrationDetails } from "./canisters/registrar/interface";
 import { RegistryDto } from "./canisters/registry/interface";
 import { CanisterError } from "./exception";
-import { createNNSActor, NNSActor } from "./canisters/nns";
 
 export interface NameDetails {
   name: string;
@@ -43,27 +44,55 @@ export interface NameDetails {
   resolver: Principal | string;
   expireAt: Date | string;
 }
-export default class ServiceApi {
-  private readonly registrarQueryActor: RegistrarActor;
-  private readonly registrarUpdateActor: RegistrarActor;
-  private readonly whiteListQueryActor: WhiteListActor;
-  private readonly createWhiteListUpdateActor: WhiteListActor;
-  private readonly registryQueryActor: RegistryActor;
-  private readonly resolverQueryActor: ResolverActor;
-  private readonly resolverUpdateActor: ResolverActor;
-  private readonly favoritesActor: FavoritesActor;
-  private readonly nnsActor: NNSActor;
+
+export default class ServiceApi extends AsyncConstructor {
+  private registrarQueryActor!: RegistrarActor;
+  private registrarUpdateActor!: RegistrarActor | undefined;
+  private whiteListQueryActor!: WhiteListActor;
+  private registryQueryActor!: RegistryActor;
+  private resolverQueryActor!: ResolverActor;
+  private resolverUpdateActor!: ResolverActor | undefined;
+  private favoritesActor!: FavoritesActor | undefined;
+  private ledgerActor!: LedgerActor | undefined;
 
   public constructor() {
+    super(async () => {
+      this.registrarUpdateActor = await createRegistrarUpdateActor();
+      this.resolverUpdateActor = await createResolverUpdateActor();
+      this.favoritesActor = await createFavoriteActor();
+      this.ledgerActor = await createLedgerActor();
+    });
     this.registrarQueryActor = createRegistrarQueryActor();
-    this.registrarUpdateActor = createRegistrarUpdateActor();
     this.whiteListQueryActor = createWhiteListQueryActor();
-    this.createWhiteListUpdateActor = createWhiteListUpdateActor();
     this.registryQueryActor = createRegistryQueryActor();
     this.resolverQueryActor = createResolverQueryActor();
-    this.resolverUpdateActor = createResolverUpdateActor();
-    this.favoritesActor = createFavoriteActor();
-    this.nnsActor = createNNSActor();
+  }
+
+
+  public async payledger(payment_account_id: any, price_icp_in_e8s: bigint, payment_memo: bigint): Promise<bigint> {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const res: any = await this.ledgerActor?.transfer({
+          amount: {
+            e8s: price_icp_in_e8s
+          },
+          memo: payment_memo,
+          to: payment_account_id,
+          fee: {
+            e8s: BigInt(10_000),
+          },
+          created_at_time: [],
+          from_subaccount: []
+        });
+        if ("Ok" in res) {
+          resolve(res.Ok);
+        } else {
+          reject(res.Err);
+        }
+      } catch (error) {
+        reject(error);
+      }
+    })
   }
 
   // get icp && cycles
@@ -80,15 +109,14 @@ export default class ServiceApi {
     }, 'getIcpToCycles');
   }
 
- 
+
   // names or addresses search
   public available = (word: string): Promise<boolean> => {
     // if word is string and not empty
     if (word.length > 0) {
       return executeWithLogging(async () => {
-        const res = await this.registrarQueryActor.available(`${word}`);
+        const res = await this.registrarQueryActor.available(word);
         // console.log('registrarQueryActor-available', res);
-        // if res is ErrorInfo
         if ("Ok" in res) {
           return res.Ok;
         } else {
@@ -109,26 +137,27 @@ export default class ServiceApi {
       }
     });
   };
-   /* Registrar */
+
+  /* Registrar */
   //reg name by quota
   public registerNameByQuota = (
     name: string,
     quota: number
   ): Promise<boolean> => {
-    return executeWithLogging(async () => {
-      // console.log("reg name", name);
-      // convert quota to QuotaType
-      const quotaParsed: QuotaType = { LenGte: quota };
-      const res = await this.registrarUpdateActor.register_with_quota(
-        name,
-        quotaParsed
-      );
-      if ("Ok" in res) {
-        return res.Ok;
-      } else {
-        throw new CanisterError(res.Err);
-      }
-    }, "registerNameByQuota");
+    const quotaParsed: QuotaType = { LenGte: quota };
+    return new Promise(async (resolve, reject) => {
+      createRegistrarUpdateActor().then(actor => {
+        if (actor !== undefined) {
+          actor.register_with_quota(name, quotaParsed).then(res => {
+            if ("Ok" in res) {
+              resolve(res.Ok);
+            } else {
+              throw new CanisterError(res.Err);
+            }
+          })
+        }
+      });
+    })
   };
 
   // submit order
@@ -138,8 +167,8 @@ export default class ServiceApi {
   ): Promise<SubmitOrderResponse> => {
     return executeWithLogging(async () => {
       // console.log("reg name", name);
-      const res = await this.registrarUpdateActor.submit_order({ name, years });
-      console.log('submit_order',res);
+      const res: any = await this.registrarUpdateActor?.submit_order({ name, years });
+      console.log('submit_order', res);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -151,7 +180,7 @@ export default class ServiceApi {
   // cancel order
   public cancelRegisterOrder = () => {
     return executeWithLogging(async () => {
-      const res = await this.registrarUpdateActor.cancel_order();
+      const res: any = await this.registrarUpdateActor?.cancel_order();
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -163,7 +192,7 @@ export default class ServiceApi {
   // cancel order icp
   public refundOrder = (): Promise<boolean> => {
     return executeWithLogging(async () => {
-      const res = await this.registrarUpdateActor.refund_order();
+      const res: any = await this.registrarUpdateActor?.refund_order();
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -174,21 +203,28 @@ export default class ServiceApi {
 
   // get pending order
   public getPendingOrder = (): Promise<[] | [GetNameOrderResponse]> => {
+    console.log(this.registrarUpdateActor)
     return executeWithLogging(async () => {
-      const res = await this.registrarUpdateActor.get_pending_order();
-      // console.log('get_pending_order', res);
-      if ("Ok" in res) {
-        return res.Ok;
+      let pendingOrder: [GetNameOrderResponse] | [] = [];
+      if (this.registrarUpdateActor !== undefined) {
+        const res: any = await this.registrarUpdateActor?.get_pending_order();
+        console.log('get_pending_order', res);
+        if ("Ok" in res) {
+          pendingOrder = res.Ok;
+        } else {
+          throw new CanisterError(res.Err);
+        }
+        return pendingOrder;
       } else {
-        throw new CanisterError(res.Err);
+        throw new Error('registrarUpdateActor is undefined');
       }
     }, "getPendingOrder");
   };
 
   // confirm order
-  public confirmOrder = (block_height:bigint): Promise<boolean> => {
+  public confirmOrder = (block_height: bigint): Promise<boolean> => {
     return executeWithLogging(async () => {
-      const res = await this.registrarUpdateActor.confirm_pay_order(block_height);
+      const res: any = await this.registrarUpdateActor?.confirm_pay_order(block_height);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -218,7 +254,7 @@ export default class ServiceApi {
   ): Promise<boolean> => {
     console.table({ name: name, key: key, value: value });
     return executeWithLogging(async () => {
-      const res = await this.resolverUpdateActor.set_record_value(name, [
+      const res: any = await this.resolverUpdateActor?.set_record_value(name, [
         [key, value],
       ]);
       // console.log("setRecord", res);
@@ -360,18 +396,25 @@ export default class ServiceApi {
           'name': '',
         }
       }
-    },  "getRegistryDetailsOfName");
+    }, "getRegistryDetailsOfName");
   };
 
   // get quota
   public getQuota = (user: Principal, quotaType: number): Promise<number> => {
     return executeWithLogging(async () => {
+      let quota: number = 0;
       const quotaParsed: QuotaType = { LenGte: quotaType };
-      const res = await this.registrarUpdateActor.get_quota(user, quotaParsed);
-      if ("Ok" in res) {
-        return Number(res.Ok);
+      if (this.registrarUpdateActor !== undefined) {
+        const res: any = await this.registrarUpdateActor?.get_quota(user, quotaParsed);
+        if ("Ok" in res) {
+          quota = Number(res.Ok);
+        } else {
+          quota = 0;
+          throw new CanisterError(res.Err);
+        }
+        return quota;
       } else {
-        throw new CanisterError(res.Err);
+        throw new Error('registrarUpdateActor is undefined');
       }
     }, "getQuota");
   };
@@ -410,8 +453,8 @@ export default class ServiceApi {
   // get favorite names
   public getFavoriteNames = (): Promise<Array<string>> => {
     return executeWithLogging(async () => {
-      const res = await this.favoritesActor.get_favorites();
-      console.log('favoritesActor.get_favorites',res)
+      const res: any = await this.favoritesActor?.get_favorites();
+      console.log('favoritesActor.get_favorites', res)
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -423,7 +466,7 @@ export default class ServiceApi {
   // add favorite name
   public addFavoriteName = (name: string): Promise<boolean> => {
     return executeWithLogging(async () => {
-      const res: any = await this.favoritesActor.add_favorite(name);
+      const res: any = await this.favoritesActor?.add_favorite(name);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -435,7 +478,7 @@ export default class ServiceApi {
   // remove favorite name
   public removeFavoriteName = (name: string): Promise<boolean> => {
     return executeWithLogging(async () => {
-      const res: any = await this.favoritesActor.remove_favorite(name);
+      const res: any = await this.favoritesActor?.remove_favorite(name);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -444,3 +487,4 @@ export default class ServiceApi {
     }, "removeFavoriteName");
   };
 }
+

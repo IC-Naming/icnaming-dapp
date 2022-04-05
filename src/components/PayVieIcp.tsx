@@ -5,8 +5,7 @@ import { useHistory } from "react-router-dom";
 import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
-import { createLedgerActor } from "utils/canisters/ledger";
-import ServiceApi from "../utils/ServiceApi";
+import ServiceApi from "utils/ServiceApi";
 import { deleteCache } from "../utils/localCache";
 import { CancelOrderIcp } from "components/CancelOrderIcp";
 import BigNumber from "bignumber.js";
@@ -41,9 +40,8 @@ const toICPe8s = (source: string): bigint => {
 
 export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => {
 	const history = useHistory();
-	const serviceApi = new ServiceApi();
-	const ledgerActor = createLedgerActor();
 	const { ...authWallet } = useAuthWallet();
+	const [serviceApi] = useState(() => new ServiceApi());
 	const { ...myInfo } = useMyInfo();
 	const [modalVisible, setModalVisible] = useState<boolean>(false)
 	const [stoicVisible, setStoicVisible] = useState<boolean>(false)
@@ -102,8 +100,8 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				console.log('You got the name! please check it out from MyAccount');
 				myInfo.cleanPendingOrder()
 				setConfirmStatus('success');
-				deleteCache('getNamesOfRegistrant' + authWallet.walletAddress)
-				deleteCache('namesOfController' + authWallet.walletAddress)
+				deleteCache('getNamesOfRegistrant' + authWallet.wallet);
+				deleteCache('namesOfController' + authWallet.wallet)
 				break;
 			case ConfirmStatus.Exception:
 				setConfirmStatus('exception');
@@ -128,7 +126,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	const payment = async () => {
 		if (payIng) return;
 
-		if (sessionStorage.getItem('walletType') === 'plug') {
+		if (sessionStorage.getItem('walletType') === 'Plug') {
 			setPayIng(true);
 			setModalVisible(true)
 			try {
@@ -167,23 +165,17 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		setModalVisible(true)
 		try {
 			if (blockHeight === 0) {
-				const transfer_result: any = await ledgerActor.transfer({
-					amount: {
-						e8s: order[0].price_icp_in_e8s
-					},
-					memo: toICPe8s(order[0].payment_memo.ICP.toString()),
-					to: order[0].payment_account_id,
-					fee: {
-						e8s: BigInt(10_000),
-					},
-					created_at_time: [],
-					from_subaccount: []
-				})
-				console.log(`Pay success: ${transfer_result.Ok}`);
-				setBlockHeight(transfer_result.Ok)
+				const transfer_result: any = await serviceApi.payledger(
+					order[0].payment_account_id,
+					order[0].price_icp_in_e8s,
+					toICPe8s(order[0].payment_memo.ICP.toString())
+				)
+				console.log(`Pay success: ${transfer_result}`);
+				setBlockHeight(transfer_result)
 				setStoicPayIng(false);
 				setPayIng(false);
 				setPaymentResult(true);
+
 			}
 		} catch (error) {
 			setStoicPayIng(false)
@@ -203,7 +195,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 			NotOrder,
 			Refund,
 		}
-		if (authWallet.walletAddress) {
+		if (authWallet.wallet?.principalId) {
 			const serviecOrderInfo: any = [];
 			let orderStatus = await (async () => {
 				let result_Status = OrderStatus.Available;
@@ -263,10 +255,10 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 			const orderInfoObj = JSON.parse(orderInfo)
 			checkOrder(orderInfoObj.name)
 		}
-	}, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
+	}, [authWallet.wallet, serviceApi])// eslint-disable-line react-hooks/exhaustive-deps
 
 	const retryToConfirm = () => {
-		if(confirmAgain) return
+		if (confirmAgain) return
 		setConfirmAgain(true)
 		checkOrder(myInfo.orderInfo.name)
 	}
@@ -394,7 +386,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				maskClosable={false}
 				className={payStyles['modal-wrap-stoicpay']}
 			>
-		
+
 				<div className={payStyles['modal-wrap-stoicpay-conent']}>
 					<h2>Please confirm that you are about to send</h2>
 					<h3>Amount: {paymentInfo.priceIcp} ICP</h3>

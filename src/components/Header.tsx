@@ -11,7 +11,7 @@ import { deleteCache } from 'utils/localCache';
 export const Header = () => {
   const history = useHistory();
   const { ...authWallet } = useAuthWallet();
-  const [showWallets, setShowWallets] = useState(false);
+  const [showConnectWallets, setShowConnectWallets] = useState(false);
   const [menuVisible, setMenuVisible] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [currentPcIndex, setCurrentPcIndex] = useState(0)
@@ -39,32 +39,26 @@ export const Header = () => {
   }
 
   const logout = async () => {
-    authWallet.quitWallet();
+    console.log('logout')
+    authWallet.disconnectWallet();
     history.push('/');
     setCurrentPcIndex(0)
     setCurrentIndex(0)
-    localStorage.removeItem('myFavoriteNames');
-    localStorage.removeItem('myQuotas');
-    sessionStorage.removeItem("connectStatus");
-    sessionStorage.removeItem("walletType");
-    sessionStorage.removeItem("orderInfo");
-    deleteCache('getNamesOfRegistrant' + authWallet.walletAddress)
-    deleteCache('namesOfController' + authWallet.walletAddress)
+    deleteCache('getNamesOfRegistrant' + authWallet.wallet?.accountId)
+    deleteCache('namesOfController' + authWallet.wallet?.accountId)
   }
 
   const HeaderWallet = () => {
     return (<div className={`${styles['wallet-wrap']} appheader-wallet-wrap`}>
       {
-        authWallet.walletAddress ?
+        authWallet.wallet?.principalId ?
           <div className={styles.wallet}>
             <i className="bi bi-person"></i>
-            <span className={styles.address}>{formatAddress(authWallet.walletAddress)}</span>
-            <i className="bi bi-box-arrow-right" onClick={() => {
-              logout()
-            }}></i>
+            <span className={styles.address}>{formatAddress(authWallet.wallet?.principalId.toText())}</span>
+            <i className="bi bi-box-arrow-right" onClick={logout}></i>
           </div>
           :
-          <button className={styles['btn-wallet']} onClick={() => { setShowWallets(true) }}>
+          <button className={styles['btn-wallet']} onClick={() => { setShowConnectWallets(true) }}>
             <span>Connect Wallet</span>
           </button>
       }
@@ -75,7 +69,7 @@ export const Header = () => {
     { title: 'FAQ', path: '/faq' },
   ])
   useEffect(() => {
-    if (authWallet.walletAddress) {
+    if (authWallet.wallet?.principalId) {
       setNavitems([
         { title: 'Home', path: '/' },
         { title: 'My Account', path: '/myaccount' },
@@ -88,9 +82,9 @@ export const Header = () => {
         { title: 'FAQ', path: '/faq' },
       ])
     }
-  }, [authWallet.walletAddress])
+  }, [authWallet.wallet?.principalId])
 
- 
+
   return (
     <header className={`${styles.header} app-header`}>
       <div className={`${styles.navbar} container-xxl flex-wrap flex-md-nowrap`}>
@@ -110,11 +104,11 @@ export const Header = () => {
           <ul className={`${styles['navbar-nav']} ms-md-auto ms-sm-auto`}>
             {
               navitems.map((item, index) => {
-                
-                  return <li key={index} className={`${styles['nav-item']} ${index === currentPcIndex ? styles.current : null}`}>
-                    <span className={styles['nav-link']} onClick={() => { history.push(item.path); houdlePcNav(index) }}>{item.title}</span>
-                  </li>
-                
+
+                return <li key={index} className={`${styles['nav-item']} ${index === currentPcIndex ? styles.current : null}`}>
+                  <span className={styles['nav-link']} onClick={() => { history.push(item.path); houdlePcNav(index) }}>{item.title}</span>
+                </li>
+
               })
             }
             <li className={styles['nav-item']}>
@@ -151,7 +145,7 @@ export const Header = () => {
           </ul>
         </div>
       </div>
-      <ConnectWallets visible={showWallets} hide={() => { setShowWallets(false) }} />
+      <ConnectWallets visible={showConnectWallets} hide={() => { setShowConnectWallets(false) }} />
       <AuthError visible={authWallet.authError.err} errDesc={authWallet.authError.desc} />
     </header>
   )

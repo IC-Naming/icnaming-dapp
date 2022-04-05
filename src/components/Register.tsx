@@ -18,7 +18,7 @@ interface RegProps {
 
 export const Register: React.FC<RegProps> = ({ regname, available }) => {
   let nameLen = regname.split('.')[0].length >= 7 ? 7 : regname.split('.')[0].length;
-  const { ...auth } = useAuthWallet();
+  const { ...authWallet } = useAuthWallet();
   const { ...myInfo } = useMyInfo();
   const history = useHistory();
   const serviceApi = new ServiceApi();
@@ -102,7 +102,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   }, [regname, myInfo.icpToCycles])
 
   useEffect(() => {
-    if (auth.isAuthWalletConnected) {
+    if (authWallet.wallet?.principalId) {
       const myQuotas = localStorage.getItem('myQuotas');
       if (myQuotas && myQuotas.length > 0) {
         const myQuotasArr = JSON.parse(myQuotas)
@@ -126,7 +126,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
       setQuotaLoading(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.isAuthWalletConnected, myInfo.quotas]);
+  }, [authWallet.wallet?.principalId, myInfo.quotas]);
 
   // filter quota when count is 0
   const avaliableQuotas = useMemo(() => {
@@ -156,7 +156,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
               <Col md={4} sm={12}></Col>
             </Row>
             {
-              !auth.walletAddress
+              !authWallet.wallet?.principalId
                 ?
                 <div className="d-grid gap-2">
                   <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect Wallet</button>
@@ -167,8 +167,8 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                     nameLen >= 6 ?
                       <button
                         className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={() => { registerVidIcp(6) }}
-                        disabled={auth.walletType === 'nns'}
-                        title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
+                        disabled={authWallet.wallet.type === 0}
+                        title={authWallet.wallet.type === 0 ? 'This feature is not available for NNS wallet' : ''}
                       >
                         {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                         Register via ICP

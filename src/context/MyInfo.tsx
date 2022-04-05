@@ -25,8 +25,8 @@ export interface MyInfoContextInterface {
 }
 
 function useProvideMyInfo() {
-	const serviceApi = new ServiceApi();
-	const { ...auth } = useAuthWallet();
+	const [serviceApi] = useState(() => new ServiceApi());
+	const { ...authWallet } = useAuthWallet();
 	const [orderInfo, setOrderInfo] = useState<{ name: string, nameLen: number, payStatus: object, payYears: number, payType: 'icp' | 'quota', quotaType?: number }>({
 		name: '',
 		nameLen: 0,
@@ -63,21 +63,22 @@ function useProvideMyInfo() {
 			]);
 			return [quota4, quota5, quota6, quota7];
 		}
-		if (auth.principal) {
+		if (authWallet.wallet?.principalId) {
 			try {
-				const res = await get_MyQuotas(auth.principal);
+				const res = await get_MyQuotas(authWallet.wallet?.principalId);
 				localStorage.setItem('myQuotas', JSON.stringify(res))
 				setQuotas(res)
 			} catch (error) {
 				console.log('get_MyQuotas', error)
-				auth.quitWallet()
-				auth.setAuthErr({err:true,desc:'There was an error - please ensure you have Cookies Enabled'})
+				/* authWallet.disconnectWallet()
+				authWallet.setAuthErr({ err: true, desc: 'There was an error - please ensure you have Cookies Enabled' }) */
 			}
 		}
 	}
 
 	const checkPendingOrder = async () => {
 		serviceApi.getPendingOrder().then(res => {
+			console.log(res)
 			if (res.length !== 0) {
 				setPendingOrder(true)
 				createOrder({
@@ -90,20 +91,21 @@ function useProvideMyInfo() {
 			} else {
 				setPendingOrder(false)
 			}
-		}).catch(error => {
+		})/* .catch(error => {
 			console.log('getPendingOrder', error)
-			auth.quitWallet()
-			auth.setAuthErr({err:true,desc:'There was an error - please ensure you have Cookies Enabled'})
-		})
+			authWallet.disconnectWallet()
+			authWallet.setAuthErr({err:true,desc:'There was an error - please ensure you have Cookies Enabled'})
+		}) */
 	}
 
 	useEffect(() => {
-		if (auth.walletAddress) {
+		if (authWallet.wallet?.principalId) {
+			console.log(authWallet.wallet.accountId)
 			checkPendingOrder();
 			getMyQuotas();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [auth.walletAddress])
+	}, [authWallet.wallet])
 
 	const getIcpToCycles = async () => {
 		serviceApi.getIcpToCycles().then(res_IcpToCycles => {

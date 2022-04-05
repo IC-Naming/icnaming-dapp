@@ -51,7 +51,7 @@ export const Pay = () => {
                   :
                   <>
                     {
-                      sessionStorage.getItem('walletType') === 'nns' ?
+                      sessionStorage.getItem('walletType') === 'Nns' ?
                         <PayVieIcpNns orderInfo={orderInfoObj} checkRefund={() => { setHasRefund(true) }} />
                         :
                         <PayVieIcp orderInfo={orderInfoObj} checkRefund={() => { setHasRefund(true) }} />

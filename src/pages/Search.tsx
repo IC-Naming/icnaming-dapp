@@ -25,7 +25,7 @@ export const Search = (props) => {
   const { ...authWallet } = useAuthWallet();
   const serviceApi = useMemo(() =>
     new ServiceApi(),
-    [authWallet.walletAddress]);// eslint-disable-line
+    [authWallet.wallet?.principalId]);// eslint-disable-line
   const [word, setWord] = useState<string | Principal>('')
   const [loading, setLoading] = useState<boolean>(true)
   const [isSearchAddress, setIsSearchAddress] = useState<boolean>(false)
@@ -66,17 +66,17 @@ export const Search = (props) => {
       })
     }
     let fav = false;
-    if (authWallet.walletAddress) {
+    if (authWallet.wallet?.principalId) {
       const myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
       fav = myFavoriteNames.some(item => item === searchName);
     }
     console.log({ name: searchName, available: available, expireAt, favorite: fav })
     setNameSearchResult({ name: searchName, available: available, expireAt, favorite: fav })
     setLoading(false)
-  }, [serviceApi, authWallet.walletAddress]);
+  }, [serviceApi, authWallet.wallet?.principalId]);
 
   const getPendingOrder = useCallback(async () => {
-    if (!authWallet.walletAddress) {
+    if (!authWallet.wallet?.principalId) {
       return undefined;
     }
     setPendingOrderLoading(true);
@@ -91,13 +91,13 @@ export const Search = (props) => {
       setPendingOrderLoading(false);
     }
     return undefined;
-  }, [serviceApi, authWallet.walletAddress]);
+  }, [serviceApi, authWallet.wallet?.principalId]);
 
 
 
   const handlWordChange = useCallback(async () => {
     const getMyFavourites = async () => {
-      if (authWallet.walletAddress) {
+      if (authWallet.wallet?.principalId) {
         let myFavoriteNamesStorage = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
         if (myFavoriteNamesStorage && myFavoriteNamesStorage.length > 0) {
           return myFavoriteNamesStorage;
@@ -106,7 +106,7 @@ export const Search = (props) => {
             const favoriteNamesSevice = await serviceApi.getFavoriteNames()
             localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
             return serviceApi.getFavoriteNames();
-          }, 'myNamesOfFavorite' + authWallet.walletAddress);
+          }, 'myNamesOfFavorite' + authWallet.wallet.accountId);
         }
       } else {
         return [];
@@ -205,11 +205,11 @@ export const Search = (props) => {
         });
       }
     }
-  }, [word, authWallet.walletAddress, serviceApi, creatNameSearchResult, getPendingOrder]);
+  }, [word, authWallet.wallet, serviceApi, creatNameSearchResult, getPendingOrder]);
 
   useEffect(() => {
     handlWordChange();
-  }, [word, authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
+  }, [word, authWallet.wallet])// eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const wordParam = props.match.params.word;

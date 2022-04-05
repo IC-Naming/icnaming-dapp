@@ -1,7 +1,7 @@
 let _callback_index = 1;
-const callbacks = {};
+// const callbacks = {};
 
-export default function (
+export default function proxy(
   method: string,
   payload: Record<string, string | number | string[]>
 ): Promise<{ result: any; status: string }> {

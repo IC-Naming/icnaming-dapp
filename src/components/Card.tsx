@@ -17,7 +17,7 @@ export interface CardProps {
   favorite: boolean,
 }
 export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccount, favorite }) => {
-  const { ...auth } = useAuthWallet();
+  const { ...authWallet } = useAuthWallet();
   const { ...myInfo } = useMyInfo();
   const history = useHistory();
   const location = useLocation();
@@ -46,8 +46,8 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
     serviceApi.addFavoriteName(name).then(res => {
       if (res) {
         console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
-        deleteCache('favoriteall' + auth.walletAddress)
-        deleteCache('myNamesOfFavorite' + auth.walletAddress);
+        deleteCache('favoriteall' + authWallet.wallet)
+        deleteCache('myNamesOfFavorite' + authWallet.wallet);
         console.log("addFavorite", res)
       }
     }).catch(err=>{
@@ -61,8 +61,8 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
     serviceApi.removeFavoriteName(name).then(res => {
       if (res) {
         console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
-        deleteCache('favoriteall' + auth.walletAddress)
-        deleteCache('myNamesOfFavorite' + auth.walletAddress);
+        deleteCache('favoriteall' + authWallet.wallet)
+        deleteCache('myNamesOfFavorite' + authWallet.wallet);
         console.log("removeFavorite", res)
       }
     }).catch(err=>{
@@ -72,7 +72,7 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
 
   const handleFavorite = (e) => {
     e.stopPropagation();
-    if (auth.isAuthWalletConnected) {
+    if (authWallet.wallet?.principalId) {
       if (isFavorite) {
         removeFavorite(e)
       } else {
@@ -85,7 +85,7 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
 
   const checkOrder = () => {
     const fromSearch = location.pathname === '/favourites' ? '?from=favourites' : ''
-    if (auth.walletAddress) {
+    if (authWallet.wallet) {
       setCheckOrderIng(true)
       if (myInfo.hasPendingOrder) {
         setVisible(true)

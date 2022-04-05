@@ -14,7 +14,7 @@ declare global {
 
 let agent;
 let publicKey;
-const idls:any = [];
+const idls: any = [];
 
 type PayType = {
 	amount: string;
@@ -25,7 +25,7 @@ type PayType = {
 	fee?: string;
 };
 
-export default {
+const icpbox = {
 	get webview() {
 		return window.ReactNativeWebView;
 	},
@@ -33,7 +33,7 @@ export default {
 		return publicKey;
 	},
 	setPublickKey(val) {
-		console.log('setPublickKey',val)
+		console.log('setPublickKey', val)
 		publicKey = val;
 	},
 	check: function () {
@@ -80,3 +80,4 @@ export default {
 		return proxy("disConnect", { host: window.location.host });
 	},
 };
+export default icpbox;

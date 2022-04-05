@@ -7,9 +7,9 @@ import { WalletConnectError, WalletConnectErrorCode } from "../exception";
 import { principalToAccountID } from "../helper";
 declare const window: any;
 export enum WalletType {
-  II,
+  Nns,
   Plug,
-  StoicWallet,
+  Stoic,
   AstroX,
 }
 
@@ -20,17 +20,19 @@ export interface WalletResponse {
   identity?: Identity;
   agent?: HttpAgent;
 }
+
 export class WalletConnector {
   public static connect = (
     walletType: WalletType,
     whitelist: Array<string>
   ) => {
+
     switch (walletType) {
-      case WalletType.II:
+      case WalletType.Nns:
         return connectII();
       case WalletType.Plug:
         return connectPlugWallet(whitelist);
-      case WalletType.StoicWallet:
+      case WalletType.Stoic:
         return connectStoicWallet();
       case WalletType.AstroX:
         throw new WalletConnectError(
@@ -44,13 +46,19 @@ export class WalletConnector {
         );
     }
   };
+
   public static disconnect = (walletType: WalletType) => {
+    localStorage.removeItem('myFavoriteNames');
+    localStorage.removeItem('myQuotas');
+    sessionStorage.removeItem("connectStatus");
+    sessionStorage.removeItem("walletType");
+    sessionStorage.removeItem("orderInfo");
     switch (walletType) {
-      case WalletType.II:
+      case WalletType.Nns:
         return disconnectII();
       case WalletType.Plug:
         return disconnectPlugWallet();
-      case WalletType.StoicWallet:
+      case WalletType.Stoic:
         return disconnectStoicWallet();
       case WalletType.AstroX:
         throw new WalletConnectError(
@@ -76,11 +84,15 @@ const connectPlugWallet = async (
       "Plug not install"
     );
   } else {
+    let connected
     try {
-      const connected = await window.ic?.plug?.requestConnect({
-        whitelist,
-        host: IC_HOST,
-      });
+      const isConnected = await window.ic.plug.isConnected();
+      if (isConnected && !window.ic.plug.agent) {
+        connected = await window.ic?.plug?.createAgent({ whitelist, host: IC_HOST });
+      } else {
+        connected = await window.ic?.plug?.requestConnect({ whitelist, host: IC_HOST });
+      }
+
       if (!connected) {
         throw new WalletConnectError(
           WalletConnectErrorCode.PlugConnectFailed,
@@ -103,28 +115,30 @@ const connectPlugWallet = async (
 };
 
 const connectStoicWallet = async (): Promise<WalletResponse | undefined> => {
+  let identity;
   const stoicConn = await StoicIdentity.load();
   try {
-    if (stoicConn !== false) {
-      throw new WalletConnectError(
-        WalletConnectErrorCode.StoicConnectFailed,
-        `Stoic connect failed`
-      );
+    if (stoicConn === false) {
+      identity = await StoicIdentity.connect();
+    } else {
+      identity = stoicConn;
     }
-    //No existing connection, lets make one!
-    const identity = await StoicIdentity.connect();
     const principalId = identity?.getPrincipal();
     const accountId = principalToAccountID(principalId);
     return {
-      type: WalletType.StoicWallet,
+      type: WalletType.Stoic,
       principalId,
       accountId,
       identity,
     };
   } catch (error) {
-    throw error;
+    throw new WalletConnectError(
+      WalletConnectErrorCode.StoicConnectFailed,
+      `Stoic connect failed`
+    );
   }
 };
+
 
 const connectII = async (): Promise<WalletResponse | undefined> => {
   return new Promise(async (resolve, reject) => {
@@ -134,7 +148,7 @@ const connectII = async (): Promise<WalletResponse | undefined> => {
         const identity = await authClient.getIdentity();
         const accountId = principalToAccountID(identity.getPrincipal());
         resolve({
-          type: WalletType.II,
+          type: WalletType.Nns,
           principalId: identity.getPrincipal(),
           accountId,
           identity,
@@ -145,7 +159,7 @@ const connectII = async (): Promise<WalletResponse | undefined> => {
             const identity = await authClient.getIdentity();
             const accountId = principalToAccountID(identity.getPrincipal());
             resolve({
-              type: WalletType.II,
+              type: WalletType.Nns,
               principalId: identity.getPrincipal(),
               accountId,
               identity,
@@ -166,15 +180,19 @@ const connectII = async (): Promise<WalletResponse | undefined> => {
     }
   });
 };
-function disconnectII() {
-  throw new Error("Function not implemented.");
+
+const disconnectII = async () => {
+  localStorage.removeItem('ic-identity');
+  localStorage.removeItem('ic-delegation');
+  const authClient = await AuthClient.create();
+  authClient.logout()
+}
+const disconnectPlugWallet = async () => {
+  window.ic?.plug?.disconnect();
 }
 
-function disconnectPlugWallet() {
-  throw new Error("Function not implemented.");
-}
-
-function disconnectStoicWallet() {
-  throw new Error("Function not implemented.");
+const disconnectStoicWallet = async () => {
+  localStorage.removeItem("_scApp");
+  StoicIdentity.disconnect();
 }
 
