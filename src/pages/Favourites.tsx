@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Card, CopyToClipboard } from "../components";
 import styles from '../assets/styles/Search.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
-import ServiceApi from '../utils/ServiceApi';
+import serviceApi from '../utils/ServiceApi';
 import dateFormat from "dateformat";
 import { queryWithCache } from '../utils/localCache';
 import { Container } from 'react-bootstrap';
@@ -10,7 +10,6 @@ import { CanisterError } from '../utils/exception';
 import { List, Pagination, Skeleton } from '@douyinfe/semi-ui';
 export const Favourites = () => {
   const { ...authWallet } = useAuthWallet();
-  const [serviceApi] = useState(() => new ServiceApi());
   const [loading, setLoading] = useState<boolean>(true)
   const [nameResult, setNameResult] = useState<Array<any>>([]);
   const [page, onPageChange] = useState<number>(1);
@@ -23,9 +22,9 @@ export const Favourites = () => {
     } else {
       console.log('origin serivce api');
       return await queryWithCache(async () => {
-        const favoriteNamesSevice = await serviceApi.getFavoriteNames()
+        const favoriteNamesSevice = await (await serviceApi).getFavoriteNames()
         localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
-        return serviceApi.getFavoriteNames();
+        return (await serviceApi).getFavoriteNames();
       }, 'myNamesOfFavorite' + authWallet.wallet?.accountId);
     }
   }
@@ -36,13 +35,13 @@ export const Favourites = () => {
       if (authWallet.wallet?.principalId) {
         let myNamesOfFavorite = await getMyFavourites()
         const myFavoriteNamesWithExpireAt = myNamesOfFavorite.map(async (item: string) => {
-          const isMyAccount = await serviceApi.getRegistrantOfName(item) || false;
-          const available = await serviceApi.available(item).catch(err => {
+          const isMyAccount = await (await serviceApi).getRegistrantOfName(item) || false;
+          const available = await (await serviceApi).available(item).catch(err => {
             if (err instanceof CanisterError) 
             console.log(err)
             return false;
           });
-          const expireAtOfName = !available ? await serviceApi.expireAtOf(item) : 0;
+          const expireAtOfName = !available ? await (await serviceApi).expireAtOf(item) : 0;
           return {
             name: item,
             available: available,

@@ -1,5 +1,4 @@
 import { Principal } from "@dfinity/principal";
-import { AsyncConstructor } from "async-constructor";
 import {
   createRegistrarQueryActor,
   createRegistrarUpdateActor,
@@ -59,33 +58,32 @@ export class ServiceApi {
   private constructor() {}
 
   public static async initialize() {
-    ServiceApi._instance.registrarQueryActor = createRegistrarQueryActor();
-    ServiceApi._instance.whiteListQueryActor = createWhiteListQueryActor();
-    ServiceApi._instance.registryQueryActor = createRegistryQueryActor();
-    ServiceApi._instance.resolverQueryActor = createResolverQueryActor();
+    ServiceApi._instance.registrarQueryActor = await createRegistrarQueryActor();
+    ServiceApi._instance.whiteListQueryActor = await createWhiteListQueryActor();
+    ServiceApi._instance.registryQueryActor = await createRegistryQueryActor();
+    ServiceApi._instance.resolverQueryActor = await createResolverQueryActor();
     return ServiceApi._instance;
   }
 
   public static async initializeAfterAuth() {
     console.warn("ServiceApi async init");
-    ServiceApi._instance.registrarUpdateActor =
-      await createRegistrarUpdateActor();
+    ServiceApi._instance.registrarUpdateActor = await createRegistrarUpdateActor();
     if (ServiceApi._instance.registrarUpdateActor) {
       console.info(`ServiceApi registrarUpdateActor inited`);
     } else {
       console.warn(`ServiceApi registrarUpdateActor undefined`);
     }
-    ServiceApi._instance.resolverUpdateActor =
-      await createResolverUpdateActor();
+    ServiceApi._instance.resolverUpdateActor = await createResolverUpdateActor();
     ServiceApi._instance.favoritesActor = await createFavoriteActor();
     ServiceApi._instance.ledgerActor = await createLedgerActor();
   }
-  public static async payledger(
+
+  public async payledger(
     payment_account_id: any,
     price_icp_in_e8s: bigint,
     payment_memo: bigint
   ): Promise<bigint> {
-    return new Promise(async (resolve, reject) => {
+    return executeWithLogging(async () => {
       try {
         const res: any = await ServiceApi._instance.ledgerActor?.transfer({
           amount: {
@@ -100,22 +98,21 @@ export class ServiceApi {
           from_subaccount: [],
         });
         if ("Ok" in res) {
-          resolve(res.Ok);
+          return(res.Ok);
         } else {
-          reject(res.Err);
+          throw new CanisterError(res.Err);
         }
       } catch (error) {
-        reject(error);
+        throw new Error('payledger error');
       }
-    });
+    }, "payledger");
   }
 
   // get icp && cycles
   public async getIcpToCycles(): Promise<PriceTableItem[]> {
     // console.log('nameLen', nameLen)
     return executeWithLogging(async () => {
-      const res =
-        await ServiceApi._instance.registrarQueryActor.get_price_table();
+      const res = await ServiceApi._instance.registrarQueryActor.get_price_table();
       if ("Ok" in res) {
         // const t:PriceTableItem = res.Ok.items.find(x => x.len === nameLen)!;
         return res.Ok.items;

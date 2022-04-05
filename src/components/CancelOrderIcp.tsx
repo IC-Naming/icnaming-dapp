@@ -5,7 +5,7 @@ import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { ModalTipFull } from "./ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
-import ServiceApi from "../utils/ServiceApi";
+import serviceApi from "../utils/ServiceApi";
 import { CanisterError } from "utils/exception";
 import { Modal } from "@douyinfe/semi-ui";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
@@ -14,7 +14,6 @@ interface CancelOrderIcpProps {
 }
 export const CancelOrderIcp: React.FC<CancelOrderIcpProps> = ({ name }) => {
   const history = useHistory();
-  const serviceApi = new ServiceApi();
   const { ...myInfo } = useMyInfo();
   const [loading, setLoading] = useState<boolean>(false)
   const [visiableModalTipFull, setVisiableModalTipFull] = useState<boolean>(false)
@@ -23,7 +22,7 @@ export const CancelOrderIcp: React.FC<CancelOrderIcpProps> = ({ name }) => {
     if (loading) return
     setLoading(true)
     setVisiableModalTipFull(true)
-    serviceApi.cancelRegisterOrder().then(res => {
+    ;(await serviceApi).cancelRegisterOrder().then(res => {
       if (res) {
         setLoading(false)
         setVisiableModalTipFull(false)

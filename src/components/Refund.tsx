@@ -1,25 +1,24 @@
-import React, { useState } from "react";
+import React from "react";
 import { Row, Col, Spinner } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 import styles from '../assets/styles/Name.module.scss'
 import { ModalTipFull } from "./ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
-import ServiceApi from "../utils/ServiceApi";
+import serviceApi from "../utils/ServiceApi";
 import { CanisterError } from "utils/exception";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
 
 export const Refund = () => {
   const history = useHistory();
-  const serviceApi = new ServiceApi();
   const { ...myInfo } = useMyInfo();
-  const [visiableModalTipFull, setVisiableModalTipFull] = useState<boolean>(false)
+  const [visiableModalTipFull, setVisiableModalTipFull] = React.useState<boolean>(false)
 
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = React.useState<boolean>(false)
   const refund = async () => {
     if (loading) return
     setLoading(true)
     setVisiableModalTipFull(true)
-    serviceApi.refundOrder().then(res => {
+    ;(await serviceApi).refundOrder().then(res => {
       if (res) {
         toast.success('Refund success')
         setVisiableModalTipFull(false)

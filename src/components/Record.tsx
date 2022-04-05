@@ -1,7 +1,7 @@
 import styles from "../assets/styles/Name.module.scss";
 import { useEffect, useState } from "react";
 import { useAuthWallet } from "../context/AuthWallet";
-import ServiceApi from "../utils/ServiceApi";
+import serviceApi from "../utils/ServiceApi";
 import { Spinner } from "react-bootstrap";
 import { CopyToClipboard } from ".";
 import { isValidAddress, isEmail } from "../utils/helper";
@@ -20,7 +20,6 @@ interface Props {
 export const Record: React.FC<Props> = ({ title, name, recordKey, value, registant, controller }) => {
   const { ...authWallet } = useAuthWallet();
   const [recordSaveLoading, setRecordSaveLoading] = useState(false);
-  const serviceApi = new ServiceApi();
   const [recordVal, setRecordVal] = useState<string>('');
   const [ischangeRecordVal, setIschangeRecordVal] = useState(false);
   const [isController, setIsController] = useState(false);
@@ -44,7 +43,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
 
   const recordSet = async () => {
     setRecordSaveLoading(true);
-    serviceApi.setRecord(name, recordKey, recordVal).then(res => {
+    (await serviceApi).setRecord(name, recordKey, recordVal).then(res => {
       if (res) {
         toast.success('Set record success');
         console.log('clear Records cache')

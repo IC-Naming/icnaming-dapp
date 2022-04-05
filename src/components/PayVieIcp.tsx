@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
-import ServiceApi from "utils/ServiceApi";
+import serviceApi from "utils/ServiceApi";
 import { deleteCache } from "../utils/localCache";
 import { CancelOrderIcp } from "components/CancelOrderIcp";
 import BigNumber from "bignumber.js";
@@ -41,7 +41,6 @@ const toICPe8s = (source: string): bigint => {
 export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => {
 	const history = useHistory();
 	const { ...authWallet } = useAuthWallet();
-	const [serviceApi] = useState(() => new ServiceApi());
 	const { ...myInfo } = useMyInfo();
 	const [modalVisible, setModalVisible] = useState<boolean>(false)
 	const [stoicVisible, setStoicVisible] = useState<boolean>(false)
@@ -79,7 +78,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				
 			} */
 			try {
-				let result = await serviceApi.confirmOrder(BigInt(blockHeight));
+				let result = await (await serviceApi).confirmOrder(BigInt(blockHeight));
 				console.log('confirmOrder result', result)
 				if (result) {
 					result_status = ConfirmStatus.Success;
@@ -165,7 +164,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		setModalVisible(true)
 		try {
 			if (blockHeight === 0) {
-				const transfer_result: any = await serviceApi.payledger(
+				const transfer_result: any = (await serviceApi).payledger(
 					order[0].payment_account_id,
 					order[0].price_icp_in_e8s,
 					toICPe8s(order[0].payment_memo.ICP.toString())
@@ -199,9 +198,9 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 			const serviecOrderInfo: any = [];
 			let orderStatus = await (async () => {
 				let result_Status = OrderStatus.Available;
-				const [availableResult, orderResult] = await Promise.all([serviceApi.available(name).catch(err => {
+				const [availableResult, orderResult] = await Promise.all([(await serviceApi).available(name).catch(err => {
 					console.log(err)
-				}), serviceApi.getPendingOrder()]);
+				}), (await serviceApi).getPendingOrder()]);
 
 				if (orderResult.length !== 0) {
 					serviecOrderInfo.push(orderResult[0])

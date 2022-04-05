@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { Principal } from "@dfinity/principal";
-import ServiceApi from "../utils/ServiceApi";
+import serviceApi from "../utils/ServiceApi";
 import { useAuthWallet } from "./AuthWallet";
 import BigNumber from "bignumber.js";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
@@ -25,7 +25,6 @@ export interface MyInfoContextInterface {
 }
 
 function useProvideMyInfo() {
-	const [serviceApi] = useState(() => new ServiceApi());
 	const { ...authWallet } = useAuthWallet();
 	const [orderInfo, setOrderInfo] = useState<{ name: string, nameLen: number, payStatus: object, payYears: number, payType: 'icp' | 'quota', quotaType?: number }>({
 		name: '',
@@ -56,10 +55,11 @@ function useProvideMyInfo() {
 	const getMyQuotas = async () => {
 		const get_MyQuotas = async (user: Principal) => {
 			const [quota4, quota5, quota6, quota7] = await Promise.all([
-				serviceApi.getQuota(user, 4),
-				serviceApi.getQuota(user, 5),
-				serviceApi.getQuota(user, 6),
-				serviceApi.getQuota(user, 7),
+				
+				(await serviceApi).getQuota(user, 4),
+				(await serviceApi).getQuota(user, 5),
+				(await serviceApi).getQuota(user, 6),
+				(await serviceApi).getQuota(user, 7),
 			]);
 			return [quota4, quota5, quota6, quota7];
 		}
@@ -77,7 +77,8 @@ function useProvideMyInfo() {
 	}
 
 	const checkPendingOrder = async () => {
-		serviceApi.getPendingOrder().then(res => {
+	
+		(await serviceApi).getPendingOrder().then(res => {
 			console.log(res)
 			if (res.length !== 0) {
 				setPendingOrder(true)
@@ -108,7 +109,7 @@ function useProvideMyInfo() {
 	}, [authWallet.wallet])
 
 	const getIcpToCycles = async () => {
-		serviceApi.getIcpToCycles().then(res_IcpToCycles => {
+		(await serviceApi).getIcpToCycles().then(res_IcpToCycles => {
 			const res_IcpToCycles_map = res_IcpToCycles.map((item, index) => {
 				return {
 					icp: new BigNumber(item.price_in_icp_e8s.toString()).div(100000000).toString(),

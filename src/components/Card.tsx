@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { useHistory, useLocation } from "react-router-dom";
 import styles from '../assets/styles/Card.module.scss'
-import ServiceApi from '../utils/ServiceApi'
+import serviceApi from '../utils/ServiceApi'
 import { useAuthWallet } from '../context/AuthWallet';
 import { deleteCache } from '../utils/localCache';
 import { Spinner } from 'react-bootstrap';
@@ -21,7 +21,6 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
   const { ...myInfo } = useMyInfo();
   const history = useHistory();
   const location = useLocation();
-  const serviceApi = new ServiceApi();
   const [checkOrderIng, setCheckOrderIng] = React.useState<boolean>(false)
   const [isFavorite, SetIsFavorite] = React.useState<boolean>(false)
   const [visible, setVisible] = React.useState<boolean>(false)
@@ -40,10 +39,10 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
     localStorage.setItem('myFavoriteNames', JSON.stringify(myFavoriteNames))
   }
 
-  const addFavorite = (e) => {
+  const addFavorite = async (e) => {
     SetIsFavorite(!isFavorite)
     changeLocalFavorite(name)
-    serviceApi.addFavoriteName(name).then(res => {
+    ;(await serviceApi).addFavoriteName(name).then(res => {
       if (res) {
         console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
         deleteCache('favoriteall' + authWallet.wallet)
@@ -55,10 +54,10 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
     })
   }
 
-  const removeFavorite = (e) => {
+  const removeFavorite = async (e) => {
     SetIsFavorite(!isFavorite)
     changeLocalFavorite(name)
-    serviceApi.removeFavoriteName(name).then(res => {
+    ;(await serviceApi).removeFavoriteName(name).then(res => {
       if (res) {
         console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
         deleteCache('favoriteall' + authWallet.wallet)

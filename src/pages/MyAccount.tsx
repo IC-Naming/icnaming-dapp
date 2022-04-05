@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SearchInput, Card, CopyToClipboard } from "../components";
 import { Principal } from '@dfinity/principal';
 import styles from '../assets/styles/Search.module.scss'
 import { Container, Tab, Tabs } from 'react-bootstrap';
-import ServiceApi from '../utils/ServiceApi';
+import serviceApi from '../utils/ServiceApi';
 import { useAuthWallet } from '../context/AuthWallet';
 import dateFormat from "dateformat";
 import { queryWithCache } from '../utils/localCache';
@@ -11,7 +11,6 @@ import { Skeleton, Pagination, List, Input } from '@douyinfe/semi-ui';
 import { IconSearch } from '@douyinfe/semi-icons';
 export const MyAccount = () => {
   const { ...authWallet } = useAuthWallet();
-  const [serviceApi] = useState(() => new ServiceApi());
   const [loading, setLoading] = useState<boolean>(true)
   const [namesOfRegistrant, setNamesOfRegistrant] = useState<any>();
   const [namesOfController, setNamesOfController] = useState<any>();
@@ -44,9 +43,9 @@ export const MyAccount = () => {
       return myFavoriteNamesStorage;
     } else {
       return await queryWithCache(async () => {
-        const favoriteNamesSevice = await serviceApi.getFavoriteNames()
+        const favoriteNamesSevice = await (await serviceApi).getFavoriteNames()
         localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
-        return serviceApi.getFavoriteNames();
+        return (await serviceApi).getFavoriteNames();
       }, 'myNamesOfFavorite' + authWallet.wallet?.accountId);
     }
   }
@@ -59,8 +58,8 @@ export const MyAccount = () => {
       let getNamesOfControllerLoaded = false;
 
       queryWithCache(() => {
-        return new Promise((resolve, reject) => {
-          serviceApi.getNamesOfRegistrant(wordParam).then(data => {
+        return new Promise(async (resolve, reject) => {
+          (await serviceApi).getNamesOfRegistrant(wordParam).then(data => {
             resolve(data)
           }).catch(errs => {
             reject(errs)
@@ -91,8 +90,8 @@ export const MyAccount = () => {
       });
 
       queryWithCache(() => {
-        return new Promise((resolve, reject) => {
-          serviceApi.getNamesOfController(wordParam).then(data => {
+        return new Promise(async (resolve, reject) => {
+          (await serviceApi).getNamesOfController(wordParam).then(data => {
             resolve(data)
           }).catch(errs => {
             reject(errs)

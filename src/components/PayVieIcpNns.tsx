@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 // import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
-import ServiceApi, { getPendingOrder } from "../utils/ServiceApi";
+import serviceApi from "../utils/ServiceApi";
 // import { deleteCache } from "../utils/localCache";
 import { CancelOrderIcp } from "components/CancelOrderIcp";
 import { CopyToClipboard } from "components/CopyToClipboard";
@@ -26,7 +26,6 @@ interface IcpPayProps {
 
 export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => {
 	const history = useHistory();
-	const serviceApi = new ServiceApi();
 	const { ...authWallet } = useAuthWallet();
 	// const { ...myInfo } = useMyInfo();
 	const [checkOrderIng, setCheckOrderIng] = useState<boolean>(true)
@@ -118,9 +117,9 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 			const serviecOrderInfo: any = [];
 			let orderStatus = await (async () => {
 				let result_Status = OrderStatus.Available;
-				const [availableResult, orderResult] = await Promise.all([serviceApi.available(name).catch(err => {
+				const [availableResult, orderResult] = await Promise.all([(await serviceApi).available(name).catch(err => {
 					console.log(err)
-				}), getPendingOrder()]);
+				}), (await serviceApi).getPendingOrder()]);
 				if (orderResult.length !== 0) {
 					serviecOrderInfo.push(orderResult[0])
 					const arrayToHex = (arr: Array<number>) => {

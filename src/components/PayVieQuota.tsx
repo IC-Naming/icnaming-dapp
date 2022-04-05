@@ -5,7 +5,7 @@ import styles from '../assets/styles/Name.module.scss'
 import { ModalTipFull } from "../components/ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
 import { useAuthWallet } from '../context/AuthWallet';
-import ServiceApi from "../utils/ServiceApi";
+import serviceApi from "../utils/ServiceApi";
 import { deleteCache } from "../utils/localCache";
 import { CanisterError } from "utils/exception";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
@@ -16,7 +16,6 @@ interface QuotaTypeProps {
 
 export const PayVieQuota: React.FC<QuotaTypeProps> = ({ quotaType, quotaTypeCount }) => {
   const history = useHistory();
-  const serviceApi = new ServiceApi();
   const { ...myInfo } = useMyInfo();
   const { ...auth } = useAuthWallet();
 
@@ -28,7 +27,7 @@ export const PayVieQuota: React.FC<QuotaTypeProps> = ({ quotaType, quotaTypeCoun
     setLoading(true)
     setVisiableModalTipFull(true)
 
-    serviceApi.registerNameByQuota(myInfo.orderInfo.name, quotaType).then(res => {
+    ;(await serviceApi).registerNameByQuota(myInfo.orderInfo.name, quotaType).then(res => {
       if (res === true) {
         toast.success(`Congratulations! Now you are the owner of ${myInfo.orderInfo.name}!`)
         setLoading(false)
