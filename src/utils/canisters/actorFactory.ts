@@ -2,6 +2,7 @@ import { Actor, ActorSubclass, HttpAgent, Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { WalletResponse, WalletType } from "utils/connector";
 import { IC_HOST, isLocalEnv } from "utils/config";
+import { ServiceApi } from "utils/ServiceApi";
 declare const window: any;
 class ActorFactory {
   private static _instance: ActorFactory = new ActorFactory();
@@ -12,40 +13,39 @@ class ActorFactory {
   }
   _isAuthenticated: boolean = false;
 
-   async createActor<T>(
-     canisterDid: any,
-     canisterId: string | Principal
-   ): Promise<ActorSubclass<T> | undefined> {
-     if (ActorFactory._wallet) {
-       switch (ActorFactory._wallet.type) {
-         case WalletType.Nns: {
-           const agent = this.getAgent(ActorFactory._wallet.identity);
-           if (isLocalEnv()) {
-             agent.fetchRootKey().catch(console.error);
-           }
-           return Actor.createActor<T>(canisterDid, {
-             agent,
-             canisterId,
-           });
-         }
-         case WalletType.Plug: {
-           return await window.ic.plug.createActor({
-             canisterId: canisterId,
-             interfaceFactory: canisterDid,
-           });
-         }
-         case WalletType.Stoic: {
-           const agent = this.getAgent(ActorFactory._wallet.identity);
-           return Actor.createActor<T>(canisterDid, {
-             agent,
-             canisterId,
-           });
-         }
-         default:
-           return undefined;
-       }
-     }
-   }
+  async createActor<T>(
+    canisterDid: any,
+    canisterId: string | Principal
+  ): Promise<ActorSubclass<T> | undefined> {
+    switch (ActorFactory._wallet?.type) {
+      case WalletType.Nns: {
+        const agent = this.getAgent(ActorFactory._wallet.identity);
+        if (isLocalEnv()) {
+          agent.fetchRootKey().catch(console.error);
+        }
+        return Actor.createActor<T>(canisterDid, {
+          agent,
+          canisterId,
+        });
+      }
+      case WalletType.Plug: {
+        return await window.ic.plug.createActor({
+          canisterId: canisterId,
+          interfaceFactory: canisterDid,
+        });
+      }
+      case WalletType.Stoic: {
+        const agent = this.getAgent(ActorFactory._wallet.identity);
+        return Actor.createActor<T>(canisterDid, {
+          agent,
+          canisterId,
+        });
+      }
+      default:
+        console.log("default switch");
+        return this.createActorWithAnonymousIdentity(canisterDid, canisterId);
+    }
+  }
 
   createActorWithAnonymousIdentity<T>(
     canisterDid: any,
@@ -106,6 +106,7 @@ class ActorFactory {
    */
   async authenticate(wallet: WalletResponse) {
     ActorFactory._wallet = wallet;
+    await ServiceApi.initializeAfterAuth();
     this._isAuthenticated = true;
   }
 
