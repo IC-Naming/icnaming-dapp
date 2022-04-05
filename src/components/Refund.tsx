@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import styles from '../assets/styles/Name.module.scss'
 import { ModalTipFull } from "./ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
-import serviceApi from "../utils/ServiceApi";
+import ServiceApi from "../utils/ServiceApi";
 import { CanisterError } from "utils/exception";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
 
@@ -18,7 +18,7 @@ export const Refund = () => {
     if (loading) return
     setLoading(true)
     setVisiableModalTipFull(true)
-    ;(await serviceApi).refundOrder().then(res => {
+    ;(await ServiceApi.getInstance()).refundOrder().then(res => {
       if (res) {
         toast.success('Refund success')
         setVisiableModalTipFull(false)

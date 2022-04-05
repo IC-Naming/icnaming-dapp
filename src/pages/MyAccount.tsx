@@ -3,7 +3,7 @@ import { SearchInput, Card, CopyToClipboard } from "../components";
 import { Principal } from '@dfinity/principal';
 import styles from '../assets/styles/Search.module.scss'
 import { Container, Tab, Tabs } from 'react-bootstrap';
-import serviceApi from '../utils/ServiceApi';
+import ServiceApi from '../utils/ServiceApi';
 import { useAuthWallet } from '../context/AuthWallet';
 import dateFormat from "dateformat";
 import { queryWithCache } from '../utils/localCache';
@@ -43,9 +43,9 @@ export const MyAccount = () => {
       return myFavoriteNamesStorage;
     } else {
       return await queryWithCache(async () => {
-        const favoriteNamesSevice = await (await serviceApi).getFavoriteNames()
+        const favoriteNamesSevice = await (await ServiceApi.getInstance()).getFavoriteNames()
         localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
-        return (await serviceApi).getFavoriteNames();
+        return (await ServiceApi.getInstance()).getFavoriteNames();
       }, 'myNamesOfFavorite' + authWallet.wallet?.accountId);
     }
   }
@@ -59,7 +59,7 @@ export const MyAccount = () => {
 
       queryWithCache(() => {
         return new Promise(async (resolve, reject) => {
-          (await serviceApi).getNamesOfRegistrant(wordParam).then(data => {
+          (await ServiceApi.getInstance()).getNamesOfRegistrant(wordParam).then(data => {
             resolve(data)
           }).catch(errs => {
             reject(errs)
@@ -91,7 +91,7 @@ export const MyAccount = () => {
 
       queryWithCache(() => {
         return new Promise(async (resolve, reject) => {
-          (await serviceApi).getNamesOfController(wordParam).then(data => {
+          (await ServiceApi.getInstance()).getNamesOfController(wordParam).then(data => {
             resolve(data)
           }).catch(errs => {
             reject(errs)

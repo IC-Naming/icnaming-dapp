@@ -1,7 +1,7 @@
 import styles from "../assets/styles/Name.module.scss";
 import { useEffect, useState } from "react";
 import { useAuthWallet } from "../context/AuthWallet";
-import serviceApi from "../utils/ServiceApi";
+import ServiceApi from "../utils/ServiceApi";
 import { Spinner } from "react-bootstrap";
 import { CopyToClipboard } from ".";
 import { isValidAddress, isEmail } from "../utils/helper";
@@ -43,7 +43,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
 
   const recordSet = async () => {
     setRecordSaveLoading(true);
-    (await serviceApi).setRecord(name, recordKey, recordVal).then(res => {
+    (await ServiceApi.getInstance()).setRecord(name, recordKey, recordVal).then(res => {
       if (res) {
         toast.success('Set record success');
         console.log('clear Records cache')

@@ -44,8 +44,7 @@ export interface NameDetails {
   expireAt: Date | string;
 }
 
-export class ServiceApi {
-  private static _instance: ServiceApi = new ServiceApi();
+export default class ServiceApi {
   private registrarQueryActor!: RegistrarActor;
   private registrarUpdateActor!: RegistrarActor | undefined;
   private whiteListQueryActor!: WhiteListActor;
@@ -57,26 +56,20 @@ export class ServiceApi {
 
   private constructor() {}
 
-  public static async initialize() {
-    ServiceApi._instance.registrarQueryActor = await createRegistrarQueryActor();
-    ServiceApi._instance.whiteListQueryActor = await createWhiteListQueryActor();
-    ServiceApi._instance.registryQueryActor = await createRegistryQueryActor();
-    ServiceApi._instance.resolverQueryActor = await createResolverQueryActor();
-    return ServiceApi._instance;
+  public static async getInstance() {
+    let instance = new ServiceApi();
+    instance.registrarQueryActor = createRegistrarQueryActor();
+    instance.whiteListQueryActor = createWhiteListQueryActor();
+    instance.registryQueryActor = createRegistryQueryActor();
+    instance.resolverQueryActor = createResolverQueryActor();
+    instance.registrarUpdateActor = await createRegistrarUpdateActor();
+    instance.resolverUpdateActor = await createResolverUpdateActor();
+    instance.favoritesActor = await createFavoriteActor();
+    instance.ledgerActor = await createLedgerActor();
+    return instance;
   }
 
-  public static async initializeAfterAuth() {
-    console.warn("ServiceApi async init");
-    ServiceApi._instance.registrarUpdateActor = await createRegistrarUpdateActor();
-    if (ServiceApi._instance.registrarUpdateActor) {
-      console.info(`ServiceApi registrarUpdateActor inited`);
-    } else {
-      console.warn(`ServiceApi registrarUpdateActor undefined`);
-    }
-    ServiceApi._instance.resolverUpdateActor = await createResolverUpdateActor();
-    ServiceApi._instance.favoritesActor = await createFavoriteActor();
-    ServiceApi._instance.ledgerActor = await createLedgerActor();
-  }
+  public async initializeAfterAuth() {}
 
   public async payledger(
     payment_account_id: any,
@@ -85,7 +78,7 @@ export class ServiceApi {
   ): Promise<bigint> {
     return executeWithLogging(async () => {
       try {
-        const res: any = await ServiceApi._instance.ledgerActor?.transfer({
+        const res: any = await this.ledgerActor?.transfer({
           amount: {
             e8s: price_icp_in_e8s,
           },
@@ -98,12 +91,12 @@ export class ServiceApi {
           from_subaccount: [],
         });
         if ("Ok" in res) {
-          return(res.Ok);
+          return res.Ok;
         } else {
           throw new CanisterError(res.Err);
         }
       } catch (error) {
-        throw new Error('payledger error');
+        throw new Error("payledger error");
       }
     }, "payledger");
   }
@@ -112,7 +105,7 @@ export class ServiceApi {
   public async getIcpToCycles(): Promise<PriceTableItem[]> {
     // console.log('nameLen', nameLen)
     return executeWithLogging(async () => {
-      const res = await ServiceApi._instance.registrarQueryActor.get_price_table();
+      const res = await this.registrarQueryActor.get_price_table();
       if ("Ok" in res) {
         // const t:PriceTableItem = res.Ok.items.find(x => x.len === nameLen)!;
         return res.Ok.items;
@@ -127,9 +120,7 @@ export class ServiceApi {
     // if word is string and not empty
     if (word.length > 0) {
       return executeWithLogging(async () => {
-        const res = await ServiceApi._instance.registrarQueryActor.available(
-          word
-        );
+        const res = await this.registrarQueryActor.available(word);
         // console.log('registrarQueryActor-available', res);
         if ("Ok" in res) {
           return res.Ok;
@@ -143,8 +134,7 @@ export class ServiceApi {
   // get name expires
   public expireAtOf = (name: string): Promise<number> => {
     return executeWithLogging(async () => {
-      const res =
-        await ServiceApi._instance.registrarQueryActor.get_name_expires(name);
+      const res = await this.registrarQueryActor.get_name_expires(name);
       if ("Ok" in res) {
         return Number(res.Ok);
       } else {
@@ -182,11 +172,10 @@ export class ServiceApi {
   ): Promise<SubmitOrderResponse> => {
     return executeWithLogging(async () => {
       // console.log("reg name", name);
-      const res: any =
-        await ServiceApi._instance.registrarUpdateActor?.submit_order({
-          name,
-          years,
-        });
+      const res: any = await this.registrarUpdateActor?.submit_order({
+        name,
+        years,
+      });
       console.log("submit_order", res);
       if ("Ok" in res) {
         return res.Ok;
@@ -199,8 +188,7 @@ export class ServiceApi {
   // cancel order
   public cancelRegisterOrder = () => {
     return executeWithLogging(async () => {
-      const res: any =
-        await ServiceApi._instance.registrarUpdateActor?.cancel_order();
+      const res: any = await this.registrarUpdateActor?.cancel_order();
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -212,8 +200,7 @@ export class ServiceApi {
   // cancel order icp
   public refundOrder = (): Promise<boolean> => {
     return executeWithLogging(async () => {
-      const res: any =
-        await ServiceApi._instance.registrarUpdateActor?.refund_order();
+      const res: any = await this.registrarUpdateActor?.refund_order();
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -224,12 +211,10 @@ export class ServiceApi {
 
   // get pending order
   public getPendingOrder = (): Promise<[] | [GetNameOrderResponse]> => {
-    console.log(ServiceApi._instance.registrarUpdateActor);
     return executeWithLogging(async () => {
       let pendingOrder: [GetNameOrderResponse] | [] = [];
-      if (ServiceApi._instance.registrarUpdateActor !== undefined) {
-        const res: any =
-          await ServiceApi._instance.registrarUpdateActor?.get_pending_order();
+      if (this.registrarUpdateActor !== undefined) {
+        const res: any = await this.registrarUpdateActor?.get_pending_order();
         console.log("get_pending_order", res);
         if ("Ok" in res) {
           pendingOrder = res.Ok;
@@ -246,10 +231,9 @@ export class ServiceApi {
   // confirm order
   public confirmOrder = (block_height: bigint): Promise<boolean> => {
     return executeWithLogging(async () => {
-      const res: any =
-        await ServiceApi._instance.registrarUpdateActor?.confirm_pay_order(
-          block_height
-        );
+      const res: any = await this.registrarUpdateActor?.confirm_pay_order(
+        block_height
+      );
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -261,9 +245,7 @@ export class ServiceApi {
   // get credit
   public creditOfEthAddress = (ethAddress: string): Promise<number> => {
     return executeWithLogging(async () => {
-      const res: any = await ServiceApi._instance.whiteListQueryActor.refStatus(
-        ethAddress
-      );
+      const res: any = await this.whiteListQueryActor.refStatus(ethAddress);
       console.log("creditOfEthAddress", res);
       if ("Ok" in res) {
         return Number(res.Ok.credit);
@@ -281,10 +263,9 @@ export class ServiceApi {
   ): Promise<boolean> => {
     console.table({ name: name, key: key, value: value });
     return executeWithLogging(async () => {
-      const res: any =
-        await ServiceApi._instance.resolverUpdateActor?.set_record_value(name, [
-          [key, value],
-        ]);
+      const res: any = await this.resolverUpdateActor?.set_record_value(name, [
+        [key, value],
+      ]);
       // console.log("setRecord", res);
       if ("Ok" in res) {
         return res.Ok;
@@ -303,10 +284,7 @@ export class ServiceApi {
     };
     // console.log('getNamesOfRegistrant----------', address)
     return executeWithLogging(async () => {
-      const res = await ServiceApi._instance.registrarQueryActor.get_names(
-        address,
-        pagingArgs
-      );
+      const res = await this.registrarQueryActor.get_names(address, pagingArgs);
       // console.log('getNamesOfRegistrant----------', res)
       if ("Ok" in res) {
         return res.Ok.items;
@@ -324,11 +302,10 @@ export class ServiceApi {
       limit: BigInt(100),
     };
     return executeWithLogging(async () => {
-      const res =
-        await ServiceApi._instance.registryQueryActor.get_controlled_names(
-          address,
-          pagingArgs
-        );
+      const res = await this.registryQueryActor.get_controlled_names(
+        address,
+        pagingArgs
+      );
       // console.log('getNamesOfController----------', res)
       if ("Ok" in res) {
         return res.Ok.items;
@@ -341,9 +318,7 @@ export class ServiceApi {
   // get name's registrant
   public getRegistrantOfName = (name: string): Promise<Principal> => {
     return executeWithLogging(async () => {
-      const res = await ServiceApi._instance.registrarQueryActor.get_owner(
-        name
-      );
+      const res = await this.registrarQueryActor.get_owner(name);
       // console.log("getRegistrantOfName", res);
       if ("Ok" in res) {
         return res.Ok;
@@ -357,7 +332,7 @@ export class ServiceApi {
   // get name's controller
   public getControllerOfName = (name: string): Promise<Principal> => {
     return executeWithLogging(async () => {
-      const res = await ServiceApi._instance.registryQueryActor.get_owner(name);
+      const res = await this.registryQueryActor.get_owner(name);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -369,9 +344,7 @@ export class ServiceApi {
   // get name's resolver
   public getResolverOfName = (name: string): Promise<Principal> => {
     return executeWithLogging(async () => {
-      const res = await ServiceApi._instance.registryQueryActor.get_resolver(
-        name
-      );
+      const res = await this.registryQueryActor.get_resolver(name);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -385,9 +358,7 @@ export class ServiceApi {
     name: string
   ): Promise<RegistrationDetails> => {
     return executeWithLogging(async () => {
-      const res = await ServiceApi._instance.registrarQueryActor.get_details(
-        name
-      );
+      const res = await this.registrarQueryActor.get_details(name);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -407,8 +378,7 @@ export class ServiceApi {
     name: string
   ): Promise<Array<[string, string]>> => {
     return executeWithLogging(async () => {
-      const res =
-        await ServiceApi._instance.resolverQueryActor.get_record_value(name);
+      const res = await this.resolverQueryActor.get_record_value(name);
       // console.log('get_record_value', res)
       if ("Ok" in res) {
         return res.Ok;
@@ -423,8 +393,7 @@ export class ServiceApi {
   // get details of name  registry
   public getRegistryDetailsOfName = (name: string): Promise<RegistryDto> => {
     return executeWithLogging(async () => {
-      const res: any =
-        await ServiceApi._instance.registryQueryActor.get_details(name);
+      const res: any = await this.registryQueryActor.get_details(name);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -444,12 +413,11 @@ export class ServiceApi {
     return executeWithLogging(async () => {
       let quota: number = 0;
       const quotaParsed: QuotaType = { LenGte: quotaType };
-      if (ServiceApi._instance.registrarUpdateActor !== undefined) {
-        const res: any =
-          await ServiceApi._instance.registrarUpdateActor?.get_quota(
-            user,
-            quotaParsed
-          );
+      if (this.registrarUpdateActor !== undefined) {
+        const res: any = await this.registrarUpdateActor?.get_quota(
+          user,
+          quotaParsed
+        );
         if ("Ok" in res) {
           quota = Number(res.Ok);
         } else {
@@ -466,9 +434,7 @@ export class ServiceApi {
   // get name details
   public getNameDetails = (name: string): Promise<any> => {
     return executeWithLogging(async () => {
-      const isAvailable = await ServiceApi._instance
-        .available(name)
-        .catch(() => false);
+      const isAvailable = await this.available(name).catch(() => false);
       // console.log('getNameDetails =========== isAvailable',isAvailable)
       if (isAvailable) {
         return {
@@ -481,8 +447,8 @@ export class ServiceApi {
         };
       } else {
         const values = await Promise.all([
-          ServiceApi._instance.getRegistrationDetailsOfName(name),
-          ServiceApi._instance.getRegistryDetailsOfName(name),
+          this.getRegistrationDetailsOfName(name),
+          this.getRegistryDetailsOfName(name),
         ]);
         return {
           name: name,
@@ -499,8 +465,7 @@ export class ServiceApi {
   // get favorite names
   public getFavoriteNames = (): Promise<Array<string>> => {
     return executeWithLogging(async () => {
-      const res: any =
-        await ServiceApi._instance.favoritesActor?.get_favorites();
+      const res: any = await this.favoritesActor?.get_favorites();
       console.log("favoritesActor.get_favorites", res);
       if ("Ok" in res) {
         return res.Ok;
@@ -513,9 +478,7 @@ export class ServiceApi {
   // add favorite name
   public addFavoriteName = (name: string): Promise<boolean> => {
     return executeWithLogging(async () => {
-      const res: any = await ServiceApi._instance.favoritesActor?.add_favorite(
-        name
-      );
+      const res: any = await this.favoritesActor?.add_favorite(name);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -527,8 +490,7 @@ export class ServiceApi {
   // remove favorite name
   public removeFavoriteName = (name: string): Promise<boolean> => {
     return executeWithLogging(async () => {
-      const res: any =
-        await ServiceApi._instance.favoritesActor?.remove_favorite(name);
+      const res: any = await this.favoritesActor?.remove_favorite(name);
       if ("Ok" in res) {
         return res.Ok;
       } else {
@@ -537,7 +499,3 @@ export class ServiceApi {
     }, "removeFavoriteName");
   };
 }
-
-ServiceApi.initialize();
-const serviceApi = (async () => await ServiceApi.initialize())();
-export default serviceApi;

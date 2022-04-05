@@ -5,7 +5,7 @@ import styles from '../assets/styles/Search.module.scss'
 import { Container, Tab, Tabs } from 'react-bootstrap';
 import { Principal } from '@dfinity/principal';
 import { useAuthWallet } from '../context/AuthWallet';
-import serviceApi from '../utils/ServiceApi';
+import ServiceApi from '../utils/ServiceApi';
 import dateFormat from "dateformat";
 import { IC_EXTENSION } from '../utils/config';
 import { CanisterError } from '../utils/exception';
@@ -52,7 +52,7 @@ export const Search = (props) => {
 		if (available) {
 			expireAt = '';
 		} else {
-			await (await serviceApi).expireAtOf(searchName).then(res => {
+			await (await ServiceApi.getInstance()).expireAtOf(searchName).then(res => {
 				if (res) {
 					expireAt = 'Expires ' + dateFormat(new Date(res), "isoDateTime")
 				}
@@ -78,7 +78,7 @@ export const Search = (props) => {
 		}
 		setPendingOrderLoading(true);
 		try {
-			const res = await (await serviceApi).getPendingOrder();
+			const res = await (await ServiceApi.getInstance()).getPendingOrder();
 			if (res[0]) {
 				return res[0];
 			}
@@ -100,9 +100,9 @@ export const Search = (props) => {
 					return myFavoriteNamesStorage;
 				} else {
 					return await queryWithCache(async () => {
-						const favoriteNamesSevice = await (await serviceApi).getFavoriteNames()
+						const favoriteNamesSevice = await (await ServiceApi.getInstance()).getFavoriteNames()
 						localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
-						return (await serviceApi).getFavoriteNames();
+						return (await ServiceApi.getInstance()).getFavoriteNames();
 					}, 'myNamesOfFavorite' + authWallet.wallet.accountId);
 				}
 			} else {
@@ -135,7 +135,7 @@ export const Search = (props) => {
 					searchName = `${word}${IC_EXTENSION}`
 				}
 				try {
-					const [userPendingOrder, available] = await Promise.all([getPendingOrder(), (await serviceApi).available(searchName)]);
+					const [userPendingOrder, available] = await Promise.all([getPendingOrder(), (await ServiceApi.getInstance()).available(searchName)]);
 					if (userPendingOrder?.name === searchName) {
 						setExistPendingOrderInfo(userPendingOrder);
 						setLoading(false);
@@ -156,7 +156,7 @@ export const Search = (props) => {
 			else {
 				let getNamesOfRegistrantLoaded = false;
 				let getNamesOfControllerLoaded = false;
-				(await serviceApi).getNamesOfRegistrant(word).then(async res => {
+				(await ServiceApi.getInstance()).getNamesOfRegistrant(word).then(async res => {
 					console.log("search address result of registation", res)
 					// for each res ,map it to NameModel
 					let myNamesOfFavorite = await getMyFavourites()
@@ -178,7 +178,7 @@ export const Search = (props) => {
 					console.log(err)
 					setLoading(false)
 				});
-				(await serviceApi).getNamesOfController(word).then(async res => {
+				(await ServiceApi.getInstance()).getNamesOfController(word).then(async res => {
 					console.log("search address result of controller", res)
 					// for each res ,map it to NameModel
 

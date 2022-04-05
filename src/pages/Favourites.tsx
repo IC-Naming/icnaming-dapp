@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Card, CopyToClipboard } from "../components";
 import styles from '../assets/styles/Search.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
-import serviceApi from '../utils/ServiceApi';
+import ServiceApi from '../utils/ServiceApi';
 import dateFormat from "dateformat";
 import { queryWithCache } from '../utils/localCache';
 import { Container } from 'react-bootstrap';
@@ -22,9 +22,9 @@ export const Favourites = () => {
     } else {
       console.log('origin serivce api');
       return await queryWithCache(async () => {
-        const favoriteNamesSevice = await (await serviceApi).getFavoriteNames()
+        const favoriteNamesSevice = await (await ServiceApi.getInstance()).getFavoriteNames()
         localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
-        return (await serviceApi).getFavoriteNames();
+        return (await ServiceApi.getInstance()).getFavoriteNames();
       }, 'myNamesOfFavorite' + authWallet.wallet?.accountId);
     }
   }
@@ -35,13 +35,13 @@ export const Favourites = () => {
       if (authWallet.wallet?.principalId) {
         let myNamesOfFavorite = await getMyFavourites()
         const myFavoriteNamesWithExpireAt = myNamesOfFavorite.map(async (item: string) => {
-          const isMyAccount = await (await serviceApi).getRegistrantOfName(item) || false;
-          const available = await (await serviceApi).available(item).catch(err => {
+          const isMyAccount = await (await ServiceApi.getInstance()).getRegistrantOfName(item) || false;
+          const available = await (await ServiceApi.getInstance()).available(item).catch(err => {
             if (err instanceof CanisterError) 
             console.log(err)
             return false;
           });
-          const expireAtOfName = !available ? await (await serviceApi).expireAtOf(item) : 0;
+          const expireAtOfName = !available ? await (await ServiceApi.getInstance()).expireAtOf(item) : 0;
           return {
             name: item,
             available: available,

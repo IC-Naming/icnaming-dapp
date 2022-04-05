@@ -5,7 +5,7 @@ import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { ModalTipFull } from "./ModalTipFull";
 import { useMyInfo } from "../context/MyInfo";
-import serviceApi from "../utils/ServiceApi";
+import ServiceApi from "../utils/ServiceApi";
 import { CanisterError } from "utils/exception";
 import { Modal } from "@douyinfe/semi-ui";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
@@ -21,8 +21,8 @@ export const CancelOrderIcp: React.FC<CancelOrderIcpProps> = ({ name }) => {
   const cancelRegisterOrder = async () => {
     if (loading) return
     setLoading(true)
-    setVisiableModalTipFull(true)
-    ;(await serviceApi).cancelRegisterOrder().then(res => {
+    setVisiableModalTipFull(true);
+    (await ServiceApi.getInstance()).cancelRegisterOrder().then(res => {
       if (res) {
         setLoading(false)
         setVisiableModalTipFull(false)

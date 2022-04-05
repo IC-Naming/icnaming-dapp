@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react'
 import { useHistory, useLocation } from "react-router-dom";
 import styles from '../assets/styles/Card.module.scss'
-import serviceApi from '../utils/ServiceApi'
+import ServiceApi from '../utils/ServiceApi'
 import { useAuthWallet } from '../context/AuthWallet';
 import { deleteCache } from '../utils/localCache';
 import { Spinner } from 'react-bootstrap';
@@ -42,7 +42,7 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
   const addFavorite = async (e) => {
     SetIsFavorite(!isFavorite)
     changeLocalFavorite(name)
-    ;(await serviceApi).addFavoriteName(name).then(res => {
+    ;(await ServiceApi.getInstance()).addFavoriteName(name).then(res => {
       if (res) {
         console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
         deleteCache('favoriteall' + authWallet.wallet)
@@ -57,7 +57,7 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
   const removeFavorite = async (e) => {
     SetIsFavorite(!isFavorite)
     changeLocalFavorite(name)
-    ;(await serviceApi).removeFavoriteName(name).then(res => {
+    ;(await ServiceApi.getInstance()).removeFavoriteName(name).then(res => {
       if (res) {
         console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
         deleteCache('favoriteall' + authWallet.wallet)

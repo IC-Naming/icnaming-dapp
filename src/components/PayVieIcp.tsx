@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
-import serviceApi from "utils/ServiceApi";
+import ServiceApi from "utils/ServiceApi";
 import { deleteCache } from "../utils/localCache";
 import { CancelOrderIcp } from "components/CancelOrderIcp";
 import BigNumber from "bignumber.js";
@@ -78,7 +78,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				
 			} */
 			try {
-				let result = await (await serviceApi).confirmOrder(BigInt(blockHeight));
+				let result = await (await ServiceApi.getInstance()).confirmOrder(BigInt(blockHeight));
 				console.log('confirmOrder result', result)
 				if (result) {
 					result_status = ConfirmStatus.Success;
@@ -164,7 +164,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		setModalVisible(true)
 		try {
 			if (blockHeight === 0) {
-				const transfer_result: any = (await serviceApi).payledger(
+				const transfer_result: any = (await ServiceApi.getInstance()).payledger(
 					order[0].payment_account_id,
 					order[0].price_icp_in_e8s,
 					toICPe8s(order[0].payment_memo.ICP.toString())
@@ -198,9 +198,9 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 			const serviecOrderInfo: any = [];
 			let orderStatus = await (async () => {
 				let result_Status = OrderStatus.Available;
-				const [availableResult, orderResult] = await Promise.all([(await serviceApi).available(name).catch(err => {
+				const [availableResult, orderResult] = await Promise.all([(await ServiceApi.getInstance()).available(name).catch(err => {
 					console.log(err)
-				}), (await serviceApi).getPendingOrder()]);
+				}), (await ServiceApi.getInstance()).getPendingOrder()]);
 
 				if (orderResult.length !== 0) {
 					serviecOrderInfo.push(orderResult[0])
@@ -254,7 +254,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 			const orderInfoObj = JSON.parse(orderInfo)
 			checkOrder(orderInfoObj.name)
 		}
-	}, [authWallet.wallet, serviceApi])// eslint-disable-line react-hooks/exhaustive-deps
+	}, [authWallet.wallet])// eslint-disable-line react-hooks/exhaustive-deps
 
 	const retryToConfirm = () => {
 		if (confirmAgain) return

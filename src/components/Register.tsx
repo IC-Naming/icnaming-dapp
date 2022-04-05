@@ -3,7 +3,7 @@ import { Row, Col, Spinner } from "react-bootstrap";
 import styles from '../assets/styles/Name.module.scss'
 import { useAuthWallet } from "../context/AuthWallet";
 import { useMyInfo } from "../context/MyInfo";
-import serviceApi from "../utils/ServiceApi";
+import ServiceApi from "../utils/ServiceApi";
 import { useHistory } from "react-router-dom";
 import { ConnectWallets } from ".";
 import { PendingOrderTip } from "./PendingOrderTip";
@@ -42,7 +42,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     } else {
       if (regname.split('.')[0].length >= btnNamelen) {
         setLoadingSubmit(true)
-        ;(await serviceApi).submitRegisterOrder(regname, 1).then(res => {
+        ;(await ServiceApi.getInstance()).submitRegisterOrder(regname, 1).then(res => {
           if (res) {
             setLoadingSubmit(false)
             myInfo.createOrder({

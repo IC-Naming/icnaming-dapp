@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from 'react-router-dom';
 import { SearchInput, CopyToClipboard, Record, Register, ConnectWallets } from "../components";
 import styles from "../assets/styles/Name.module.scss";
-import serviceApi, { NameDetails } from "../utils/ServiceApi";
+import ServiceApi, { NameDetails } from "../utils/ServiceApi";
 import { queryWithCache } from '../utils/localCache';
 import { CanisterError } from "../utils/exception";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
@@ -52,7 +52,7 @@ export const Name = (props) => {
 			let getNameDetailsLoaded = false;
 			let getRecordsOfNameLoaded = false;
 			(async () => {
-				(await serviceApi).getNameDetails(name).then(res => {
+				(await ServiceApi.getInstance()).getNameDetails(name).then(res => {
 					// console.log('details', res)
 					setNameDetails(res);
 					getNameDetailsLoaded = true;
@@ -69,7 +69,7 @@ export const Name = (props) => {
 			})();
 			queryWithCache(() => {
 				return new Promise(async (resolve, reject) => {
-					(await serviceApi).getRecordsOfName(name).then(data => {
+					(await ServiceApi.getInstance()).getRecordsOfName(name).then(data => {
 						resolve(data)
 					}).catch(errs => {
 						reject(errs)
