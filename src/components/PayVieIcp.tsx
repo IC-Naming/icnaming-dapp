@@ -5,6 +5,7 @@ import { useHistory } from "react-router-dom";
 import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
+import { createLedgerActor } from "utils/canisters/ledger";
 import ServiceApi from "../utils/ServiceApi";
 import { deleteCache } from "../utils/localCache";
 import { CancelOrderIcp } from "components/CancelOrderIcp";
@@ -22,17 +23,36 @@ interface IcpPayProps {
 	checkRefund: () => void;
 }
 
+const toICPe8s = (source: string): bigint => {
+	if (!source) {
+		return BigInt(0);
+	}
+	// replace all _  to empty string
+	const str = source.replace(/_/g, "").toLowerCase();
+	// treat as icp if icp in string
+	if (str.includes("icp")) {
+		// remove icp and convert to bigint
+		return BigInt(parseFloat(str.replace("icp", "")) * 100_000_000);
+	} else {
+		// convert to bigint
+		return BigInt(str);
+	}
+}
+
 export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => {
 	const history = useHistory();
 	const serviceApi = new ServiceApi();
+	const ledgerActor = createLedgerActor();
 	const { ...authWallet } = useAuthWallet();
 	const { ...myInfo } = useMyInfo();
 	const [modalVisible, setModalVisible] = useState<boolean>(false)
+	const [stoicVisible, setStoicVisible] = useState<boolean>(false)
 	const [checkOrderIng, setCheckOrderIng] = useState<boolean>(false)
 	const [nameAvailable, setNameAvailable] = useState<boolean>(false)
 	const [paymentInfo, setPaymentInfo] = useState<any>({ paymentAccountId: 0, paymentMemo: 0, years: 1, priceIcp: 0, cycles: 2 })
 	const [order, setOrder] = useState<any>([])
 	const [payIng, setPayIng] = useState<boolean>(false)
+	const [stoicPayIng, setStoicPayIng] = useState<boolean>(false)
 	const [paymentResult, setPaymentResult] = useState<boolean>(false)
 
 	const [blockHeight, setBlockHeight] = useState<number>(0)
@@ -55,22 +75,22 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		console.assert(blockHeight > 0, 'blockHeight must be greater than 0');
 		// get confirm status
 		let confirmStatus = await (async () => {
-			const max_retry = 3;
 			let result_status = ConfirmStatus.Success;
+			/* const max_retry = 2;
 			for (let i = 0; i < max_retry; i++) {
-				try {
-					let result = await serviceApi.confirmOrder(BigInt(blockHeight));
-					console.log('confirmOrder result',result)
-					if (result) {
-						result_status = ConfirmStatus.Success;
-						break;
-					} else {
-						result_status = ConfirmStatus.Fail;
-					}
-				} catch (error) {
-					console.error(`exception when confirm order: ${error}`);
-					return ConfirmStatus.Exception;
+				
+			} */
+			try {
+				let result = await serviceApi.confirmOrder(BigInt(blockHeight));
+				console.log('confirmOrder result', result)
+				if (result) {
+					result_status = ConfirmStatus.Success;
+				} else {
+					result_status = ConfirmStatus.Fail;
 				}
+			} catch (error) {
+				console.error(`exception when confirm order: ${error}`);
+				result_status = ConfirmStatus.Exception;
 			}
 			return result_status;
 		})();
@@ -98,42 +118,84 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 
 	useEffect(() => {
 		if (blockHeight !== 0) { confirmOrderFunction() };
-		return () => { setBlockHeight(0) };
+		// return () => { setBlockHeight(0) };
 	}, [blockHeight])// eslint-disable-line react-hooks/exhaustive-deps
+
+	const arrayToHex = (arr: Array<number>) => {
+		return arr.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"), "")
+	}
 
 	const payment = async () => {
 		if (payIng) return;
-		setPayIng(true)
-		setModalVisible(true)
-		console.log('payment..................', order)
-		const arrayToHex = (arr: Array<number>) => {
-			return arr.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"), "")
+
+		if (sessionStorage.getItem('walletType') === 'plug') {
+			setPayIng(true);
+			setModalVisible(true)
+			try {
+				if (blockHeight === 0) {
+					const payResult = await window.ic.plug.requestTransfer({
+						to: arrayToHex(order[0].payment_account_id),
+						amount: Number(order[0].price_icp_in_e8s),
+						opts: {
+							fee: 10000,
+							memo: order[0].payment_memo.ICP.toString(),
+						},
+					});
+					console.log(`Pay success: ${JSON.stringify(payResult)}`);
+					setBlockHeight(payResult.height)
+					setPayIng(false);
+					setPaymentResult(true);
+				}
+			} catch (err) {
+				setPayIng(false)
+				setPaymentResult(false)
+				console.log(`Payment failed: ${JSON.stringify(err)}`);
+				return
+			}
+		} else {
+			console.log('pay stoic');
+			setStoicVisible(true)
 		}
+	}
+
+
+	const payStoic = async () => {
+		if (stoicPayIng) return;
+		setStoicPayIng(true);
+		setStoicVisible(false)
+		setPayIng(true);
+		setModalVisible(true)
 		try {
 			if (blockHeight === 0) {
-				const payResult = await window.ic.plug.requestTransfer({
-					to: arrayToHex(order[0].payment_account_id),
-					amount: Number(order[0].price_icp_in_e8s),
-					opts: {
-						fee: 10000,
-						memo: order[0].payment_memo.ICP.toString(),
+				const transfer_result: any = await ledgerActor.transfer({
+					amount: {
+						e8s: order[0].price_icp_in_e8s
 					},
-				});
-				console.log(`Pay success: ${JSON.stringify(payResult)}`);
-				setBlockHeight(payResult.height)
+					memo: toICPe8s(order[0].payment_memo.ICP.toString()),
+					to: order[0].payment_account_id,
+					fee: {
+						e8s: BigInt(10_000),
+					},
+					created_at_time: [],
+					from_subaccount: []
+				})
+				console.log(`Pay success: ${transfer_result.Ok}`);
+				setBlockHeight(transfer_result.Ok)
+				setStoicPayIng(false);
 				setPayIng(false);
 				setPaymentResult(true);
 			}
-		} catch (err) {
+		} catch (error) {
+			setStoicPayIng(false)
 			setPayIng(false)
 			setPaymentResult(false)
-			console.log(`Payment failed: ${JSON.stringify(err)}`);
+			console.log(`Payment failed: ${JSON.stringify(error)}`);
 			return
 		}
 	}
 
 	const checkOrder = async (name) => {
-		console.log('checkOrder start',name)
+		console.log('checkOrder start', name)
 		setCheckOrderIng(true)
 		enum OrderStatus {
 			Available,
@@ -197,13 +259,17 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 
 	useEffect(() => {
 		const orderInfo = localStorage.getItem('orderInfo');
-		if(orderInfo){
+		if (orderInfo) {
 			const orderInfoObj = JSON.parse(orderInfo)
 			checkOrder(orderInfoObj.name)
 		}
 	}, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
 
-
+	const retryToConfirm = () => {
+		if(confirmAgain) return
+		setConfirmAgain(true)
+		checkOrder(myInfo.orderInfo.name)
+	}
 	return (
 		<React.Fragment>
 			{
@@ -216,7 +282,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 								<>
 									<Row>
 										<Col md={4} sm={12}>Registration Period </Col>
-										<Col md={4} sm={12}> 1 Years</Col>
+										<Col md={4} sm={12}> {paymentInfo.years} Years</Col>
 										<Col md={4} sm={12}></Col>
 									</Row>
 									<Row className="mb-5">
@@ -225,7 +291,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 										<Col md={4} sm={12}></Col>
 									</Row>
 								</> :
-
 								<div className={payStyles['order-info-msg']}>
 									The domain name is not available
 								</div>
@@ -234,12 +299,11 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 							<CancelOrderIcp name={orderInfo.name} />
 							{nameAvailable &&
 								blockHeight === 0 &&
-								<button className={`${styles.btn} ${payStyles['btn-pay-icp']}`} onClick={() => { payment() }}>
+								<button className={`${styles.btn} ${payStyles['btn-pay-icp']}`} onClick={payment}>
 									{modalVisible && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}Pay
 								</button>
 							}
 						</div>
-
 					</React.Fragment>
 			}
 			<Modal
@@ -300,10 +364,12 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 										Sorry, something error, please retry to confirm payment.
 									</div>
 									<div className="d-grid gap-2">
-										<button className={`${payStyles['btn']}  ${payStyles['btn-order']}`} disabled={confirmAgain} onClick={() => {
-											setConfirmAgain(true)
-											confirmOrderFunction()
-										}}>{confirmAgain && <Spin size="middle" />}Retry to confirm</button>
+										<button
+											className={`${payStyles['btn']}  ${payStyles['btn-order']}`}
+											disabled={confirmAgain}
+											onClick={retryToConfirm}>
+											{confirmAgain && <Spin size="middle" />}Retry to confirm
+										</button>
 									</div>
 								</React.Fragment>
 							}
@@ -321,6 +387,25 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 						</React.Fragment>
 				}
 			</Modal>
-		</React.Fragment>
+			<Modal
+				header={null}
+				footer={null}
+				visible={stoicVisible}
+				maskClosable={false}
+				className={payStyles['modal-wrap-stoicpay']}
+			>
+		
+				<div className={payStyles['modal-wrap-stoicpay-conent']}>
+					<h2>Please confirm that you are about to send</h2>
+					<h3>Amount: {paymentInfo.priceIcp} ICP</h3>
+					<div className={payStyles['modal-stoic-btn-wrap']}>
+						<button className={payStyles['btn']} onClick={() => { setStoicVisible(false) }}>Decline</button>
+						<button className={payStyles['btn']} onClick={payStoic}>
+							Confirm
+						</button>
+					</div>
+				</div>
+			</Modal>
+		</React.Fragment >
 	)
 }

@@ -14,12 +14,12 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-    "@dfinity/agent": "^0.10.1",
-    "@dfinity/auth-client": "^0.10.1",
-    "@dfinity/authentication": "^0.10.1",
-    "@dfinity/candid": "^0.10.1",
-    "@dfinity/identity": "^0.10.1",
-    "@dfinity/principal": "^0.10.1",
+    "@dfinity/agent": "^0.10.2",
+    "@dfinity/auth-client": "^0.10.2",
+    "@dfinity/authentication": "^0.10.2",
+    "@dfinity/candid": "^0.10.2",
+    "@dfinity/identity": "^0.10.2",
+    "@dfinity/principal": "^0.10.2",
     "@douyinfe/semi-ui": "^2.4.1",
     "bignumber.js": "9.0.2",
     "bootstrap": "^5.1.3",
@@ -55,8 +55,7 @@
     "jest-localstorage-mock": "^2.4.16",
     "test-console": "^1.1.0",
     "typescript": "^4.4.3",
-    "typescript-plugin-css-modules": "^3.4.0",
-    "vconsole": "^3.14.2"
+    "typescript-plugin-css-modules": "^3.4.0"
   },
   "eslintConfig": {
     "extends": [

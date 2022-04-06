@@ -54,7 +54,8 @@
 }
 .card-left{
   @include flex(row,flex-start,center,nowrap);
-  width: 60%;
+  @include no-wrap;
+  // width: 60%;
 }
 .add-favorite{
   margin-right: .8rem;
@@ -77,9 +78,10 @@
   border: 1px solid #00CFBB;
   font-size: 12px;
   text-transform: uppercase;
-  padding: .4rem .5rem;
+  padding: 0 .5rem;
   display: block;
   transition: all .3s;
+  outline: none;
   &:hover{
     background: rgba(0, 255, 230, 0.3);
       border: 1px solid #00FFE6;

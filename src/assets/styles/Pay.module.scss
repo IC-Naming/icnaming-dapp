@@ -155,6 +155,46 @@
     }
   }
 }
+
+.modal-wrap-stoicpay{
+ 
+  :global{
+    .semi-modal-content{
+      background: linear-gradient(180deg, #334773 0%, #1C2A4A 100%) !important;
+      padding-bottom: 1.5rem;
+    }
+    .semi-modal-body{
+      min-height: 200px;
+    }
+  }
+  .modal-wrap-stoicpay-conent{
+    color: #fff;
+    display: flex;
+    padding-top: 1.6rem;
+    justify-content: space-between;
+    flex-direction: column;
+    align-items: center;
+    height: 180px;
+    h2,h3{
+      text-align: center;
+    }
+    h2{
+      font-size: 1.2rem;
+    }
+    h3{
+      color: #00FFE6;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 1rem 0;
+    }
+  }
+  .modal-stoic-btn-wrap{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 0.5rem;
+  }
+}
+
 @media screen and (min-width: 576px){
   .btn-pay-wrap{
     flex-direction: row;
