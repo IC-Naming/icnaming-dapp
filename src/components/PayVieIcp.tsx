@@ -117,7 +117,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	}
 
 	useEffect(() => {
-		if (blockHeight !== 0) { confirmOrderFunction() };
+		if (blockHeight !== undefined && blockHeight > 0) { confirmOrderFunction() };
 		// return () => { setBlockHeight(0) };
 	}, [blockHeight])// eslint-disable-line react-hooks/exhaustive-deps
 
@@ -142,9 +142,13 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 						},
 					});
 					console.log(`Pay success: ${JSON.stringify(payResult)}`);
-					setBlockHeight(payResult.height)
+					if (payResult !== undefined) {
+						setBlockHeight(payResult.height)
+						setPaymentResult(true);
+					} else {						
+						setPaymentResult(false)
+					}
 					setPayIng(false);
-					setPaymentResult(true);
 				}
 			} catch (err) {
 				setPayIng(false)
@@ -179,11 +183,15 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 					created_at_time: [],
 					from_subaccount: []
 				})
-				console.log(`Pay success: ${transfer_result.Ok}`);
-				setBlockHeight(transfer_result.Ok)
+				if (transfer_result.Ok !== undefined) {
+					console.log(`StoicPay success: ${transfer_result.Ok}`);
+					setBlockHeight(transfer_result.Ok)					
+					setPaymentResult(true);
+				} else {
+					setPaymentResult(false)
+				}
 				setStoicPayIng(false);
 				setPayIng(false);
-				setPaymentResult(true);
 			}
 		} catch (error) {
 			setStoicPayIng(false)
@@ -266,7 +274,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	}, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
 
 	const retryToConfirm = () => {
-		if(confirmAgain) return
+		if (confirmAgain) return
 		setConfirmAgain(true)
 		checkOrder(myInfo.orderInfo.name)
 	}
@@ -394,7 +402,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				maskClosable={false}
 				className={payStyles['modal-wrap-stoicpay']}
 			>
-		
+
 				<div className={payStyles['modal-wrap-stoicpay-conent']}>
 					<h2>Please confirm that you are about to send</h2>
 					<h3>Amount: {paymentInfo.priceIcp} ICP</h3>
