@@ -402,7 +402,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				maskClosable={false}
 				className={payStyles['modal-wrap-stoicpay']}
 			>
-
 				<div className={payStyles['modal-wrap-stoicpay-conent']}>
 					<h2>Please confirm that you are about to send</h2>
 					<h3>Amount: {paymentInfo.priceIcp} ICP</h3>
