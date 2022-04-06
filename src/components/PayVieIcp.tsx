@@ -54,12 +54,10 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	const [payIng, setPayIng] = useState<boolean>(false)
 	const [stoicPayIng, setStoicPayIng] = useState<boolean>(false)
 	const [paymentResult, setPaymentResult] = useState<boolean>(false)
-
 	const [blockHeight, setBlockHeight] = useState<number>(0)
 	const [confirmIng, setConfirmIng] = useState<boolean>(true)
 	const [confirmAgain, setConfirmAgain] = useState<boolean>(false)
 	const [confirmStatus, setConfirmStatus] = useState<'success' | 'fail' | 'exception'>('success')
-
 	/**
 	 * try to confirm order payment for several times
 	 * go to my account when it confirms success
@@ -76,10 +74,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		// get confirm status
 		let confirmStatus = await (async () => {
 			let result_status = ConfirmStatus.Success;
-			/* const max_retry = 2;
-			for (let i = 0; i < max_retry; i++) {
-				
-			} */
+			/* const max_retry = 2;for (let i = 0; i < max_retry; i++) {} */
 			try {
 				let result = await serviceApi.confirmOrder(BigInt(blockHeight));
 				console.log('confirmOrder result', result)
@@ -127,7 +122,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 
 	const payment = async () => {
 		if (payIng) return;
-
 		if (sessionStorage.getItem('walletType') === 'plug') {
 			setPayIng(true);
 			setModalVisible(true)
@@ -145,7 +139,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 					if (payResult !== undefined) {
 						setBlockHeight(payResult.height)
 						setPaymentResult(true);
-					} else {						
+					} else {
 						setPaymentResult(false)
 					}
 					setPayIng(false);
@@ -183,9 +177,10 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 					created_at_time: [],
 					from_subaccount: []
 				})
+				console.log('Stoic transfer_result', transfer_result);
 				if (transfer_result.Ok !== undefined) {
 					console.log(`StoicPay success: ${transfer_result.Ok}`);
-					setBlockHeight(transfer_result.Ok)					
+					setBlockHeight(transfer_result.Ok)
 					setPaymentResult(true);
 				} else {
 					setPaymentResult(false)
