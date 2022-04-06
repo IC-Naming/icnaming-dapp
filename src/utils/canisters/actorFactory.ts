@@ -2,6 +2,8 @@ import { Actor, ActorSubclass, HttpAgent, Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { WalletResponse, WalletType } from "utils/connector";
 import { IC_HOST, isLocalEnv } from "utils/config";
+// import { createAgent, createActor } from "utils/icpbox/agent";
+import icpbox from "utils/icpbox";
 declare const window: any;
 class ActorFactory {
   private static _instance: ActorFactory = new ActorFactory();
@@ -15,9 +17,9 @@ class ActorFactory {
   async createActor<T>(
     canisterDid: any,
     canisterId: string | Principal
-  ): Promise<ActorSubclass<T> | undefined> {
+  ): Promise<ActorSubclass<T>> {
     switch (ActorFactory._wallet?.type) {
-      case WalletType.Nns: {
+      case WalletType.II: {
         const agent = this.getAgent(ActorFactory._wallet.identity);
         if (isLocalEnv()) {
           agent.fetchRootKey().catch(console.error);
@@ -40,8 +42,17 @@ class ActorFactory {
           canisterId,
         });
       }
+      case WalletType.Icpbox: {
+        let actor;
+        await icpbox.createActor({
+          canisterId: canisterId,
+          interfaceFactory: canisterDid,
+        }).then((a) => {
+          actor = a;
+        })
+        return actor;
+      }
       default:
-        console.log("default switch");
         return this.createActorWithAnonymousIdentity(canisterDid, canisterId);
     }
   }

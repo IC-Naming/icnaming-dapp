@@ -55,7 +55,6 @@ function useProvideMyInfo() {
 	const getMyQuotas = async () => {
 		const get_MyQuotas = async (user: Principal) => {
 			const [quota4, quota5, quota6, quota7] = await Promise.all([
-				
 				(await ServiceApi.getInstance()).getQuota(user, 4),
 				(await ServiceApi.getInstance()).getQuota(user, 5),
 				(await ServiceApi.getInstance()).getQuota(user, 6),
@@ -69,7 +68,7 @@ function useProvideMyInfo() {
 				localStorage.setItem('myQuotas', JSON.stringify(res))
 				setQuotas(res)
 			} catch (error) {
-				console.log('get_MyQuotas', error)
+				console.log('myInfo get_MyQuotas', error)
 				/* authWallet.disconnectWallet()
 				authWallet.setAuthErr({ err: true, desc: 'There was an error - please ensure you have Cookies Enabled' }) */
 			}
@@ -92,16 +91,15 @@ function useProvideMyInfo() {
 			} else {
 				setPendingOrder(false)
 			}
-		})/* .catch(error => {
+		}).catch(error => {
 			console.log('getPendingOrder', error)
-			authWallet.disconnectWallet()
-			authWallet.setAuthErr({err:true,desc:'There was an error - please ensure you have Cookies Enabled'})
-		}) */
+			/* authWallet.disconnectWallet()
+			authWallet.setAuthErr({err:true,desc:'There was an error - please ensure you have Cookies Enabled'}) */
+		})
 	}
 
 	useEffect(() => {
 		if (authWallet.wallet?.principalId) {
-			console.log(authWallet.wallet.accountId)
 			checkPendingOrder();
 			getMyQuotas();
 		}

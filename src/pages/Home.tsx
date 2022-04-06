@@ -1,6 +1,6 @@
 import { SearchInput } from "../components";
 import styles from '../assets/styles/Home.module.scss';
-import icpbox from 'utils/icpboxts'
+import icpbox from 'utils/icpbox'
 import { idlFactory as registrarIDL } from "utils/canisters/registrar/did";
 import { REGISTRAR_ID } from "utils/canisters/registrar/canisterId";
 
@@ -14,6 +14,7 @@ export const Home = () => {
     const icpboxConnected: any = await icpbox.isConnected();
     alert('isConnected:' + icpboxConnected.result)
   }
+
   let principalId;
   const auth = async () => {
     try {
@@ -25,24 +26,6 @@ export const Home = () => {
       console.log("auth ok: ", data, icpbox.publicKey);
     } catch (error) {
       console.log("error: ", error);
-    }
-  };
-
-  const pay = async function () {
-    const icpboxConnected: any = await icpbox.isConnected();
-    if (icpboxConnected.result !== true) {
-      alert('no auth')
-    } else {
-      try {
-        const payResult = await icpbox.pay({
-          amount: "0.0001",
-          to: "63561c8164fb6f462b7a2acfd6304f54991a0eaae5b4182a5c67b6610274ba08",
-          memo: "123456",
-        });
-        console.log('paydata', payResult)
-      } catch (error) {
-        console.log(error);
-      }
     }
   };
 
@@ -61,6 +44,26 @@ export const Home = () => {
       console.log("error: ", error);
     }
   };
+
+  const pay = async function () {
+    const icpboxConnected: any = await icpbox.isConnected();
+    if (icpboxConnected.result !== true) {
+      alert('no auth')
+    } else {
+      try {
+        const payResult = await icpbox.pay({
+          amount: "0.0001",
+          to: "63561c8164fb6f462b7a2acfd6304f54991a0eaae5b4182a5c67b6610274ba08",
+          memo: "123456",          
+        });
+        console.log('paydata', payResult)
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
+ 
 
   const btnstyle = {
     color: '#fff', backgroundColor: '#07c160', border: 'none', fontSize: 12, width: '40%', height: 30, display: 'block', borderRadius: '5px',

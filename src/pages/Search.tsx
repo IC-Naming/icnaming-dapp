@@ -46,7 +46,6 @@ export const Search = (props) => {
 	}
 
 	const creatNameSearchResult = useCallback(async (searchName, available) => {
-		console.log('creatNameSearchResult start..........')
 		// let expireAt = available ? '' : 'Expires ' + dateFormat(new Date(await serviceApi.expireAtOf(searchName)), "isoDateTime")
 		let expireAt = '';
 		if (available) {
@@ -67,7 +66,7 @@ export const Search = (props) => {
 			const myFavoriteNames = JSON.parse(localStorage.getItem('myFavoriteNames') || '[]');
 			fav = myFavoriteNames.some(item => item === searchName);
 		}
-		console.log({ name: searchName, available: available, expireAt, favorite: fav })
+		// console.log({ name: searchName, available: available, expireAt, favorite: fav })
 		setNameSearchResult({ name: searchName, available: available, expireAt, favorite: fav })
 		setLoading(false)
 	}, [authWallet.wallet]);

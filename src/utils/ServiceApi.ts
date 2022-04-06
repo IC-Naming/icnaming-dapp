@@ -46,15 +46,15 @@ export interface NameDetails {
 
 export default class ServiceApi {
   private registrarQueryActor!: RegistrarActor;
-  private registrarUpdateActor!: RegistrarActor | undefined;
+  private registrarUpdateActor: RegistrarActor | undefined;
   private whiteListQueryActor!: WhiteListActor;
   private registryQueryActor!: RegistryActor;
   private resolverQueryActor!: ResolverActor;
-  private resolverUpdateActor!: ResolverActor | undefined;
-  private favoritesActor!: FavoritesActor | undefined;
-  private ledgerActor!: LedgerActor | undefined;
+  private resolverUpdateActor: ResolverActor | undefined;
+  private favoritesActor: FavoritesActor | undefined;
+  private ledgerActor: LedgerActor | undefined;
 
-  private constructor() {}
+  private constructor() { }
 
   public static async getInstance() {
     let instance = new ServiceApi();
@@ -69,7 +69,7 @@ export default class ServiceApi {
     return instance;
   }
 
-  public async initializeAfterAuth() {}
+  public async initializeAfterAuth() { }
 
   public async payledger(
     payment_account_id: any,
@@ -207,25 +207,6 @@ export default class ServiceApi {
         throw new CanisterError(res.Err);
       }
     }, "refundOrder");
-  };
-
-  // get pending order
-  public getPendingOrder = (): Promise<[] | [GetNameOrderResponse]> => {
-    return executeWithLogging(async () => {
-      let pendingOrder: [GetNameOrderResponse] | [] = [];
-      if (this.registrarUpdateActor !== undefined) {
-        const res: any = await this.registrarUpdateActor?.get_pending_order();
-        console.log("get_pending_order", res);
-        if ("Ok" in res) {
-          pendingOrder = res.Ok;
-        } else {
-          throw new CanisterError(res.Err);
-        }
-        return pendingOrder;
-      } else {
-        throw new Error("registrarUpdateActor is undefined");
-      }
-    }, "getPendingOrder");
   };
 
   // confirm order
@@ -408,26 +389,39 @@ export default class ServiceApi {
     }, "getRegistryDetailsOfName");
   };
 
+  // get pending order
+  public getPendingOrder = (): Promise<[] | [GetNameOrderResponse]> => {
+    return executeWithLogging(async () => {
+      let pendingOrder: [GetNameOrderResponse] | [] = [];
+      const res: any = await this.registrarUpdateActor?.get_pending_order();
+      console.log("get_pending_order", res);
+      if ("Ok" in res) {
+        pendingOrder = res.Ok;
+      } else {
+        throw new CanisterError(res.Err);
+      }
+      return pendingOrder;
+    }, "getPendingOrder");
+  };
+
   // get quota
   public getQuota = (user: Principal, quotaType: number): Promise<number> => {
+    console.log({'service getquota user':user})
     return executeWithLogging(async () => {
       let quota: number = 0;
       const quotaParsed: QuotaType = { LenGte: quotaType };
-      if (this.registrarUpdateActor !== undefined) {
-        const res: any = await this.registrarUpdateActor?.get_quota(
-          user,
-          quotaParsed
-        );
-        if ("Ok" in res) {
-          quota = Number(res.Ok);
-        } else {
-          quota = 0;
-          throw new CanisterError(res.Err);
-        }
-        return quota;
+      const res: any = await this.registrarUpdateActor?.get_quota(
+        user,
+        quotaParsed
+      );
+      console.log('get_quota', res)
+      if ("Ok" in res) {
+        quota = Number(res.Ok);
       } else {
-        throw new Error("registrarUpdateActor is undefined");
+        quota = 0;
+        throw new CanisterError(res.Err);
       }
+      return quota;
     }, "getQuota");
   };
 

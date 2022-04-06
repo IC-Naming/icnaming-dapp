@@ -2,14 +2,18 @@ import { HttpAgent, Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import { Principal } from "@dfinity/principal";
 import { StoicIdentity } from "utils/ic-stoic-identity";
+import icpbox from "utils/icpbox";
+import { createAgent } from "utils/icpbox/agent";
 import { IC_HOST } from "../config";
 import { WalletConnectError, WalletConnectErrorCode } from "../exception";
 import { principalToAccountID } from "../helper";
+import { idlFactory } from "utils/canisters/registrar/did";
 declare const window: any;
 export enum WalletType {
-  Nns,
+  II,
   Plug,
   Stoic,
+  Icpbox,
   AstroX,
 }
 
@@ -22,18 +26,16 @@ export interface WalletResponse {
 }
 
 export class WalletConnector {
-  public static connect = (
-    walletType: WalletType,
-    whitelist: Array<string>
-  ) => {
-
+  public static connect = (walletType: WalletType, whitelist: Array<string>) => {
     switch (walletType) {
-      case WalletType.Nns:
+      case WalletType.II:
         return connectII();
       case WalletType.Plug:
         return connectPlugWallet(whitelist);
       case WalletType.Stoic:
         return connectStoicWallet();
+      case WalletType.Icpbox:
+        return connectIcpboxWallet(whitelist);
       case WalletType.AstroX:
         throw new WalletConnectError(
           WalletConnectErrorCode.AstorXConnectFailed,
@@ -54,12 +56,14 @@ export class WalletConnector {
     sessionStorage.removeItem("walletType");
     sessionStorage.removeItem("orderInfo");
     switch (walletType) {
-      case WalletType.Nns:
+      case WalletType.II:
         return disconnectII();
       case WalletType.Plug:
         return disconnectPlugWallet();
       case WalletType.Stoic:
         return disconnectStoicWallet();
+      case WalletType.Icpbox:
+        return disconnectIcpboxWallet();
       case WalletType.AstroX:
         throw new WalletConnectError(
           WalletConnectErrorCode.AstorXConnectFailed,
@@ -148,7 +152,7 @@ const connectII = async (): Promise<WalletResponse | undefined> => {
         const identity = await authClient.getIdentity();
         const accountId = principalToAccountID(identity.getPrincipal());
         resolve({
-          type: WalletType.Nns,
+          type: WalletType.II,
           principalId: identity.getPrincipal(),
           accountId,
           identity,
@@ -159,7 +163,7 @@ const connectII = async (): Promise<WalletResponse | undefined> => {
             const identity = await authClient.getIdentity();
             const accountId = principalToAccountID(identity.getPrincipal());
             resolve({
-              type: WalletType.Nns,
+              type: WalletType.II,
               principalId: identity.getPrincipal(),
               accountId,
               identity,
@@ -181,6 +185,53 @@ const connectII = async (): Promise<WalletResponse | undefined> => {
   });
 };
 
+const connectIcpboxWallet = async (whitelist: string[]) => {
+  try {
+    const icpboxConnected: { result: any; status: string } = await icpbox.isConnected();
+    console.log('icpboxConnected', icpboxConnected.result);
+    if (icpboxConnected.result === true && sessionStorage.getItem('connectStatus') === 'connected') {
+      const localauthData: any = localStorage.getItem('icpboxAuth');
+      const auth_data = JSON.parse(localauthData)
+      icpbox.setPublickKey(auth_data.publicKey);
+      const accountId = principalToAccountID(Principal.fromText(auth_data.principal));
+      const principalId = Principal.fromText(auth_data.principal);
+      const agent = await createAgent(
+        auth_data.publicKey,
+        {whitelist: whitelist},
+        idlFactory
+      );
+      console.log('local principal', Principal.fromText(auth_data.principal))
+      return {
+        type: WalletType.Icpbox,
+        principalId,
+        accountId,
+        agent
+      };
+    } else {
+      console.log('auto authorize')
+      const authData: any = await icpbox.authorize({ canisters: whitelist });
+      console.log("auth ok: ", authData);
+      icpbox.setPublickKey(authData.publicKey);
+      const accountId = principalToAccountID(Principal.fromText(authData.principal))
+      const principalId = Principal.fromText(authData.principal);
+      localStorage.setItem('icpboxAuth', JSON.stringify(authData))
+      const agent = await createAgent(
+        authData.publicKey,
+        {whitelist: whitelist},
+        idlFactory
+      );
+      return {
+        type: WalletType.Icpbox,
+        principalId,
+        accountId,
+        agent
+      };
+    }
+  } catch (error) {
+    console.log('icpbox error', error);
+  }
+}
+
 const disconnectII = async () => {
   localStorage.removeItem('ic-identity');
   localStorage.removeItem('ic-delegation');
@@ -196,3 +247,7 @@ const disconnectStoicWallet = async () => {
   StoicIdentity.disconnect();
 }
 
+const disconnectIcpboxWallet = async () => {
+  localStorage.removeItem("icppboxAuth");
+  icpbox.disConnect();
+}

@@ -11,6 +11,7 @@ import { CancelOrderIcp } from "components/CancelOrderIcp";
 import BigNumber from "bignumber.js";
 import { useMyInfo } from "context/MyInfo";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
+import icpbox from "utils/icpbox";
 declare var window: any;
 interface IcpPayProps {
 	orderInfo: {
@@ -149,12 +150,40 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				console.log(`Payment failed: ${JSON.stringify(err)}`);
 				return
 			}
-		} else {
-			console.log('pay stoic');
+		} else if (sessionStorage.getItem('walletType') === 'Stoic') {
 			setStoicVisible(true)
+		} else {
+			payIcpbox();
 		}
 	}
 
+	const payIcpbox = async () => {
+		const icpboxConnected: any = await icpbox.isConnected();
+		if (icpboxConnected.result !== true) {
+			alert('no auth')
+		} else {
+			setPayIng(true);
+			setModalVisible(true)
+			console.log('pay Icpbox ==============')
+			try {
+				const payResult = await icpbox.pay({
+					amount: new BigNumber(order[0].price_icp_in_e8s.toString()).div(100000000).toString(),
+					to: arrayToHex(order[0].payment_account_id),
+					memo: order[0].payment_memo.ICP.toString(),
+					fee: '10000'
+				});
+				console.log('paydata', payResult)
+				setBlockHeight(Number(payResult.status))
+				setPayIng(false);
+				setPaymentResult(true);
+			} catch (error) {
+				console.log(`Icpbox Payment failed: ${JSON.stringify(error)}`);
+				setPayIng(false)
+				setPaymentResult(false)
+				return
+			}
+		}
+	}
 
 	const payStoic = async () => {
 		if (stoicPayIng) return;
@@ -174,7 +203,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				setStoicPayIng(false);
 				setPayIng(false);
 				setPaymentResult(true);
-
 			}
 		} catch (error) {
 			setStoicPayIng(false)

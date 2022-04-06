@@ -32,7 +32,7 @@ const icpbox = {
 	get publicKey() {
 		return publicKey;
 	},
-	setPublickKey(val) {
+	setPublickKey(val: any) {
 		console.log('setPublickKey', val)
 		publicKey = val;
 	},

@@ -4,6 +4,7 @@ import { whietLists } from "utils/canisters/plugWhiteListConfig";
 import { Toast } from "@douyinfe/semi-ui";
 import { WalletConnector, WalletResponse, WalletType } from "utils/connector";
 import { WalletConnectError } from "utils/exception";
+import icpbox from "utils/icpbox";
 
 export interface AuthWalletContextInterface {
 	authError: { err: boolean, desc: string };
@@ -21,18 +22,21 @@ function useProvideAuthWallet() {
 	const connectWallet = async (walletType: WalletType) => {
 		try {
 			const res = await WalletConnector.connect(walletType, whitelist);
-			console.log(res)
+			console.log('authWallet connectWallet', res)
 			if (res?.principalId) {
 				sessionStorage.setItem('connectStatus', 'connected');
 				switch (walletType) {
-					case WalletType.Nns:
-						sessionStorage.setItem('walletType', 'Nns');
+					case WalletType.II:
+						sessionStorage.setItem('walletType', 'II');
 						break;
 					case WalletType.Plug:
 						sessionStorage.setItem('walletType', 'Plug');
 						break;
 					case WalletType.Stoic:
 						sessionStorage.setItem('walletType', 'Stoic');
+						break;
+					case WalletType.Icpbox:
+						sessionStorage.setItem('walletType', 'Icpbox');
 						break;
 				}
 				setWallet(res)
@@ -60,6 +64,10 @@ function useProvideAuthWallet() {
 	}
 
 	useEffect(() => {
+		if (icpbox.check()) {
+			connectWallet(3)
+			return;
+		}
 		(async () => {
 			if (sessionStorage.getItem('connectStatus') === 'connected') {
 				let walletTypeStorage = sessionStorage.getItem('walletType')
