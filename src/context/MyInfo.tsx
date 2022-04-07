@@ -69,14 +69,15 @@ function useProvideMyInfo() {
 				setQuotas(res)
 			} catch (error) {
 				console.log('myInfo get_MyQuotas', error)
-				/* authWallet.disconnectWallet()
-				authWallet.setAuthErr({ err: true, desc: 'There was an error - please ensure you have Cookies Enabled' }) */
+				if (sessionStorage.getItem('walletType') === 'Stoic') {
+					authWallet.disconnectWallet()
+					authWallet.setAuthErr({ err: true, desc: 'There was an error - please ensure you have Cookies Enabled' })
+				}
 			}
 		}
 	}
 
 	const checkPendingOrder = async () => {
-	
 		(await ServiceApi.getInstance()).getPendingOrder().then(res => {
 			console.log(res)
 			if (res.length !== 0) {
@@ -93,8 +94,10 @@ function useProvideMyInfo() {
 			}
 		}).catch(error => {
 			console.log('getPendingOrder', error)
-			/* authWallet.disconnectWallet()
-			authWallet.setAuthErr({err:true,desc:'There was an error - please ensure you have Cookies Enabled'}) */
+			if (sessionStorage.getItem('walletType') === 'Stoic') {
+				authWallet.disconnectWallet()
+				authWallet.setAuthErr({ err: true, desc: 'There was an error - please ensure you have Cookies Enabled' })
+			}
 		})
 	}
 
