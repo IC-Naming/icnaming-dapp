@@ -84,7 +84,7 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 								<Col sm="12">
 									<button className={styles["btn-connect"]} onClick={() => { connetcWallet(2) }} disabled={connecting}>
 										<img src={stoicwallet} alt="Stoic" />
-										<span>Stioc Wallet</span>
+										<span>Stoic Wallet</span>
 									</button>
 								</Col>
 							</Row>
