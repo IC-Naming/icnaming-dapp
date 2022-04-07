@@ -26,7 +26,6 @@ interface IcpPayProps {
 
 export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => {
 	const history = useHistory();
-	const serviceApi = new ServiceApi();
 	const { ...authWallet } = useAuthWallet();
 	// const { ...myInfo } = useMyInfo();
 	const [checkOrderIng, setCheckOrderIng] = useState<boolean>(true)
@@ -113,14 +112,14 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 			NotOrder,
 			Refund,
 		}
-		if (authWallet.walletAddress) {
+		if (authWallet.wallet?.principalId) {
 			setCheckOrderIng(true)
 			const serviecOrderInfo: any = [];
 			let orderStatus = await (async () => {
 				let result_Status = OrderStatus.Available;
-				const [availableResult, orderResult] = await Promise.all([serviceApi.available(name).catch(err => {
+				const [availableResult, orderResult] = await Promise.all([(await ServiceApi.getInstance()).available(name).catch(err => {
 					console.log(err)
-				}), serviceApi.getPendingOrder()]);
+				}), (await ServiceApi.getInstance()).getPendingOrder()]);
 				if (orderResult.length !== 0) {
 					serviecOrderInfo.push(orderResult[0])
 					const arrayToHex = (arr: Array<number>) => {
@@ -177,7 +176,7 @@ export const PayVieIcpNns: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) 
 			const orderInfoObj = JSON.parse(orderInfo)
 			checkOrder(orderInfoObj.name)
 		}
-	}, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
+	}, [authWallet.wallet?.principalId])// eslint-disable-line react-hooks/exhaustive-deps
 
 	return (
 		<React.Fragment>

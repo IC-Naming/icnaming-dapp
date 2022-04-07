@@ -18,9 +18,8 @@ interface Props {
 }
 
 export const Record: React.FC<Props> = ({ title, name, recordKey, value, registant, controller }) => {
-  const { ...auth } = useAuthWallet();
+  const { ...authWallet } = useAuthWallet();
   const [recordSaveLoading, setRecordSaveLoading] = useState(false);
-  const serviceApi = new ServiceApi();
   const [recordVal, setRecordVal] = useState<string>('');
   const [ischangeRecordVal, setIschangeRecordVal] = useState(false);
   const [isController, setIsController] = useState(false);
@@ -35,8 +34,8 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
   }
 
   useEffect(() => {
-    if (auth.principal?.toText() === registant || auth.principal?.toText() === controller) setIsController(true);
-  }, [auth, controller, registant]);
+    if (authWallet.wallet?.principalId.toText() === registant || authWallet.wallet?.principalId?.toText() === controller) setIsController(true);
+  }, [authWallet.wallet?.principalId, controller, registant]);
 
   useEffect(() => {
     value ? setRecordVal(value) : setRecordVal('Not set');
@@ -44,7 +43,7 @@ export const Record: React.FC<Props> = ({ title, name, recordKey, value, regista
 
   const recordSet = async () => {
     setRecordSaveLoading(true);
-    serviceApi.setRecord(name, recordKey, recordVal).then(res => {
+    (await ServiceApi.getInstance()).setRecord(name, recordKey, recordVal).then(res => {
       if (res) {
         toast.success('Set record success');
         console.log('clear Records cache')

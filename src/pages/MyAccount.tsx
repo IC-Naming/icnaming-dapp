@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SearchInput, Card, CopyToClipboard } from "../components";
 import { Principal } from '@dfinity/principal';
 import styles from '../assets/styles/Search.module.scss'
@@ -11,7 +11,6 @@ import { Skeleton, Pagination, List, Input } from '@douyinfe/semi-ui';
 import { IconSearch } from '@douyinfe/semi-icons';
 export const MyAccount = () => {
   const { ...authWallet } = useAuthWallet();
-  const serviceApi = new ServiceApi();
   const [loading, setLoading] = useState<boolean>(true)
   const [namesOfRegistrant, setNamesOfRegistrant] = useState<any>();
   const [namesOfController, setNamesOfController] = useState<any>();
@@ -44,29 +43,29 @@ export const MyAccount = () => {
       return myFavoriteNamesStorage;
     } else {
       return await queryWithCache(async () => {
-        const favoriteNamesSevice = await serviceApi.getFavoriteNames()
+        const favoriteNamesSevice = await (await ServiceApi.getInstance()).getFavoriteNames()
         localStorage.setItem('myFavoriteNames', JSON.stringify(favoriteNamesSevice))
-        return serviceApi.getFavoriteNames();
-      }, 'myNamesOfFavorite' + authWallet.walletAddress);
+        return (await ServiceApi.getInstance()).getFavoriteNames();
+      }, 'myNamesOfFavorite' + authWallet.wallet?.accountId);
     }
   }
 
   useEffect(() => {
 
-    if (authWallet.walletAddress) {
-      const wordParam: Principal = Principal.fromText(authWallet.walletAddress);
+    if (authWallet.wallet?.principalId) {
+      const wordParam: Principal = authWallet.wallet?.principalId;
       let getNamesOfRegistrantLoaded = false;
       let getNamesOfControllerLoaded = false;
 
       queryWithCache(() => {
-        return new Promise((resolve, reject) => {
-          serviceApi.getNamesOfRegistrant(wordParam).then(data => {
+        return new Promise(async (resolve, reject) => {
+          (await ServiceApi.getInstance()).getNamesOfRegistrant(wordParam).then(data => {
             resolve(data)
           }).catch(errs => {
             reject(errs)
           });
         })
-      }, 'getNamesOfRegistrant' + authWallet.walletAddress, 60).then(async (res) => {
+      }, 'getNamesOfRegistrant' + authWallet.wallet.accountId, 60).then(async (res) => {
         // console.log("my address result of Registrant", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
@@ -91,14 +90,14 @@ export const MyAccount = () => {
       });
 
       queryWithCache(() => {
-        return new Promise((resolve, reject) => {
-          serviceApi.getNamesOfController(wordParam).then(data => {
+        return new Promise(async (resolve, reject) => {
+          (await ServiceApi.getInstance()).getNamesOfController(wordParam).then(data => {
             resolve(data)
           }).catch(errs => {
             reject(errs)
           });
         })
-      }, 'namesOfController' + authWallet.walletAddress).then(async (res) => {
+      }, 'namesOfController' + authWallet.wallet.accountId).then(async (res) => {
         // console.log("my address result of controller", res)
         // for each res ,map it to NameModel
         let myNamesOfFavorite = await getMyFavourites()
@@ -124,7 +123,7 @@ export const MyAccount = () => {
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authWallet.walletAddress])
+  }, [authWallet.wallet])
 
   const myAccountId = (
     <>
@@ -132,12 +131,12 @@ export const MyAccount = () => {
         <Skeleton.Avatar style={{ width: 70, height: 60, marginRight: '1rem' }} />
         <Skeleton.Title style={{ width: '100%', height: 32 }} />
       </div>
-      <div style={{ display: 'flex', alignItems: 'center',justifyContent:'space-between', marginBottom: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center'}}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <Skeleton.Button style={{ marginRight: 5 }} />
           <Skeleton.Button />
         </div>
-        <Skeleton.Title style={{width:200,height:40}}></Skeleton.Title>
+        <Skeleton.Title style={{ width: 200, height: 40 }}></Skeleton.Title>
       </div>
       <div className={styles['skeleton-pargraph']}>
         <Skeleton.Paragraph rows={3} />
@@ -153,8 +152,8 @@ export const MyAccount = () => {
             <div className={styles['search-address']}>
               <Skeleton placeholder={myAccountId} loading={loading} style={{ width: '100%' }} active>
                 <span className={styles.icon}><i className="bi bi-person"></i></span>
-                <span className={styles.address}>{authWallet.walletAddress}</span>
-                <CopyToClipboard text={authWallet.walletAddress} />
+                <span className={styles.address}>{authWallet.wallet?.principalId.toText()}</span>
+                <CopyToClipboard text={authWallet.wallet?.principalId.toText()} />
               </Skeleton>
             </div>
             {
@@ -174,7 +173,7 @@ export const MyAccount = () => {
                             onSearch(e.currentTarget.value.replace(/\s+/g, ''), namesOfRegistrant, 'registrant')
                           }
                         }
-                          onChange={(v) =>!v? onSearch('', namesOfRegistrant, 'registrant'):null} placeholder='Search name' prefix={<IconSearch />} />}
+                          onChange={(v) => !v ? onSearch('', namesOfRegistrant, 'registrant') : null} placeholder='Search name' prefix={<IconSearch />} />}
                         renderItem={item =>
                           <Card key={item.name} name={item.name} expireAt={item.expireAt} available={false} isMyAccount={true} favorite={item.favorite} />
                         }
@@ -190,7 +189,7 @@ export const MyAccount = () => {
                         dataSource={getData(pageReg, searchNamesOfController)}
                         split={false}
                         className={styles['myaccount-list']}
-                        header={<Input 
+                        header={<Input
                           onEnterPress={
                             (e) => {
                               e.preventDefault();
@@ -198,7 +197,7 @@ export const MyAccount = () => {
                               onSearch(e.currentTarget.value.replace(/\s+/g, ''), namesOfController, 'controller')
                             }
                           }
-                          onChange={(v) =>!v? onSearch('', namesOfController, 'controller'):null}
+                          onChange={(v) => !v ? onSearch('', namesOfController, 'controller') : null}
                           placeholder='Search name' prefix={<IconSearch />} />}
                         renderItem={item =>
                           <Card name={item.name} expireAt="" available={false} isMyAccount={true} favorite={item.favorite} />

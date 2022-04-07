@@ -5,13 +5,13 @@ import { useHistory } from "react-router-dom";
 import styles from '../assets/styles/Name.module.scss'
 import payStyles from '../assets/styles/Pay.module.scss'
 import { useAuthWallet } from '../context/AuthWallet';
-import { createLedgerActor } from "utils/canisters/ledger";
-import ServiceApi from "../utils/ServiceApi";
+import ServiceApi from "utils/ServiceApi";
 import { deleteCache } from "../utils/localCache";
 import { CancelOrderIcp } from "components/CancelOrderIcp";
 import BigNumber from "bignumber.js";
 import { useMyInfo } from "context/MyInfo";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
+import icpbox from "utils/icpbox";
 declare var window: any;
 interface IcpPayProps {
 	orderInfo: {
@@ -41,8 +41,6 @@ const toICPe8s = (source: string): bigint => {
 
 export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => {
 	const history = useHistory();
-	const serviceApi = new ServiceApi();
-	const ledgerActor = createLedgerActor();
 	const { ...authWallet } = useAuthWallet();
 	const { ...myInfo } = useMyInfo();
 	const [modalVisible, setModalVisible] = useState<boolean>(false)
@@ -54,10 +52,12 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	const [payIng, setPayIng] = useState<boolean>(false)
 	const [stoicPayIng, setStoicPayIng] = useState<boolean>(false)
 	const [paymentResult, setPaymentResult] = useState<boolean>(false)
+
 	const [blockHeight, setBlockHeight] = useState<number>(0)
 	const [confirmIng, setConfirmIng] = useState<boolean>(true)
 	const [confirmAgain, setConfirmAgain] = useState<boolean>(false)
 	const [confirmStatus, setConfirmStatus] = useState<'success' | 'fail' | 'exception'>('success')
+
 	/**
 	 * try to confirm order payment for several times
 	 * go to my account when it confirms success
@@ -74,9 +74,12 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		// get confirm status
 		let confirmStatus = await (async () => {
 			let result_status = ConfirmStatus.Success;
-			/* const max_retry = 2;for (let i = 0; i < max_retry; i++) {} */
+			/* const max_retry = 2;
+			for (let i = 0; i < max_retry; i++) {
+				
+			} */
 			try {
-				let result = await serviceApi.confirmOrder(BigInt(blockHeight));
+				let result = await (await ServiceApi.getInstance()).confirmOrder(BigInt(blockHeight));
 				console.log('confirmOrder result', result)
 				if (result) {
 					result_status = ConfirmStatus.Success;
@@ -97,8 +100,8 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				console.log('You got the name! please check it out from MyAccount');
 				myInfo.cleanPendingOrder()
 				setConfirmStatus('success');
-				deleteCache('getNamesOfRegistrant' + authWallet.walletAddress)
-				deleteCache('namesOfController' + authWallet.walletAddress)
+				deleteCache('getNamesOfRegistrant' + authWallet.wallet);
+				deleteCache('namesOfController' + authWallet.wallet)
 				break;
 			case ConfirmStatus.Exception:
 				setConfirmStatus('exception');
@@ -122,40 +125,72 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 
 	const payment = async () => {
 		if (payIng) return;
-		if (sessionStorage.getItem('walletType') === 'plug') {
-			setPayIng(true);
-			setModalVisible(true)
-			try {
-				if (blockHeight === 0) {
-					const payResult = await window.ic.plug.requestTransfer({
-						to: arrayToHex(order[0].payment_account_id),
-						amount: Number(order[0].price_icp_in_e8s),
-						opts: {
-							fee: 10000,
-							memo: order[0].payment_memo.ICP.toString(),
-						},
-					});
-					console.log(`Pay success: ${JSON.stringify(payResult)}`);
-					if (payResult !== undefined) {
-						setBlockHeight(payResult.height)
-						setPaymentResult(true);
-					} else {
-						setPaymentResult(false)
-					}
-					setPayIng(false);
-				}
-			} catch (err) {
-				setPayIng(false)
-				setPaymentResult(false)
-				console.log(`Payment failed: ${JSON.stringify(err)}`);
-				return
-			}
-		} else {
-			console.log('pay stoic');
-			setStoicVisible(true)
+		switch (sessionStorage.getItem('walletType')) {
+			case 'Icpbox':
+				payIcpbox();
+				break;
+			case 'Stoic':
+				setStoicVisible(true)
+				break;
+			case 'Plug':
+				payPlug();
+				break;
 		}
 	}
 
+	const payIcpbox = async () => {
+		const icpboxConnected: any = await icpbox.isConnected();
+		if (icpboxConnected.result !== true) {
+			alert('no auth')
+		} else {
+			setPayIng(true);
+			setModalVisible(true)
+			console.log('pay Icpbox ==============')
+			icpbox.pay({
+				amount: new BigNumber(order[0].price_icp_in_e8s.toString()).div(100000000).toString(),
+				to: arrayToHex(order[0].payment_account_id),
+				memo: order[0].payment_memo.ICP.toString(),
+				fee: '10000'
+			}).then(payResult => {
+				console.log('paydata', payResult)
+				setBlockHeight(Number(payResult.status))
+				setPayIng(false);
+				setPaymentResult(true);
+			}).catch(error => {
+				console.log(`Icpbox Payment failed: ${JSON.stringify(error)}`);
+				setPayIng(false)
+				setPaymentResult(false)
+				return
+			});
+
+		}
+	}
+
+	const payPlug = async () => {
+		setPayIng(true);
+		setModalVisible(true)
+		try {
+			if (blockHeight === 0) {
+				const payResult = await window.ic.plug.requestTransfer({
+					to: arrayToHex(order[0].payment_account_id),
+					amount: Number(order[0].price_icp_in_e8s),
+					opts: {
+						fee: 10000,
+						memo: order[0].payment_memo.ICP.toString(),
+					},
+				});
+				console.log(`Pay success: ${JSON.stringify(payResult)}`);
+				setBlockHeight(payResult.height)
+				setPayIng(false);
+				setPaymentResult(true);
+			}
+		} catch (err) {
+			setPayIng(false)
+			setPaymentResult(false)
+			console.log(`Payment failed: ${JSON.stringify(err)}`);
+			return
+		}
+	}
 
 	const payStoic = async () => {
 		if (stoicPayIng) return;
@@ -165,18 +200,11 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		setModalVisible(true)
 		try {
 			if (blockHeight === 0) {
-				const transfer_result: any = await ledgerActor.transfer({
-					amount: {
-						e8s: order[0].price_icp_in_e8s
-					},
-					memo: toICPe8s(order[0].payment_memo.ICP.toString()),
-					to: order[0].payment_account_id,
-					fee: {
-						e8s: BigInt(10_000),
-					},
-					created_at_time: [],
-					from_subaccount: []
-				})
+				const transfer_result: any = (await ServiceApi.getInstance()).payledger(
+					order[0].payment_account_id,
+					order[0].price_icp_in_e8s,
+					toICPe8s(order[0].payment_memo.ICP.toString())
+				)
 				console.log('Stoic transfer_result', transfer_result);
 				if (transfer_result.Ok !== undefined) {
 					console.log(`StoicPay success: ${transfer_result.Ok}`);
@@ -206,13 +234,13 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 			NotOrder,
 			Refund,
 		}
-		if (authWallet.walletAddress) {
+		if (authWallet.wallet?.principalId) {
 			const serviecOrderInfo: any = [];
 			let orderStatus = await (async () => {
 				let result_Status = OrderStatus.Available;
-				const [availableResult, orderResult] = await Promise.all([serviceApi.available(name).catch(err => {
+				const [availableResult, orderResult] = await Promise.all([(await ServiceApi.getInstance()).available(name).catch(err => {
 					console.log(err)
-				}), serviceApi.getPendingOrder()]);
+				}), (await ServiceApi.getInstance()).getPendingOrder()]);
 
 				if (orderResult.length !== 0) {
 					serviecOrderInfo.push(orderResult[0])
@@ -266,7 +294,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 			const orderInfoObj = JSON.parse(orderInfo)
 			checkOrder(orderInfoObj.name)
 		}
-	}, [authWallet.walletAddress])// eslint-disable-line react-hooks/exhaustive-deps
+	}, [authWallet.wallet])// eslint-disable-line react-hooks/exhaustive-deps
 
 	const retryToConfirm = () => {
 		if (confirmAgain) return
@@ -397,6 +425,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				maskClosable={false}
 				className={payStyles['modal-wrap-stoicpay']}
 			>
+
 				<div className={payStyles['modal-wrap-stoicpay-conent']}>
 					<h2>Please confirm that you are about to send</h2>
 					<h3>Amount: {paymentInfo.priceIcp} ICP</h3>

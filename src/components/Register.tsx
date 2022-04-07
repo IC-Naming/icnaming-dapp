@@ -10,6 +10,7 @@ import { PendingOrderTip } from "./PendingOrderTip";
 import { CanisterError } from "../utils/exception";
 import { Select, Toast } from '@douyinfe/semi-ui';
 import { ModalTipFull } from "./ModalTipFull";
+import icpbox from "utils/icpbox";
 const Option = Select.Option;
 interface RegProps {
   regname: string;
@@ -18,10 +19,9 @@ interface RegProps {
 
 export const Register: React.FC<RegProps> = ({ regname, available }) => {
   let nameLen = regname.split('.')[0].length >= 7 ? 7 : regname.split('.')[0].length;
-  const { ...auth } = useAuthWallet();
+  const { ...authWallet } = useAuthWallet();
   const { ...myInfo } = useMyInfo();
   const history = useHistory();
-  const serviceApi = new ServiceApi();
   const [showWallets, setShowWallets] = useState<boolean>(false);
   const [pendingOrderTipVisible, setPendingOrderTipVisible] = useState<boolean>(false);
   const [loadingSubmit, setLoadingSubmit] = useState<boolean>(false);
@@ -43,32 +43,32 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     } else {
       if (regname.split('.')[0].length >= btnNamelen) {
         setLoadingSubmit(true)
-        serviceApi.submitRegisterOrder(regname, 1).then(res => {
-          if (res) {
-            setLoadingSubmit(false)
-            myInfo.createOrder({
-              name: res.order.name,
-              nameLen: res.order.name.split('.')[0].length,
-              payYears: res.order.years,
-              payStatus: res.order.status,
-              payType: 'icp'
-            });
-            history.push(`/pay`)
-          }
-        }).catch(err => {
-          console.log(err)
-          setLoadingSubmit(false)
-          if (err instanceof CanisterError) {
-            if (err.code === 22) {
-              setPendingOrderTipVisible(true)
-              myInfo.checkPendingOrder();
-            } else if (err.code === 26) {
-              errorToast(err.message)
-            } else {
-              errorToast(err.message)
+          ; (await ServiceApi.getInstance()).submitRegisterOrder(regname, 1).then(res => {
+            if (res) {
+              setLoadingSubmit(false)
+              myInfo.createOrder({
+                name: res.order.name,
+                nameLen: res.order.name.split('.')[0].length,
+                payYears: res.order.years,
+                payStatus: res.order.status,
+                payType: 'icp'
+              });
+              history.push(`/pay`)
             }
-          }
-        })
+          }).catch(err => {
+            console.log(err)
+            setLoadingSubmit(false)
+            if (err instanceof CanisterError) {
+              if (err.code === 22) {
+                setPendingOrderTipVisible(true)
+                myInfo.checkPendingOrder();
+              } else if (err.code === 26) {
+                errorToast(err.message)
+              } else {
+                errorToast(err.message)
+              }
+            }
+          })
       } else {
         errorToast(' Name length must more than or equal ' + btnNamelen)
       }
@@ -102,7 +102,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
   }, [regname, myInfo.icpToCycles])
 
   useEffect(() => {
-    if (auth.isAuthWalletConnected) {
+    if (authWallet.wallet?.principalId) {
       const myQuotas = localStorage.getItem('myQuotas');
       if (myQuotas && myQuotas.length > 0) {
         const myQuotasArr = JSON.parse(myQuotas)
@@ -126,13 +126,20 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
       setQuotaLoading(false)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.isAuthWalletConnected, myInfo.quotas]);
+  }, [authWallet.wallet?.principalId, myInfo.quotas]);
 
   // filter quota when count is 0
   const avaliableQuotas = useMemo(() => {
     return quotas.filter(quota => quota.quotaCount !== 0);
   }, [quotas]);
 
+  const connectShow = () => {
+    if (icpbox.check()) {
+      authWallet.connectWallet(3);
+    } else {
+      setShowWallets(true)
+    }
+  }
   return (
     <div className={styles.register}>
       {
@@ -156,10 +163,10 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
               <Col md={4} sm={12}></Col>
             </Row>
             {
-              !auth.walletAddress
+              !authWallet.wallet?.principalId
                 ?
                 <div className="d-grid gap-2">
-                  <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect Wallet</button>
+                  <button className={styles.btn} onClick={connectShow}>Connnect Wallet</button>
                 </div>
                 :
                 <div className={`${styles['btn-wrap']} ${styles['btn-reg-wrap']}`}>
@@ -167,8 +174,8 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
                     nameLen >= 6 ?
                       <button
                         className={`${styles.btn} ${styles['btn-via-icp']}`} onClick={() => { registerVidIcp(6) }}
-                        disabled={auth.walletType === 'nns'}
-                        title={auth.walletType === 'nns' ? 'This feature is not available for NNS wallet' : ''}
+                        disabled={authWallet.wallet.type === 0}
+                        title={authWallet.wallet.type === 0 ? 'This feature is not available for NNS wallet' : ''}
                       >
                         {loadingSubmit && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}
                         Register via ICP
