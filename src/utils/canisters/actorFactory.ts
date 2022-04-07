@@ -43,12 +43,9 @@ class ActorFactory {
         });
       }
       case WalletType.Icpbox: {
-        let actor;
-        await icpbox.createActor({
+        const actor: any = await icpbox.createActor({
           canisterId: canisterId,
           interfaceFactory: canisterDid,
-        }).then((a) => {
-          actor = a;
         })
         return actor;
       }
