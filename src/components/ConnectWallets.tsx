@@ -46,7 +46,7 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 		})
 	}
 
-	const connectStiocWallet = () => {
+	const connectStoicWallet = () => {
 		setConnecting(true)
 		authWallet.connectStoic().then((res: any) => {
 			setConnecting(false)
@@ -109,9 +109,9 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 									</Col>
 								}
 								<Col sm="12">
-									<button className={styles["btn-connect"]} onClick={connectStiocWallet} disabled={connecting}>
+									<button className={styles["btn-connect"]} onClick={connectStoicWallet} disabled={connecting}>
 										<img src={stoicwallet} alt="stioc" />
-										<span>Stioc Wallet</span>
+										<span>Stoic Wallet</span>
 									</button>
 								</Col>
 							</Row>
