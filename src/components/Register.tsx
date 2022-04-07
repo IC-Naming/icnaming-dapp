@@ -10,6 +10,7 @@ import { PendingOrderTip } from "./PendingOrderTip";
 import { CanisterError } from "../utils/exception";
 import { Select, Toast } from '@douyinfe/semi-ui';
 import { ModalTipFull } from "./ModalTipFull";
+import icpbox from "utils/icpbox";
 const Option = Select.Option;
 interface RegProps {
   regname: string;
@@ -42,32 +43,32 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     } else {
       if (regname.split('.')[0].length >= btnNamelen) {
         setLoadingSubmit(true)
-        ;(await ServiceApi.getInstance()).submitRegisterOrder(regname, 1).then(res => {
-          if (res) {
-            setLoadingSubmit(false)
-            myInfo.createOrder({
-              name: res.order.name,
-              nameLen: res.order.name.split('.')[0].length,
-              payYears: res.order.years,
-              payStatus: res.order.status,
-              payType: 'icp'
-            });
-            history.push(`/pay`)
-          }
-        }).catch(err => {
-          console.log(err)
-          setLoadingSubmit(false)
-          if (err instanceof CanisterError) {
-            if (err.code === 22) {
-              setPendingOrderTipVisible(true)
-              myInfo.checkPendingOrder();
-            } else if (err.code === 26) {
-              errorToast(err.message)
-            } else {
-              errorToast(err.message)
+          ; (await ServiceApi.getInstance()).submitRegisterOrder(regname, 1).then(res => {
+            if (res) {
+              setLoadingSubmit(false)
+              myInfo.createOrder({
+                name: res.order.name,
+                nameLen: res.order.name.split('.')[0].length,
+                payYears: res.order.years,
+                payStatus: res.order.status,
+                payType: 'icp'
+              });
+              history.push(`/pay`)
             }
-          }
-        })
+          }).catch(err => {
+            console.log(err)
+            setLoadingSubmit(false)
+            if (err instanceof CanisterError) {
+              if (err.code === 22) {
+                setPendingOrderTipVisible(true)
+                myInfo.checkPendingOrder();
+              } else if (err.code === 26) {
+                errorToast(err.message)
+              } else {
+                errorToast(err.message)
+              }
+            }
+          })
       } else {
         errorToast(' Name length must more than or equal ' + btnNamelen)
       }
@@ -132,6 +133,13 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
     return quotas.filter(quota => quota.quotaCount !== 0);
   }, [quotas]);
 
+  const connectShow = () => {
+    if (icpbox.check()) {
+      authWallet.connectWallet(3);
+    } else {
+      setShowWallets(true)
+    }
+  }
   return (
     <div className={styles.register}>
       {
@@ -158,7 +166,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
               !authWallet.wallet?.principalId
                 ?
                 <div className="d-grid gap-2">
-                  <button className={styles.btn} onClick={() => { setShowWallets(true) }}>Connnect Wallet</button>
+                  <button className={styles.btn} onClick={connectShow}>Connnect Wallet</button>
                 </div>
                 :
                 <div className={`${styles['btn-wrap']} ${styles['btn-reg-wrap']}`}>

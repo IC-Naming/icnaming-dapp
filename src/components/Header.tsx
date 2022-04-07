@@ -7,6 +7,7 @@ import { useAuthWallet } from "../context/AuthWallet";
 import { AuthError } from 'components/AuthError';
 import { formatAddress } from '../utils/helper';
 import { deleteCache } from 'utils/localCache';
+import icpbox from 'utils/icpbox';
 
 export const Header = () => {
   const history = useHistory();
@@ -48,6 +49,13 @@ export const Header = () => {
     deleteCache('namesOfController' + authWallet.wallet?.accountId)
   }
 
+  const connectShow = () => {
+    if (icpbox.check()) {
+      authWallet.connectWallet(3);
+    } else {
+      setShowConnectWallets(true)
+    }
+  }
   const HeaderWallet = () => {
     return (<div className={`${styles['wallet-wrap']} appheader-wallet-wrap`}>
       {
@@ -58,7 +66,7 @@ export const Header = () => {
             <i className="bi bi-box-arrow-right" onClick={logout}></i>
           </div>
           :
-          <button className={styles['btn-wallet']} onClick={() => { setShowConnectWallets(true) }}>
+          <button className={styles['btn-wallet']} onClick={connectShow}>
             <span>Connect Wallet</span>
           </button>
       }
@@ -84,7 +92,7 @@ export const Header = () => {
     }
   }, [authWallet.wallet?.principalId])
 
-
+  
   return (
     <header className={`${styles.header} app-header`}>
       <div className={`${styles.navbar} container-xxl flex-wrap flex-md-nowrap`}>

@@ -406,7 +406,7 @@ export default class ServiceApi {
 
   // get quota
   public getQuota = (user: Principal, quotaType: number): Promise<number> => {
-    console.log({'service getquota user':user})
+    // console.log({'service getquota user':user})
     return executeWithLogging(async () => {
       let quota: number = 0;
       const quotaParsed: QuotaType = { LenGte: quotaType };
@@ -414,7 +414,7 @@ export default class ServiceApi {
         user,
         quotaParsed
       );
-      console.log('get_quota', res)
+      console.log('service get_quota', res)
       if ("Ok" in res) {
         quota = Number(res.Ok);
       } else {

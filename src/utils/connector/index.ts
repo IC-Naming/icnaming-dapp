@@ -3,11 +3,9 @@ import { AuthClient } from "@dfinity/auth-client";
 import { Principal } from "@dfinity/principal";
 import { StoicIdentity } from "utils/ic-stoic-identity";
 import icpbox from "utils/icpbox";
-import { createAgent } from "utils/icpbox/agent";
 import { IC_HOST } from "../config";
 import { WalletConnectError, WalletConnectErrorCode } from "../exception";
 import { principalToAccountID } from "../helper";
-import { idlFactory } from "utils/canisters/registrar/did";
 declare const window: any;
 export enum WalletType {
   II,
@@ -195,17 +193,12 @@ const connectIcpboxWallet = async (whitelist: string[]) => {
       icpbox.setPublickKey(auth_data.publicKey);
       const accountId = principalToAccountID(Principal.fromText(auth_data.principal));
       const principalId = Principal.fromText(auth_data.principal);
-      const agent = await createAgent(
-        auth_data.publicKey,
-        {whitelist: whitelist},
-        idlFactory
-      );
+
       console.log('local principal', Principal.fromText(auth_data.principal))
       return {
         type: WalletType.Icpbox,
         principalId,
         accountId,
-        agent
       };
     } else {
       console.log('auto authorize')
@@ -215,16 +208,11 @@ const connectIcpboxWallet = async (whitelist: string[]) => {
       const accountId = principalToAccountID(Principal.fromText(authData.principal))
       const principalId = Principal.fromText(authData.principal);
       localStorage.setItem('icpboxAuth', JSON.stringify(authData))
-      const agent = await createAgent(
-        authData.publicKey,
-        {whitelist: whitelist},
-        idlFactory
-      );
+
       return {
         type: WalletType.Icpbox,
         principalId,
         accountId,
-        agent
       };
     }
   } catch (error) {
