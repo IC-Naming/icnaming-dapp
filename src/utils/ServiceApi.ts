@@ -394,7 +394,7 @@ export default class ServiceApi {
     return executeWithLogging(async () => {
       let pendingOrder: [GetNameOrderResponse] | [] = [];
       const res: any = await this.registrarUpdateActor?.get_pending_order();
-      console.log("get_pending_order", res);
+      // console.log("get_pending_order", res);
       if ("Ok" in res) {
         pendingOrder = res.Ok;
       } else {
@@ -408,19 +408,18 @@ export default class ServiceApi {
   public getQuota = (user: Principal, quotaType: number): Promise<number> => {
     // console.log({'service getquota user':user})
     return executeWithLogging(async () => {
-      let quota: number = 0;
       const quotaParsed: QuotaType = { LenGte: quotaType };
-      const res: any = await this.registrarUpdateActor?.get_quota(
+      let quota = 0;
+      await this.registrarUpdateActor?.get_quota(
         user,
         quotaParsed
-      );
-      console.log('service get_quota', res)
-      if ("Ok" in res) {
-        quota = Number(res.Ok);
-      } else {
-        quota = 0;
-        throw new CanisterError(res.Err);
-      }
+      ).then((res: any) => {
+        if ("Ok" in res) {
+          quota = res.Ok;
+        }else{
+          throw new CanisterError(res.Err);
+        }
+      })
       return quota;
     }, "getQuota");
   };

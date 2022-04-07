@@ -25,20 +25,6 @@ function useProvideAuthWallet() {
 			console.log('authWallet connectWallet', res)
 			if (res?.principalId) {
 				sessionStorage.setItem('connectStatus', 'connected');
-				switch (walletType) {
-					case WalletType.II:
-						sessionStorage.setItem('walletType', 'II');
-						break;
-					case WalletType.Plug:
-						sessionStorage.setItem('walletType', 'Plug');
-						break;
-					case WalletType.Stoic:
-						sessionStorage.setItem('walletType', 'Stoic');
-						break;
-					case WalletType.Icpbox:
-						sessionStorage.setItem('walletType', 'Icpbox');
-						break;
-				}
 				setWallet(res)
 				await actorFactory.authenticate(res!);
 				return true

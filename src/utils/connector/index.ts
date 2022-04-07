@@ -104,6 +104,7 @@ const connectPlugWallet = async (
       const principalId = await window.ic?.plug?.agent.getPrincipal();
       const agent = await window.ic?.plug?.agent;
       const accountId = principalToAccountID(principalId);
+      sessionStorage.setItem('walletType', 'Plug');
       return {
         type: WalletType.Plug,
         principalId,
@@ -127,6 +128,7 @@ const connectStoicWallet = async (): Promise<WalletResponse | undefined> => {
     }
     const principalId = identity?.getPrincipal();
     const accountId = principalToAccountID(principalId);
+    sessionStorage.setItem('walletType', 'Stoic');
     return {
       type: WalletType.Stoic,
       principalId,
@@ -149,6 +151,7 @@ const connectII = async (): Promise<WalletResponse | undefined> => {
       if (await authClient.isAuthenticated()) {
         const identity = await authClient.getIdentity();
         const accountId = principalToAccountID(identity.getPrincipal());
+        sessionStorage.setItem('walletType', 'II');
         resolve({
           type: WalletType.II,
           principalId: identity.getPrincipal(),
@@ -160,6 +163,7 @@ const connectII = async (): Promise<WalletResponse | undefined> => {
           onSuccess: async () => {
             const identity = await authClient.getIdentity();
             const accountId = principalToAccountID(identity.getPrincipal());
+            sessionStorage.setItem('walletType', 'II');
             resolve({
               type: WalletType.II,
               principalId: identity.getPrincipal(),
@@ -195,6 +199,7 @@ const connectIcpboxWallet = async (whitelist: string[]) => {
       const principalId = Principal.fromText(auth_data.principal);
 
       console.log('local principal', Principal.fromText(auth_data.principal))
+      sessionStorage.setItem('walletType', 'Icpbox');
       return {
         type: WalletType.Icpbox,
         principalId,
@@ -208,7 +213,7 @@ const connectIcpboxWallet = async (whitelist: string[]) => {
       const accountId = principalToAccountID(Principal.fromText(authData.principal))
       const principalId = Principal.fromText(authData.principal);
       localStorage.setItem('icpboxAuth', JSON.stringify(authData))
-
+      sessionStorage.setItem('walletType', 'Icpbox');
       return {
         type: WalletType.Icpbox,
         principalId,

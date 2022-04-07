@@ -63,12 +63,14 @@ function useProvideMyInfo() {
 			return [quota4, quota5, quota6, quota7];
 		}
 		if (authWallet.wallet?.principalId) {
+			console.log('getMyQuotas input principalId',authWallet.wallet?.principalId)
 			try {
 				const res = await get_MyQuotas(authWallet.wallet?.principalId);
+				console.log('myinfogetMyQuotas',res)
 				localStorage.setItem('myQuotas', JSON.stringify(res))
 				setQuotas(res)
 			} catch (error) {
-				console.log('myInfo get_MyQuotas', error)
+				console.log('myInfo catch get_MyQuotas', error)
 				if (sessionStorage.getItem('walletType') === 'Stoic') {
 					authWallet.disconnectWallet()
 					authWallet.setAuthErr({ err: true, desc: 'There was an error - please ensure you have Cookies Enabled' })
@@ -79,7 +81,6 @@ function useProvideMyInfo() {
 
 	const checkPendingOrder = async () => {
 		(await ServiceApi.getInstance()).getPendingOrder().then(res => {
-			console.log(res)
 			if (res.length !== 0) {
 				setPendingOrder(true)
 				createOrder({
