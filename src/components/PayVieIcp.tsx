@@ -115,7 +115,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	}
 
 	useEffect(() => {
-		if (blockHeight !== 0) { confirmOrderFunction() };
+		if (blockHeight !== undefined && blockHeight > 0) { confirmOrderFunction() };
 		// return () => { setBlockHeight(0) };
 	}, [blockHeight])// eslint-disable-line react-hooks/exhaustive-deps
 
@@ -125,35 +125,16 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 
 	const payment = async () => {
 		if (payIng) return;
-
-		if (sessionStorage.getItem('walletType') === 'Plug') {
-			setPayIng(true);
-			setModalVisible(true)
-			try {
-				if (blockHeight === 0) {
-					const payResult = await window.ic.plug.requestTransfer({
-						to: arrayToHex(order[0].payment_account_id),
-						amount: Number(order[0].price_icp_in_e8s),
-						opts: {
-							fee: 10000,
-							memo: order[0].payment_memo.ICP.toString(),
-						},
-					});
-					console.log(`Pay success: ${JSON.stringify(payResult)}`);
-					setBlockHeight(payResult.height)
-					setPayIng(false);
-					setPaymentResult(true);
-				}
-			} catch (err) {
-				setPayIng(false)
-				setPaymentResult(false)
-				console.log(`Payment failed: ${JSON.stringify(err)}`);
-				return
-			}
-		} else if (sessionStorage.getItem('walletType') === 'Stoic') {
-			setStoicVisible(true)
-		} else {
-			payIcpbox();
+		switch (sessionStorage.getItem('walletType')) {
+			case 'Icpbox':
+				payIcpbox();
+				break;
+			case 'Stoic':
+				setStoicVisible(true)
+				break;
+			case 'Plug':
+				payPlug();
+				break;
 		}
 	}
 
@@ -185,6 +166,32 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		}
 	}
 
+	const payPlug = async () => {
+		setPayIng(true);
+		setModalVisible(true)
+		try {
+			if (blockHeight === 0) {
+				const payResult = await window.ic.plug.requestTransfer({
+					to: arrayToHex(order[0].payment_account_id),
+					amount: Number(order[0].price_icp_in_e8s),
+					opts: {
+						fee: 10000,
+						memo: order[0].payment_memo.ICP.toString(),
+					},
+				});
+				console.log(`Pay success: ${JSON.stringify(payResult)}`);
+				setBlockHeight(payResult.height)
+				setPayIng(false);
+				setPaymentResult(true);
+			}
+		} catch (err) {
+			setPayIng(false)
+			setPaymentResult(false)
+			console.log(`Payment failed: ${JSON.stringify(err)}`);
+			return
+		}
+	}
+
 	const payStoic = async () => {
 		if (stoicPayIng) return;
 		setStoicPayIng(true);
@@ -198,11 +205,16 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 					order[0].price_icp_in_e8s,
 					toICPe8s(order[0].payment_memo.ICP.toString())
 				)
-				console.log(`Pay success: ${transfer_result}`);
-				setBlockHeight(transfer_result)
+				console.log('Stoic transfer_result', transfer_result);
+				if (transfer_result.Ok !== undefined) {
+					console.log(`StoicPay success: ${transfer_result.Ok}`);
+					setBlockHeight(transfer_result.Ok)
+					setPaymentResult(true);
+				} else {
+					setPaymentResult(false)
+				}
 				setStoicPayIng(false);
 				setPayIng(false);
-				setPaymentResult(true);
 			}
 		} catch (error) {
 			setStoicPayIng(false)
