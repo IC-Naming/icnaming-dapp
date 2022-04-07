@@ -20,6 +20,9 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 	const [connecting, setConnecting] = React.useState<boolean>(false)
 	const connetcWallet = async (walletType: WalletType) => {
 		setConnecting(true)
+		if(walletType === 2){
+			localStorage.removeItem("_scApp");
+		}
 		try {
 			const connectResult: any = await authWallet.connectWallet(walletType);
 			if (connectResult === true) {
