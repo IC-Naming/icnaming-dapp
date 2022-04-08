@@ -1,6 +1,6 @@
 import { IDL, JsonValue } from "@dfinity/candid";
 import { Buffer } from "buffer/";
-import { recursiveParseBigint } from "./bigint";
+// import { recursiveParseBigint } from "./bigint";
 import proxy from "./proxy";
 
 export interface SignInfo {
@@ -52,12 +52,7 @@ const decodeArgs = (signInfo: SignInfo, argsTypes: ArgsTypesOfCanister) => {
   }
 };
 
-/* const getDomainMetadata = () => {
-  return {
-    name: "",
-    host: window.location.host,
-  };
-}; */
+const decoder = new TextDecoder();
 
 export const signFactory =
   (
@@ -67,19 +62,20 @@ export const signFactory =
   ) =>
   async (payload: ArrayBuffer, signInfo?: SignInfo): Promise<ArrayBuffer> => {
     const payloadArr = new Uint8Array(payload);
-
     if (signInfo)
-      signInfo.decodedArguments = signInfo.arguments
-        ? recursiveParseBigint(decodeArgs(signInfo, argsTypes))
-        : [];
-
+      signInfo.decodedArguments = signInfo.arguments ? decodeArgs(signInfo, argsTypes) : [];
+    
     const res: {
       result: { data: any };
       status: string;
     } = await proxy("requestSign", [
       payloadArr,
       metadata,
-      { ...signInfo, preApprove },
+      {
+        ...signInfo,
+        arguments: decoder.decode(signInfo?.arguments),
+        preApprove,
+      },
     ] as any);
 
     return res.result.data;

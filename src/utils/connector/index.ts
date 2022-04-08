@@ -189,9 +189,9 @@ const connectII = async (): Promise<WalletResponse | undefined> => {
 
 const connectIcpboxWallet = async (whitelist: string[]) => {
   try {
-    const icpboxConnected: { result: any; status: string } = await icpbox.isConnected();
-    console.log('icpboxConnected', icpboxConnected.result);
-    if (icpboxConnected.result === true && sessionStorage.getItem('connectStatus') === 'connected') {
+    const icpboxConnected: any = await icpbox.isConnected();
+    console.log('icpboxConnected', icpboxConnected);
+    if (icpboxConnected === true && sessionStorage.getItem('connectStatus') === 'connected') {
       const localauthData: any = localStorage.getItem('icpboxAuth');
       const auth_data = JSON.parse(localauthData)
       icpbox.setPublickKey(auth_data.publicKey);
@@ -241,6 +241,6 @@ const disconnectStoicWallet = async () => {
 }
 
 const disconnectIcpboxWallet = async () => {
-  localStorage.removeItem("icppboxAuth");
+  localStorage.removeItem("icpboxAuth");
   icpbox.disConnect();
 }
