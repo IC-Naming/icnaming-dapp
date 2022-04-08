@@ -25,8 +25,7 @@ export interface MyInfoContextInterface {
 }
 
 function useProvideMyInfo() {
-	const serviceApi = new ServiceApi();
-	const { ...auth } = useAuthWallet();
+	const { ...authWallet } = useAuthWallet();
 	const [orderInfo, setOrderInfo] = useState<{ name: string, nameLen: number, payStatus: object, payYears: number, payType: 'icp' | 'quota', quotaType?: number }>({
 		name: '',
 		nameLen: 0,
@@ -56,28 +55,32 @@ function useProvideMyInfo() {
 	const getMyQuotas = async () => {
 		const get_MyQuotas = async (user: Principal) => {
 			const [quota4, quota5, quota6, quota7] = await Promise.all([
-				serviceApi.getQuota(user, 4),
-				serviceApi.getQuota(user, 5),
-				serviceApi.getQuota(user, 6),
-				serviceApi.getQuota(user, 7),
+				(await ServiceApi.getInstance()).getQuota(user, 4),
+				(await ServiceApi.getInstance()).getQuota(user, 5),
+				(await ServiceApi.getInstance()).getQuota(user, 6),
+				(await ServiceApi.getInstance()).getQuota(user, 7),
 			]);
 			return [quota4, quota5, quota6, quota7];
 		}
-		if (auth.principal) {
+		if (authWallet.wallet?.principalId) {
+			console.log('getMyQuotas input principalId',authWallet.wallet?.principalId)
 			try {
-				const res = await get_MyQuotas(auth.principal);
+				const res = await get_MyQuotas(authWallet.wallet?.principalId);
+				console.log('myinfogetMyQuotas',res)
 				localStorage.setItem('myQuotas', JSON.stringify(res))
 				setQuotas(res)
 			} catch (error) {
-				console.log('get_MyQuotas', error)
-				auth.quitWallet()
-				auth.setAuthErr({err:true,desc:'There was an error - please ensure you have Cookies Enabled'})
+				console.log('myInfo catch get_MyQuotas', error)
+				if (sessionStorage.getItem('walletType') === 'Stoic') {
+					authWallet.disconnectWallet()
+					authWallet.setAuthErr({ err: true, desc: 'There was an error - please ensure you have Cookies Enabled' })
+				}
 			}
 		}
 	}
 
 	const checkPendingOrder = async () => {
-		serviceApi.getPendingOrder().then(res => {
+		(await ServiceApi.getInstance()).getPendingOrder().then(res => {
 			if (res.length !== 0) {
 				setPendingOrder(true)
 				createOrder({
@@ -92,21 +95,23 @@ function useProvideMyInfo() {
 			}
 		}).catch(error => {
 			console.log('getPendingOrder', error)
-			auth.quitWallet()
-			auth.setAuthErr({err:true,desc:'There was an error - please ensure you have Cookies Enabled'})
+			if (sessionStorage.getItem('walletType') === 'Stoic') {
+				authWallet.disconnectWallet()
+				authWallet.setAuthErr({ err: true, desc: 'There was an error - please ensure you have Cookies Enabled' })
+			}
 		})
 	}
 
 	useEffect(() => {
-		if (auth.walletAddress) {
+		if (authWallet.wallet?.principalId) {
 			checkPendingOrder();
 			getMyQuotas();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [auth.walletAddress])
+	}, [authWallet.wallet])
 
 	const getIcpToCycles = async () => {
-		serviceApi.getIcpToCycles().then(res_IcpToCycles => {
+		(await ServiceApi.getInstance()).getIcpToCycles().then(res_IcpToCycles => {
 			const res_IcpToCycles_map = res_IcpToCycles.map((item, index) => {
 				return {
 					icp: new BigNumber(item.price_in_icp_e8s.toString()).div(100000000).toString(),

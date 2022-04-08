@@ -14,7 +14,6 @@ interface CancelOrderIcpProps {
 }
 export const CancelOrderIcp: React.FC<CancelOrderIcpProps> = ({ name }) => {
   const history = useHistory();
-  const serviceApi = new ServiceApi();
   const { ...myInfo } = useMyInfo();
   const [loading, setLoading] = useState<boolean>(false)
   const [visiableModalTipFull, setVisiableModalTipFull] = useState<boolean>(false)
@@ -22,8 +21,8 @@ export const CancelOrderIcp: React.FC<CancelOrderIcpProps> = ({ name }) => {
   const cancelRegisterOrder = async () => {
     if (loading) return
     setLoading(true)
-    setVisiableModalTipFull(true)
-    serviceApi.cancelRegisterOrder().then(res => {
+    setVisiableModalTipFull(true);
+    (await ServiceApi.getInstance()).cancelRegisterOrder().then(res => {
       if (res) {
         setLoading(false)
         setVisiableModalTipFull(false)

@@ -17,11 +17,10 @@ export interface CardProps {
   favorite: boolean,
 }
 export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccount, favorite }) => {
-  const { ...auth } = useAuthWallet();
+  const { ...authWallet } = useAuthWallet();
   const { ...myInfo } = useMyInfo();
   const history = useHistory();
   const location = useLocation();
-  const serviceApi = new ServiceApi();
   const [checkOrderIng, setCheckOrderIng] = React.useState<boolean>(false)
   const [isFavorite, SetIsFavorite] = React.useState<boolean>(false)
   const [visible, setVisible] = React.useState<boolean>(false)
@@ -40,14 +39,14 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
     localStorage.setItem('myFavoriteNames', JSON.stringify(myFavoriteNames))
   }
 
-  const addFavorite = (e) => {
+  const addFavorite = async (e) => {
     SetIsFavorite(!isFavorite)
     changeLocalFavorite(name)
-    serviceApi.addFavoriteName(name).then(res => {
+    ;(await ServiceApi.getInstance()).addFavoriteName(name).then(res => {
       if (res) {
         console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
-        deleteCache('favoriteall' + auth.walletAddress)
-        deleteCache('myNamesOfFavorite' + auth.walletAddress);
+        deleteCache('favoriteall' + authWallet.wallet)
+        deleteCache('myNamesOfFavorite' + authWallet.wallet);
         console.log("addFavorite", res)
       }
     }).catch(err=>{
@@ -55,14 +54,14 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
     })
   }
 
-  const removeFavorite = (e) => {
+  const removeFavorite = async (e) => {
     SetIsFavorite(!isFavorite)
     changeLocalFavorite(name)
-    serviceApi.removeFavoriteName(name).then(res => {
+    ;(await ServiceApi.getInstance()).removeFavoriteName(name).then(res => {
       if (res) {
         console.log('clear cache of myNamesOfFavorite & myFavoriteNamesWithExpireAt')
-        deleteCache('favoriteall' + auth.walletAddress)
-        deleteCache('myNamesOfFavorite' + auth.walletAddress);
+        deleteCache('favoriteall' + authWallet.wallet)
+        deleteCache('myNamesOfFavorite' + authWallet.wallet);
         console.log("removeFavorite", res)
       }
     }).catch(err=>{
@@ -72,7 +71,7 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
 
   const handleFavorite = (e) => {
     e.stopPropagation();
-    if (auth.isAuthWalletConnected) {
+    if (authWallet.wallet?.principalId) {
       if (isFavorite) {
         removeFavorite(e)
       } else {
@@ -85,7 +84,7 @@ export const Card: React.FC<CardProps> = ({ name, expireAt, available, isMyAccou
 
   const checkOrder = () => {
     const fromSearch = location.pathname === '/favourites' ? '?from=favourites' : ''
-    if (auth.walletAddress) {
+    if (authWallet.wallet) {
       setCheckOrderIng(true)
       if (myInfo.hasPendingOrder) {
         setVisible(true)
