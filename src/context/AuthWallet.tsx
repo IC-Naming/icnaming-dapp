@@ -22,7 +22,6 @@ function useProvideAuthWallet() {
 	const connectWallet = async (walletType: WalletType) => {
 		try {
 			const res = await WalletConnector.connect(walletType, whitelist);
-			console.log('authWallet connectWallet', res)
 			if (res?.principalId) {
 				sessionStorage.setItem('connectStatus', 'connected');
 				setWallet(res)

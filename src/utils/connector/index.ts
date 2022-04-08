@@ -197,8 +197,6 @@ const connectIcpboxWallet = async (whitelist: string[]) => {
       icpbox.setPublickKey(auth_data.publicKey);
       const accountId = principalToAccountID(Principal.fromText(auth_data.principal));
       const principalId = Principal.fromText(auth_data.principal);
-
-      console.log('local principal', Principal.fromText(auth_data.principal))
       sessionStorage.setItem('walletType', 'Icpbox');
       return {
         type: WalletType.Icpbox,

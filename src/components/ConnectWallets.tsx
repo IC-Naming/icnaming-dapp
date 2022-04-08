@@ -1,7 +1,7 @@
 import React from "react";
-import logoipc from '../assets/images/icplogo.png';
-import plugimg from '../assets/images/pluglogo.png';
-import stoicwallet from '../assets/images/stoicwallet.png';
+import logoIpc from '../assets/images/icplogo.png';
+import plugImg from '../assets/images/pluglogo.png';
+import stoicWallet from '../assets/images/stoicwallet.png';
 import styles from "../assets/styles/ConnectWallets.module.scss";
 import { Row, Col, Modal, Spinner } from "react-bootstrap";
 import { useAuthWallet } from "../context/AuthWallet";
@@ -18,45 +18,8 @@ interface propsType {
 export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 	const { ...authWallet } = useAuthWallet()
 	const [connecting, setConnecting] = React.useState<boolean>(false)
-	const connetcWallet = async (walletType: WalletType) => {
+	const connectWallet = async (walletType: WalletType) => {
 		setConnecting(true)
-<<<<<<< HEAD
-		authWallet.connectPlugWallet().then(async (res: any) => {
-			setConnecting(false)
-			if (res && res.connected) {
-				hide()
-			} else {
-				toast.error('fail connect')
-			}
-		}).catch(err => {
-			hide();
-			toast.error(err)
-		}).finally(() => {
-			setConnecting(false)
-		});
-	}
-
-	const connectIIWallet = () => {
-		setConnecting(true)
-		authWallet.connectII().then((res: any) => {
-			setConnecting(false)
-			if (res && res.connected) {
-				hide()
-			} else {
-				toast.error('fail connect')
-			}
-		})
-	}
-
-	const connectStoicWallet = () => {
-		setConnecting(true)
-		authWallet.connectStoic().then((res: any) => {
-			setConnecting(false)
-			if (res && res.connected) {
-				hide()
-			} else {
-				toast.error('fail connect')
-=======
 		if(walletType === 2){
 			localStorage.removeItem("_scApp");
 		}
@@ -65,7 +28,6 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 			if (connectResult === true) {
 				hide();
 				setConnecting(false)
->>>>>>> 6775be9a06fe0b3b78ed9b70a529f39d40014868
 			}
 		} catch (error) {
 			console.log(error)
@@ -82,7 +44,7 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 			}}
 		>
 			<Modal.Header>
-				<Modal.Title className="fz-18 connectwallettitle">Select a Wallet</Modal.Title>
+				<Modal.Title className="fz-18 connectWalletTitle">Select a Wallet</Modal.Title>
 				<button className='close' onClick={() => {
 					hide()
 					setConnecting(false)
@@ -106,27 +68,22 @@ export const ConnectWallets: React.FC<propsType> = ({ visible, hide }) => {
 							<div className="mb-4 modal-text-color">Please select a wallet to connect to this dapp:</div>
 							<Row>
 								<Col sm="12">
-									<button className={styles["btn-connect"]} onClick={() => { connetcWallet(0) }} disabled={connecting}>
-										<img src={logoipc} alt="Nns" />
+									<button className={styles["btn-connect"]} onClick={() => { connectWallet(0) }} disabled={connecting}>
+										<img src={logoIpc} alt="Nns" />
 										<span>Internet Identity</span>
 									</button>
 								</Col>
 								{
 									!isMobile && <Col sm="12">
-										<button className={styles["btn-connect"]} onClick={() => { connetcWallet(1) }} disabled={connecting}>
-											<img src={plugimg} alt="Plug" />
+										<button className={styles["btn-connect"]} onClick={() => { connectWallet(1) }} disabled={connecting}>
+											<img src={plugImg} alt="Plug" />
 											<span>Plug</span>
 										</button>
 									</Col>
 								}
 								<Col sm="12">
-<<<<<<< HEAD
-									<button className={styles["btn-connect"]} onClick={connectStoicWallet} disabled={connecting}>
-										<img src={stoicwallet} alt="stioc" />
-=======
-									<button className={styles["btn-connect"]} onClick={() => { connetcWallet(2) }} disabled={connecting}>
-										<img src={stoicwallet} alt="Stoic" />
->>>>>>> 6775be9a06fe0b3b78ed9b70a529f39d40014868
+									<button className={styles["btn-connect"]} onClick={() => { connectWallet(2) }} disabled={connecting}>
+										<img src={stoicWallet} alt="Stoic" />
 										<span>Stoic Wallet</span>
 									</button>
 								</Col>

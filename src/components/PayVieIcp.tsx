@@ -120,31 +120,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 
 	const payment = async () => {
 		if (payIng) return;
-<<<<<<< HEAD
-		if (sessionStorage.getItem('walletType') === 'plug') {
-			setPayIng(true);
-			setModalVisible(true)
-			try {
-				if (blockHeight === 0) {
-					const payResult = await window.ic.plug.requestTransfer({
-						to: arrayToHex(order[0].payment_account_id),
-						amount: Number(order[0].price_icp_in_e8s),
-						opts: {
-							fee: 10000,
-							memo: order[0].payment_memo.ICP.toString(),
-						},
-					});
-					console.log(`Pay success: ${JSON.stringify(payResult)}`);
-					if (payResult !== undefined) {
-						setBlockHeight(payResult.height)
-						setPaymentResult(true);
-					} else {
-						setPaymentResult(false)
-					}
-					setPayIng(false);
-				}
-			} catch (err) {
-=======
 		switch (sessionStorage.getItem('walletType')) {
 			case 'Icpbox':
 				payIcpbox();
@@ -178,7 +153,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				setPaymentResult(true);
 			}).catch(error => {
 				console.log(`Icpbox Payment failed: ${JSON.stringify(error)}`);
->>>>>>> 6775be9a06fe0b3b78ed9b70a529f39d40014868
 				setPayIng(false)
 				setPaymentResult(false)
 				return
@@ -221,26 +195,11 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		setModalVisible(true)
 		try {
 			if (blockHeight === 0) {
-<<<<<<< HEAD
-				const transfer_result: any = await ledgerActor.transfer({
-					amount: {
-						e8s: order[0].price_icp_in_e8s
-					},
-					memo: toICPe8s(order[0].payment_memo.ICP.toString()),
-					to: order[0].payment_account_id,
-					fee: {
-						e8s: BigInt(10_000),
-					},
-					created_at_time: [],
-					from_subaccount: []
-				})
-=======
 				const transfer_result: any = (await ServiceApi.getInstance()).payledger(
 					order[0].payment_account_id,
 					order[0].price_icp_in_e8s,
 					toICPe8s(order[0].payment_memo.ICP.toString())
 				)
->>>>>>> 6775be9a06fe0b3b78ed9b70a529f39d40014868
 				console.log('Stoic transfer_result', transfer_result);
 				if (transfer_result.Ok !== undefined) {
 					console.log(`StoicPay success: ${transfer_result.Ok}`);
@@ -461,10 +420,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				maskClosable={false}
 				className={payStyles['modal-wrap-stoicpay']}
 			>
-<<<<<<< HEAD
-=======
-
->>>>>>> 6775be9a06fe0b3b78ed9b70a529f39d40014868
 				<div className={payStyles['modal-wrap-stoicpay-conent']}>
 					<h2>Please confirm that you are about to send</h2>
 					<h3>Amount: {paymentInfo.priceIcp} ICP</h3>
