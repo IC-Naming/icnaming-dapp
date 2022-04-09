@@ -4,7 +4,7 @@ import { whietLists } from "utils/canisters/plugWhiteListConfig";
 import { Toast } from "@douyinfe/semi-ui";
 import { WalletConnector, WalletResponse, WalletType } from "utils/connector";
 import { WalletConnectError } from "utils/exception";
-import icpbox from "utils/icpbox";
+import icpbox from "@icpbox/js-sdk";
 
 export interface AuthWalletContextInterface {
 	authError: { err: boolean, desc: string };

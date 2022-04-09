@@ -2,7 +2,7 @@ import { Actor, ActorSubclass, HttpAgent, Identity } from "@dfinity/agent";
 import { Principal } from "@dfinity/principal";
 import { WalletResponse, WalletType } from "utils/connector";
 import { IC_HOST, isLocalEnv } from "utils/config";
-import icpbox from "utils/icpbox";
+import icpbox from "@icpbox/js-sdk";
 declare const window: any;
 class ActorFactory {
   private static _instance: ActorFactory = new ActorFactory();

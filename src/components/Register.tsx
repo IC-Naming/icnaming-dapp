@@ -10,7 +10,7 @@ import { PendingOrderTip } from "./PendingOrderTip";
 import { CanisterError } from "../utils/exception";
 import { Select, Toast } from '@douyinfe/semi-ui';
 import { ModalTipFull } from "./ModalTipFull";
-import icpbox from "utils/icpbox";
+import icpbox from "@icpbox/js-sdk";
 const Option = Select.Option;
 interface RegProps {
   regname: string;

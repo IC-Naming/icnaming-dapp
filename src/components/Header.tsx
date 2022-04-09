@@ -7,7 +7,7 @@ import { useAuthWallet } from "../context/AuthWallet";
 import { AuthError } from 'components/AuthError';
 import { formatAddress } from '../utils/helper';
 import { deleteCache } from 'utils/localCache';
-import icpbox from 'utils/icpbox';
+import icpbox from "@icpbox/js-sdk";
 
 export const Header = () => {
   const history = useHistory();
