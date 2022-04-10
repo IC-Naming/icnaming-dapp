@@ -192,11 +192,11 @@ const connectIcpboxWallet = async (whitelist: string[]) => {
     const icpboxConnected: any = await icpbox.isConnected();
     console.log('icpboxConnected', icpboxConnected);
     if (icpboxConnected === true && sessionStorage.getItem('connectStatus') === 'connected') {
-      const localauthData: any = localStorage.getItem('icpboxAuth');
-      const auth_data = JSON.parse(localauthData)
-      icpbox.setPublickKey(auth_data.publicKey);
-      const accountId = principalToAccountID(Principal.fromText(auth_data.principal));
-      const principalId = Principal.fromText(auth_data.principal);
+      const localAuthData: any = localStorage.getItem('icpboxAuth');
+      const authData = JSON.parse(localAuthData)
+      icpbox.setPublickKey(authData.publicKey);
+      const accountId = principalToAccountID(Principal.fromText(authData.principal));
+      const principalId = Principal.fromText(authData.principal);
       sessionStorage.setItem('walletType', 'Icpbox');
       return {
         type: WalletType.Icpbox,
@@ -210,6 +210,7 @@ const connectIcpboxWallet = async (whitelist: string[]) => {
       icpbox.setPublickKey(authData.publicKey);
       const accountId = principalToAccountID(Principal.fromText(authData.principal))
       const principalId = Principal.fromText(authData.principal);
+      console.log(principalId)
       localStorage.setItem('icpboxAuth', JSON.stringify(authData))
       sessionStorage.setItem('walletType', 'Icpbox');
       return {
