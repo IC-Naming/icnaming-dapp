@@ -4,7 +4,7 @@ import ServiceApi from "../utils/ServiceApi";
 import { useAuthWallet } from "./AuthWallet";
 import BigNumber from "bignumber.js";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
-
+import icpbox from "@icpbox/js-sdk";
 export interface MyInfoContextInterface {
 	orderInfo: {
 		name: string,
@@ -54,23 +54,37 @@ function useProvideMyInfo() {
 
 	const getMyQuotas = async () => {
 		const get_MyQuotas = async (user: Principal) => {
-			const [quota4, quota5, quota6, quota7] = await Promise.all([
+			if (icpbox.check()) {
+				const quota4 = await (await ServiceApi.getInstance()).getQuota(user, 4);
+				const quota5 = await (await ServiceApi.getInstance()).getQuota(user, 5);
+				const quota6 = await (await ServiceApi.getInstance()).getQuota(user, 6);
+				const quota7 = await (await ServiceApi.getInstance()).getQuota(user, 7);
+				return [quota4, quota5, quota6, quota7];
+			}else{
+				const [quota4, quota5, quota6, quota7] = await Promise.all([
+					(await ServiceApi.getInstance()).getQuota(user, 4),
+					(await ServiceApi.getInstance()).getQuota(user, 5),
+					(await ServiceApi.getInstance()).getQuota(user, 6),
+					(await ServiceApi.getInstance()).getQuota(user, 7),
+				]);
+				return [quota4, quota5, quota6, quota7];
+			}
+			/* const [quota4, quota5, quota6, quota7] = await Promise.all([
 				(await ServiceApi.getInstance()).getQuota(user, 4),
 				(await ServiceApi.getInstance()).getQuota(user, 5),
 				(await ServiceApi.getInstance()).getQuota(user, 6),
 				(await ServiceApi.getInstance()).getQuota(user, 7),
 			]);
-			return [quota4, quota5, quota6, quota7];
+			return [quota4, quota5, quota6, quota7]; */
 		}
-		if (authWallet.wallet?.principalId) {
-			console.log('getMyQuotas input principalId',authWallet.wallet?.principalId)
+
+		if (authWallet.wallet?.principalId !== undefined) {
 			try {
 				const res = await get_MyQuotas(authWallet.wallet?.principalId);
-				console.log('myinfogetMyQuotas',res)
+				console.log('myinfogetMyQuotas', res)
 				localStorage.setItem('myQuotas', JSON.stringify(res))
 				setQuotas(res)
 			} catch (error) {
-				console.log('myInfo catch get_MyQuotas', error)
 				if (sessionStorage.getItem('walletType') === 'Stoic') {
 					authWallet.disconnectWallet()
 					authWallet.setAuthErr({ err: true, desc: 'There was an error - please ensure you have Cookies Enabled' })
@@ -93,6 +107,11 @@ function useProvideMyInfo() {
 			} else {
 				setPendingOrder(false)
 			}
+			if(icpbox.check()){
+				if(!localStorage.getItem('myQuotas')){
+					getMyQuotas()
+				}
+			}
 		}).catch(error => {
 			console.log('getPendingOrder', error)
 			if (sessionStorage.getItem('walletType') === 'Stoic') {
@@ -102,10 +121,17 @@ function useProvideMyInfo() {
 		})
 	}
 
+
 	useEffect(() => {
-		if (authWallet.wallet?.principalId) {
-			checkPendingOrder();
-			getMyQuotas();
+		if (authWallet.wallet?.principalId !== undefined) {
+			(async () => {
+				if (icpbox.check()) {
+					checkPendingOrder();
+				} else {
+					getMyQuotas();
+					checkPendingOrder();
+				}
+			})();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [authWallet.wallet])

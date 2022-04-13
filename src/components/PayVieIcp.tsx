@@ -39,6 +39,8 @@ const toICPe8s = (source: string): bigint => {
 	}
 }
 
+
+
 export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => {
 	const history = useHistory();
 	const { ...authWallet } = useAuthWallet();
@@ -52,7 +54,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	const [payIng, setPayIng] = useState<boolean>(false)
 	const [stoicPayIng, setStoicPayIng] = useState<boolean>(false)
 	const [paymentResult, setPaymentResult] = useState<boolean>(false)
-	const [blockHeight, setBlockHeight] = useState<number>(0)
+	const [blockHeight, setBlockHeight] = useState<any>(0)
 	const [confirmIng, setConfirmIng] = useState<boolean>(true)
 	const [confirmAgain, setConfirmAgain] = useState<boolean>(false)
 	const [confirmStatus, setConfirmStatus] = useState<'success' | 'fail' | 'exception'>('success')
@@ -72,10 +74,8 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		// get confirm status
 		let confirmStatus = await (async () => {
 			let result_status = ConfirmStatus.Success;
-			/* const max_retry = 2;for (let i = 0; i < max_retry; i++) {} */
 			try {
-				let result = await (await ServiceApi.getInstance()).confirmOrder(BigInt(blockHeight));
-				console.log('confirmOrder result', result)
+				const result = await (await ServiceApi.getInstance()).confirmOrder(BigInt(blockHeight));
 				if (result) {
 					result_status = ConfirmStatus.Success;
 				} else {
@@ -89,7 +89,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		})();
 		console.log(`confirm status: ${confirmStatus}`);
 		setConfirmIng(false)
-		setConfirmAgain(false)
+		// setConfirmAgain(false)
 		switch (confirmStatus) {
 			case ConfirmStatus.Success:
 				console.log('You got the name! please check it out from MyAccount');
@@ -100,6 +100,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				break;
 			case ConfirmStatus.Exception:
 				setConfirmStatus('exception');
+				// setConfirmAgain(false)
 				break;
 			case ConfirmStatus.Fail:
 				// name is not available or invalid request from client
@@ -110,7 +111,9 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	}
 
 	useEffect(() => {
-		if (blockHeight !== undefined && blockHeight > 0) { confirmOrderFunction() };
+		if (blockHeight !== undefined && blockHeight > 0) { 
+			confirmOrderFunction() 
+		};
 		// return () => { setBlockHeight(0) };
 	}, [blockHeight])// eslint-disable-line react-hooks/exhaustive-deps
 
@@ -135,29 +138,30 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 
 	const payIcpbox = async () => {
 		const icpboxConnected: any = await icpbox.isConnected();
-		if (icpboxConnected.result !== true) {
+		if (icpboxConnected !== true) {
 			alert('no auth')
 		} else {
 			setPayIng(true);
 			setModalVisible(true)
-			console.log('pay Icpbox ==============')
 			icpbox.pay({
 				amount: new BigNumber(order[0].price_icp_in_e8s.toString()).div(100000000).toString(),
 				to: arrayToHex(order[0].payment_account_id),
 				memo: order[0].payment_memo.ICP.toString(),
 				fee: '10000'
 			}).then(payResult => {
-				console.log('paydata', payResult)
-				setBlockHeight(Number(payResult.status))
+				if (payResult.status === 'success') {
+					setBlockHeight(Number(payResult.result));
+					setPaymentResult(true);
+				} else {
+					setPaymentResult(false);
+				}
 				setPayIng(false);
-				setPaymentResult(true);
 			}).catch(error => {
-				console.log(`Icpbox Payment failed: ${JSON.stringify(error)}`);
+				console.log(`Icpbox Payment failed: ${error}`);
 				setPayIng(false)
 				setPaymentResult(false)
 				return
 			});
-
 		}
 	}
 
@@ -193,35 +197,35 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		setStoicVisible(false)
 		setPayIng(true);
 		setModalVisible(true)
-		try {
-			if (blockHeight === 0) {
-				const transfer_result: any = (await ServiceApi.getInstance()).payledger(
-					order[0].payment_account_id,
-					order[0].price_icp_in_e8s,
-					toICPe8s(order[0].payment_memo.ICP.toString())
-				)
+		if (blockHeight === 0) {
+			(await ServiceApi.getInstance()).payledger(
+				order[0].payment_account_id,
+				order[0].price_icp_in_e8s,
+				toICPe8s(order[0].payment_memo.ICP.toString())
+			).then(transfer_result => {
 				console.log('Stoic transfer_result', transfer_result);
-				if (transfer_result.Ok !== undefined) {
-					console.log(`StoicPay success: ${transfer_result.Ok}`);
-					setBlockHeight(transfer_result.Ok)
+				if (transfer_result !== undefined) {
+					console.log(`StoicPay success: ${transfer_result}`);
+					setBlockHeight(Number(transfer_result))
 					setPaymentResult(true);
 				} else {
 					setPaymentResult(false)
+					console.log(`Payment failed`);
 				}
+			}).catch(error => {
+				setPaymentResult(false)
+				console.log(`Payment failed,${error}`);
+			}).finally(() => {
 				setStoicPayIng(false);
 				setPayIng(false);
-			}
-		} catch (error) {
-			setStoicPayIng(false)
-			setPayIng(false)
-			setPaymentResult(false)
-			console.log(`Payment failed: ${JSON.stringify(error)}`);
-			return
+			})
 		}
 	}
 
 	const checkOrder = async (name) => {
-		console.log('checkOrder start', name)
+		console.log('checkOrder start==================', name)
+		console.log('blockHeight==================', blockHeight)
+
 		setCheckOrderIng(true)
 		enum OrderStatus {
 			Available,
@@ -230,16 +234,16 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 			Refund,
 		}
 		if (authWallet.wallet?.principalId) {
-			const serviecOrderInfo: any = [];
+			const serviceOrderInfo: any = [];
 			let orderStatus = await (async () => {
 				let result_Status = OrderStatus.Available;
 				const [availableResult, orderResult] = await Promise.all([(await ServiceApi.getInstance()).available(name).catch(err => {
 					console.log(err)
 				}), (await ServiceApi.getInstance()).getPendingOrder()]);
-
+				console.log('availableResult', availableResult);
 				if (orderResult.length !== 0) {
-					serviecOrderInfo.push(orderResult[0])
-					setOrder(serviecOrderInfo)
+					serviceOrderInfo.push(orderResult[0])
+					setOrder(serviceOrderInfo)
 					let nameLen = orderResult[0].name.replace('.icp', "").length
 					nameLen = nameLen >= 7 ? 7 : nameLen;
 					let cycles = 0;
@@ -261,18 +265,22 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				} else {
 					result_Status = OrderStatus.NotOrder;
 				}
+				// setConfirmAgain(false)
 				return result_Status;
 			})();
 			setCheckOrderIng(false)
 			console.log('OrderStatus', orderStatus)
 			switch (orderStatus) {
 				case OrderStatus.Available:
-					setNameAvailable(true)
+					setNameAvailable(true);
+					setModalVisible(false);
 					break;
 				case OrderStatus.Disabled:
-					setNameAvailable(false)
+					setNameAvailable(false);
+					setModalVisible(false);
 					break;
 				case OrderStatus.NotOrder:
+					myInfo.cleanPendingOrder();
 					history.push('/myaccount');
 					toast.error('no pending order')
 					break;
@@ -292,9 +300,11 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	}, [authWallet.wallet])// eslint-disable-line react-hooks/exhaustive-deps
 
 	const retryToConfirm = () => {
-		if (confirmAgain) return
+		if (confirmAgain) return;
+		console.log('retryToConfirm')
 		setConfirmAgain(true)
-		checkOrder(myInfo.orderInfo.name)
+		confirmOrderFunction()
+		// checkOrder(myInfo.orderInfo.name)
 	}
 	return (
 		<React.Fragment>
@@ -324,9 +334,15 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 						<div className={payStyles['btn-pay-wrap']}>
 							<CancelOrderIcp name={orderInfo.name} />
 							{nameAvailable &&
-								blockHeight === 0 &&
+								blockHeight === 0 ?
 								<button className={`${styles.btn} ${payStyles['btn-pay-icp']}`} onClick={payment}>
 									{modalVisible && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}Pay
+								</button>
+								:
+								<button className={`${styles.btn} ${payStyles['btn-pay-icp']}`} onClick={() => {
+									setModalVisible(true)
+								}}>
+									{modalVisible && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}Retry
 								</button>
 							}
 						</div>
@@ -393,7 +409,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 										<button
 											className={`${payStyles['btn']}  ${payStyles['btn-order']}`}
 											disabled={confirmAgain}
-											onClick={retryToConfirm}>
+											onClick={() => { retryToConfirm() }}>
 											{confirmAgain && <Spin size="middle" />}Retry to confirm
 										</button>
 									</div>

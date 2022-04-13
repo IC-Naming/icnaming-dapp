@@ -71,7 +71,7 @@ export default class ServiceApi {
 
   public async initializeAfterAuth() { }
 
-  public async payledger(
+  public payledger(
     payment_account_id: any,
     price_icp_in_e8s: bigint,
     payment_memo: bigint
@@ -212,9 +212,8 @@ export default class ServiceApi {
   // confirm order
   public confirmOrder = (block_height: bigint): Promise<boolean> => {
     return executeWithLogging(async () => {
-      const res: any = await this.registrarUpdateActor?.confirm_pay_order(
-        block_height
-      );
+      console.log('serviceApi block_height', block_height);
+      const res: any = await this.registrarUpdateActor?.confirm_pay_order(block_height);
       if ("Ok" in res) {
         return res.Ok;
       } else {
