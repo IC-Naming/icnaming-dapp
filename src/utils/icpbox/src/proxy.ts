@@ -1,7 +1,7 @@
 let _callback_index = 1;
 // const callbacks = {};
 
-export default function <T extends {}>(
+export default function proxy<T extends {}>(
   method: string,
   payload: Record<string, string | number | string[]>,
   info?: any
