@@ -2,7 +2,7 @@ import { HttpAgent, Identity } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import { Principal } from "@dfinity/principal";
 import { StoicIdentity } from "utils/ic-stoic-identity";
-import icpbox from "@icpbox/js-sdk";
+import icpbox from "utils/icpbox";
 import { IC_HOST } from "../config";
 import { WalletConnectError, WalletConnectErrorCode } from "../exception";
 import { principalToAccountID } from "../helper";

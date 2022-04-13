@@ -11,7 +11,7 @@ import { CancelOrderIcp } from "components/CancelOrderIcp";
 import BigNumber from "bignumber.js";
 import { useMyInfo } from "context/MyInfo";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
-import icpbox from "@icpbox/js-sdk";
+import icpbox from "utils/icpbox";
 declare var window: any;
 interface IcpPayProps {
 	orderInfo: {

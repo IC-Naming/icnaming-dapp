@@ -1,10 +1,10 @@
 import React, { useContext, useState, useEffect } from "react";
 import { actorFactory } from 'utils/canisters/actorFactory';
-import { whietLists } from "utils/canisters/plugWhiteListConfig";
+import { whiteLists } from "utils/canisters/plugWhiteListConfig";
 import { Toast } from "@douyinfe/semi-ui";
 import { WalletConnector, WalletResponse, WalletType } from "utils/connector";
 import { WalletConnectError } from "utils/exception";
-import icpbox from "@icpbox/js-sdk";
+import icpbox from "utils/icpbox";
 
 export interface AuthWalletContextInterface {
 	authError: { err: boolean, desc: string };
@@ -17,7 +17,7 @@ export interface AuthWalletContextInterface {
 function useProvideAuthWallet() {
 	const [authErr, setAuthErr] = useState<{ err: boolean, desc: string }>({ err: false, desc: '' });
 	const [wallet, setWallet] = useState<WalletResponse | undefined>(undefined)
-	const whitelist = whietLists();
+	const whitelist = whiteLists();
 
 	const connectWallet = async (walletType: WalletType) => {
 		try {

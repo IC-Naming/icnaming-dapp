@@ -4,7 +4,7 @@ import ServiceApi from "../utils/ServiceApi";
 import { useAuthWallet } from "./AuthWallet";
 import BigNumber from "bignumber.js";
 import toast from "@douyinfe/semi-ui/lib/es/toast";
-import icpbox from "@icpbox/js-sdk";
+import icpbox from "utils/icpbox";
 export interface MyInfoContextInterface {
 	orderInfo: {
 		name: string,
