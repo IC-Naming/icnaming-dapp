@@ -54,7 +54,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	const [paymentResult, setPaymentResult] = useState<boolean>(false)
 	const [blockHeight, setBlockHeight] = useState<any>(0)
 	const [confirmIng, setConfirmIng] = useState<boolean>(true)
-	const [confirmAgain, setConfirmAgain] = useState<boolean>(false)
 	const [confirmStatus, setConfirmStatus] = useState<'success' | 'fail' | 'exception'>('success')
 	/**
 	 * try to confirm order payment for several times
@@ -83,10 +82,11 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				console.error(`exception when confirm order: ${error}`);
 				result_status = ConfirmStatus.Exception;
 			}
+
 			return result_status;
 		})();
 		console.log(`confirm status: ${confirmStatus}`);
-		setConfirmIng(false)
+		setConfirmIng(false);
 		switch (confirmStatus) {
 			case ConfirmStatus.Success:
 				console.log('You got the name! please check it out from MyAccount');
@@ -97,7 +97,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				break;
 			case ConfirmStatus.Exception:
 				setConfirmStatus('exception');
-				setConfirmAgain(false)
 				break;
 			case ConfirmStatus.Fail:
 				// name is not available or invalid request from client
@@ -108,8 +107,8 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	}
 
 	useEffect(() => {
-		if (blockHeight !== undefined && blockHeight > 0) { 
-			confirmOrderFunction() 
+		if (blockHeight !== undefined && blockHeight > 0) {
+			confirmOrderFunction()
 		};
 		// return () => { setBlockHeight(0) };
 	}, [blockHeight])// eslint-disable-line react-hooks/exhaustive-deps
@@ -297,11 +296,9 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 	}, [authWallet.wallet])// eslint-disable-line react-hooks/exhaustive-deps
 
 	const retryToConfirm = () => {
-		if (confirmAgain) return;
-		console.log('retryToConfirm')
-		setConfirmAgain(true)
+		if (confirmIng) return;
+		setConfirmIng(true)
 		confirmOrderFunction()
-		// checkOrder(myInfo.orderInfo.name)
 	}
 	return (
 		<React.Fragment>
@@ -405,9 +402,9 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 									<div className="d-grid gap-2">
 										<button
 											className={`${payStyles['btn']}  ${payStyles['btn-order']}`}
-											disabled={confirmAgain}
+											disabled={confirmIng}
 											onClick={() => { retryToConfirm() }}>
-											{confirmAgain && <Spin size="middle" />}Retry to confirm
+											{confirmIng && <Spin size="middle" />}Retry to confirm
 										</button>
 									</div>
 								</React.Fragment>
