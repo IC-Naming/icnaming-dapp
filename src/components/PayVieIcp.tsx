@@ -39,8 +39,6 @@ const toICPe8s = (source: string): bigint => {
 	}
 }
 
-
-
 export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => {
 	const history = useHistory();
 	const { ...authWallet } = useAuthWallet();
@@ -89,7 +87,6 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 		})();
 		console.log(`confirm status: ${confirmStatus}`);
 		setConfirmIng(false)
-		// setConfirmAgain(false)
 		switch (confirmStatus) {
 			case ConfirmStatus.Success:
 				console.log('You got the name! please check it out from MyAccount');
@@ -100,7 +97,7 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 				break;
 			case ConfirmStatus.Exception:
 				setConfirmStatus('exception');
-				// setConfirmAgain(false)
+				setConfirmAgain(false)
 				break;
 			case ConfirmStatus.Fail:
 				// name is not available or invalid request from client
@@ -334,16 +331,16 @@ export const PayVieIcp: React.FC<IcpPayProps> = ({ orderInfo, checkRefund }) => 
 						<div className={payStyles['btn-pay-wrap']}>
 							<CancelOrderIcp name={orderInfo.name} />
 							{nameAvailable &&
-								blockHeight === 0 ?
+								blockHeight === 0 &&
 								<button className={`${styles.btn} ${payStyles['btn-pay-icp']}`} onClick={payment}>
 									{modalVisible && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}Pay
 								</button>
-								:
+								/* :
 								<button className={`${styles.btn} ${payStyles['btn-pay-icp']}`} onClick={() => {
 									setModalVisible(true)
 								}}>
 									{modalVisible && <Spinner animation="border" size="sm" style={{ marginRight: 10 }} />}Retry
-								</button>
+								</button> */
 							}
 						</div>
 					</React.Fragment>
