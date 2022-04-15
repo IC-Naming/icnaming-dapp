@@ -54,7 +54,7 @@ function useProvideMyInfo() {
 
 	const getMyQuotas = async () => {
 		const get_MyQuotas = async (user: Principal) => {
-			/* if (icpbox.check()) {
+			if (icpbox.check()) {
 				const quota4 = await (await ServiceApi.getInstance()).getQuota(user, 4);
 				const quota5 = await (await ServiceApi.getInstance()).getQuota(user, 5);
 				const quota6 = await (await ServiceApi.getInstance()).getQuota(user, 6);
@@ -68,14 +68,14 @@ function useProvideMyInfo() {
 					(await ServiceApi.getInstance()).getQuota(user, 7),
 				]);
 				return [quota4, quota5, quota6, quota7];
-			} */
-			const [quota4, quota5, quota6, quota7] = await Promise.all([
+			}
+			/* const [quota4, quota5, quota6, quota7] = await Promise.all([
 				(await ServiceApi.getInstance()).getQuota(user, 4),
 				(await ServiceApi.getInstance()).getQuota(user, 5),
 				(await ServiceApi.getInstance()).getQuota(user, 6),
 				(await ServiceApi.getInstance()).getQuota(user, 7),
 			]);
-			return [quota4, quota5, quota6, quota7];
+			return [quota4, quota5, quota6, quota7]; */
 		}
 
 		if (authWallet.wallet?.principalId !== undefined) {
