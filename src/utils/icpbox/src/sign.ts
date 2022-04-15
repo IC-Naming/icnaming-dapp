@@ -27,6 +27,7 @@ export interface AssuredSignInfo {
 type Metadata = {
   name: string;
   host: string;
+  origin?: string;
 };
 
 export type ArgsTypesOfCanister = { [key: string]: { [key: string]: any } };

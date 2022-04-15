@@ -36,7 +36,11 @@ export const createAgent = async (
 
   const identity = new WalletIdentity(
     key,
-    signFactory(idls, { host, name: "host" }, preApprove),
+    signFactory(
+      idls,
+      { host, origin: window.location.origin, name: document.title },
+      preApprove
+    ),
     whitelist
   );
 

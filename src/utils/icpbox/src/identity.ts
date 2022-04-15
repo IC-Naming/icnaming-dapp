@@ -5,6 +5,7 @@ import {
   HttpAgentRequest,
   CallRequest,
   requestIdOf,
+  hashValue,
 } from "@dfinity/agent";
 import { JsonValue } from "@dfinity/candid";
 import { Principal } from "@dfinity/principal";
@@ -29,6 +30,7 @@ type SignCb = (
 type RequestType = ReadRequest | CallRequest;
 
 const domainSeparator = Buffer.from(new TextEncoder().encode("\x0Aic-request"));
+const decoder = new TextDecoder();
 export class WalletIdentity extends SignIdentity {
   private publicKey: PublicKey;
   private whitelist: string[];
@@ -59,6 +61,9 @@ export class WalletIdentity extends SignIdentity {
         Principal.from(signInfo.canister_id).toString(),
       arguments: signInfo?.arg,
       manual: false,
+      paths: signInfo?.paths
+        ? decoder.decode(hashValue(signInfo.paths))
+        : undefined,
     };
     const res = await this.signCb(blob, opts);
     return res as BinaryBlob;
