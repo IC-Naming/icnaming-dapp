@@ -49,7 +49,8 @@ export class WalletIdentity extends SignIdentity {
   }
 
   async sign(blob: BinaryBlob, signInfo?: RequestType): Promise<BinaryBlob> {
-    const res = await this.signCb(blob, {
+    const opts = {
+      ingress_expiry: signInfo?.ingress_expiry.toHash(),
       sender: signInfo?.sender && Principal.from(signInfo.sender).toString(),
       methodName: signInfo?.method_name,
       requestType: signInfo?.request_type,
@@ -58,13 +59,15 @@ export class WalletIdentity extends SignIdentity {
         Principal.from(signInfo.canister_id).toString(),
       arguments: signInfo?.arg,
       manual: false,
-    });
+    };
+    const res = await this.signCb(blob, opts);
     return res as BinaryBlob;
   }
 
   public async transformRequest(request: HttpAgentRequest): Promise<unknown> {
     const { body, ...fields } = request;
     const requestId = await requestIdOf(body);
+
     return {
       ...fields,
       body: {

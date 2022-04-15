@@ -42,8 +42,8 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
       setPendingOrderTipVisible(true)
     } else {
       if (regname.split('.')[0].length >= btnNamelen) {
-        setLoadingSubmit(true)
-          ; (await ServiceApi.getInstance()).submitRegisterOrder(regname, 1).then(res => {
+        setLoadingSubmit(true);
+        (await ServiceApi.getInstance()).submitRegisterOrder(regname, 1).then(res => {
             if (res) {
               setLoadingSubmit(false)
               myInfo.createOrder({
@@ -56,7 +56,7 @@ export const Register: React.FC<RegProps> = ({ regname, available }) => {
               history.push(`/pay`)
             }
           }).catch(err => {
-            console.log(err)
+            console.log('submitRegisterOrder',err)
             setLoadingSubmit(false)
             if (err instanceof CanisterError) {
               if (err.code === 22) {

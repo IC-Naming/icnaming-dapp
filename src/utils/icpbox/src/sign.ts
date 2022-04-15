@@ -52,8 +52,6 @@ const decodeArgs = (signInfo: SignInfo, argsTypes: ArgsTypesOfCanister) => {
   }
 };
 
-const decoder = new TextDecoder();
-
 export const signFactory =
   (
     argsTypes: ArgsTypesOfCanister,
@@ -75,7 +73,7 @@ export const signFactory =
       metadata,
       {
         ...signInfo,
-        arguments: decoder.decode(signInfo?.arguments),
+        arguments: signInfo?.arguments,
         preApprove,
       },
     ] as any);
