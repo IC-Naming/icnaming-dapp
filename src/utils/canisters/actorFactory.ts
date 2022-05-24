@@ -17,6 +17,7 @@ class ActorFactory {
     canisterDid: any,
     canisterId: string | Principal
   ): Promise<ActorSubclass<T>> {
+    console.log('factory', canisterId)
     switch (ActorFactory._wallet?.type) {
       case WalletType.II: {
         const agent = this.getAgent(ActorFactory._wallet.identity);
@@ -29,8 +30,12 @@ class ActorFactory {
         });
       }
       case WalletType.Plug: {
+        let plugCanisterId = ''
+        if (typeof canisterId !== 'string') {
+          plugCanisterId = canisterId?.toText()
+        }
         return await window.ic.plug.createActor({
-          canisterId: canisterId,
+          canisterId: plugCanisterId,
           interfaceFactory: canisterDid,
         });
       }
