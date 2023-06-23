@@ -41,7 +41,7 @@
     "react-error-overlay": "6.0.9",
     "react-ga4": "^1.4.1",
     "react-query": "^3.34.0",
-    "react-router-dom": "^5.2.0",
+    "react-router-dom": "^6.0.0",
     "react-scripts": "4.0.3",
     "reflect-metadata": "^0.1.13",
     "web-vitals": "^1.1.2"
